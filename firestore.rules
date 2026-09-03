@@ -62,8 +62,46 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Everything else (donations, transparency, members, notices, roster …)
-    // is denied until its phase adds explicit rules + tests.
+    function isMember() { return signedIn() && request.auth.token.phone_number is string; }
+    function myPhone() { return request.auth.token.phone_number; }
+    function activeMember() {
+      return isMember()
+        && exists(/databases/$(db)/documents/members/$(myPhone()))
+        && get(/databases/$(db)/documents/members/$(myPhone())).data.active == true;
+    }
+
+    match /donations/{id} {
+      allow read: if isAdmin() || (resource.data.showOnWall == true && resource.data.deleted == false);
+      allow create, update: if isAdmin() && hasDeletedFlag() && !('phone' in request.resource.data);
+      allow delete: if false;
+    }
+    match /transparency/{year} {
+      allow read: if isAdmin() || isLive();
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+    match /announcements/{id} {
+      allow read: if isAdmin() || isLive();
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+    match /members/{phone} {
+      allow read: if isAdmin() || (isMember() && myPhone() == phone);
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+    match /notices/{id} {
+      allow read: if isAdmin() || (activeMember() && isLive());
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+    match /roster/{id} {
+      allow read: if isAdmin() || (activeMember() && isLive());
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+
+    // Everything else is denied until its phase adds explicit rules + tests.
     match /{document=**} {
       allow read, write: if false;
     }

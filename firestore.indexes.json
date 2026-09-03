@@ -39,6 +39,62 @@
     { "collectionGroup": "photos", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "deleted", "order": "ASCENDING" },
       { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "donations", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "showOnWall", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "date", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "donations", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "year", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "date", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "transparency", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "year", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "transparency", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "year", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "announcements", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "announcements", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "notices", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "notices", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "roster", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "date", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "roster", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "date", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "roster", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "memberPhones", "arrayConfig": "CONTAINS" },
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "date", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "members", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
     ] }
   ],
   "fieldOverrides": []
