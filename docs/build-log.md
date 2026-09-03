@@ -33,3 +33,5 @@ Includes settings, history, committee, albums (with nested photos), events, and 
 Fix: export errors surface as a toast; button disabled while running.
 
 v0.9.0 — Pages placeholder index + .nojekyll; deploy guide. GitHub repo creation ⏳ owner (token lacks repo-create permission); Pages/rules deploy/domain/App Check follow.
+
+v0.10.0 — js/content.js: DEFAULT_SETTINGS, getSettings (memoised, merged defaults), listPublished/listCommittee/listPhotos/getPublished — published-only queries; smoke-tested in browser against emulator.
