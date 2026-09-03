@@ -55,3 +55,5 @@ Fix: multi-upload widget persists across photo re-renders (no mid-upload teardow
 
 v0.16.1 — admin gate: opening a second same-origin tab initialised Auth with the SDK's default indexedDBLocalPersistence while the admin tab used explicit browserLocalPersistence, and the SDK's cross-tab persistence sync then cleared the admin tab's session outright (`onAuthStateChanged(null)`, no error, no `isAdmin()` call, no network request) — `js/firebase.js` now pins every tab to `browserLocalPersistence` unconditionally, removing the mismatch — transient Firestore errors no longer sign the admin out; only permission-denied does; gate not re-run for the same uid.
 Fix: Auth persistence fixed at construction via initializeAuth (no post-hoc setPersistence window).
+
+v0.17.0 — Events: admin section (title/start/end/venue/desc, draft/publish, chronological list, soft delete, empty-start guard) + public events page (upcoming/past split, bn/en); verified with Playwright incl. datetime round-trip.
