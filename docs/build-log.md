@@ -15,4 +15,5 @@ Fix: Bengali digit codepoints (was Devanagari 1–9), date-only fmtDate parses a
 v0.3.0 — Firestore rules (default deny; published+deleted gates; admins console-only; audit append-only) + emulator test matrix (9 tests). Mutation checks: dropping the deleted clause fails history/events/albums; dropping audit uid check fails audit.
 Fix: settings/site delete denied; committee/photo deleted guards, hasDeletedFlag and legacy-doc reads now under test; mutation 3 (hasDeletedFlag) verified.
 
-v0.4.0 — Storage rules (public/ read-all, admin write via firestore.exists, ≤5MB, image/pdf only) + 4 emulator tests; scripts/deploy-rules.sh (tests gate deploy). Mutations: dropping okType fails .exe test; dropping firestore.exists fails other-user upload.
+v0.4.0 — Storage rules (public/ read-all, admin write via firestore.exists, under 5 MB, image/pdf only) + 4 emulator tests; scripts/deploy-rules.sh (tests gate deploy). Mutations: dropping okType fails .exe test; dropping firestore.exists fails other-user upload.
+Fix: update-op, anon-delete, admin-private-read, list, exact-5MB, anchored-type tests; clearStorage in _env; size mutation verified; deploy script pins --project.

@@ -12,6 +12,7 @@ export async function setup() {
     storage: { rules: readFileSync('storage.rules', 'utf8'), host: '127.0.0.1', port: 9199 },
   });
   await testEnv.clearFirestore();
+  await testEnv.clearStorage();
   // The admin gate is a doc, so seed it with rules off.
   await testEnv.withSecurityRulesDisabled(async ctx => {
     await ctx.firestore().doc(`admins/${ADMIN_UID}`).set({ createdAt: new Date() });
