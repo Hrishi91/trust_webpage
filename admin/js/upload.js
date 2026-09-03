@@ -4,7 +4,8 @@ import { el, toast } from '../../js/ui.js';
 import { fitDims } from './resize.js';
 
 export async function resizeImage(file, { max = 1600, quality = 0.82 } = {}) {
-  const bmp = await createImageBitmap(file);
+  // from-image: honour the file's EXIF Orientation tag so a portrait phone photo draws upright
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
   const { w, h } = fitDims(bmp.width, bmp.height, max);
   const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
   canvas.getContext('2d').drawImage(bmp, 0, 0, w, h); bmp.close?.();
@@ -27,6 +28,7 @@ export function imageField(ctx, label, currentUrl = '', { folder, max = 1600 } =
   let url = currentUrl;
   const img = el('img', { class: 'thumb', src: url || '', alt: '', hidden: !url });
   const bar = el('progress', { max: 1, value: 0, hidden: true });
+  // no `capture`: admins pick from gallery; camera is still offered by the OS picker
   const input = el('input', { type: 'file', accept: 'image/*' });
   input.onchange = async () => {
     const file = input.files[0]; if (!file) return;
@@ -36,6 +38,7 @@ export function imageField(ctx, label, currentUrl = '', { folder, max = 1600 } =
       url = await uploadPublic(ctx, blob, fname(folder, blob), p => { bar.value = p; });
       img.src = url; img.hidden = false; bar.hidden = true;
     } catch (e) { console.error(e); toast('Upload failed', 'err'); bar.hidden = true; }
+    finally { input.value = ''; }
   };
   return { node: el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'row' }, img, input), bar), read: () => url };
 }
