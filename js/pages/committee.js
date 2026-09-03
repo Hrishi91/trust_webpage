@@ -4,7 +4,7 @@ import { pick, t } from '../i18n.js';
 import { el } from '../ui.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('committee');
+const s = await mountShell('committee', t('nav.committee'));
 if (s) {
   let people = [];
   try {

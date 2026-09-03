@@ -4,7 +4,7 @@ import { pick, t, getLang } from '../i18n.js';
 import { el, fmtDate } from '../ui.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('events');
+const s = await mountShell('events', t('nav.events'));
 if (s) {
   let all, errored = false;
   try {

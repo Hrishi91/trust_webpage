@@ -6,7 +6,7 @@ import { el, bnDigits } from '../ui.js';
 import { renderRich } from '../rich.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('about');
+const s = await mountShell('about', t('nav.about'));
 if (s) {
   const preview = new URLSearchParams(location.search).has('preview');
   let items;

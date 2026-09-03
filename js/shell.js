@@ -10,12 +10,12 @@ const NAV = [
   ['events', 'events.html', 'nav.events', 'events'],
 ];
 
-export async function mountShell(active) {
+export async function mountShell(active, pageTitle) {
   const s = await getSettings();
   document.documentElement.lang = getLang();
   const render = () => {
     document.documentElement.lang = getLang();
-    document.title = pick(s.name);
+    document.title = pageTitle ? `${pageTitle} · ${pick(s.name)}` : pick(s.name);
     document.getElementById('site-header').replaceChildren(
       el('header', { class: 'site-top' },
         el('a', { href: 'index.html', class: 'brand' },

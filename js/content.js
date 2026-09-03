@@ -10,9 +10,20 @@ export const DEFAULT_SETTINGS = {
 
 let settingsPromise;
 export function getSettings() {
+  // On a failed read, fail CLOSED (maintenance: true) rather than open — a broken settings read
+  // is exactly the kind of outage the maintenance notice exists for, and showing the site as if
+  // nothing were wrong (with placeholder/default content) would be worse than a "come back
+  // shortly" notice. Also do NOT memoise the failure: resetting settingsPromise here means the
+  // very next call (e.g. a fresh page load, or the same page 60s later) retries the network read
+  // instead of being stuck showing maintenance for the rest of the page's life once the backend
+  // recovers.
   settingsPromise ??= getDoc(doc(db, 'settings', 'site'))
     .then(s => ({ ...DEFAULT_SETTINGS, ...(s.data() ?? {}), sectionVisibility: { ...DEFAULT_SETTINGS.sectionVisibility, ...(s.data()?.sectionVisibility ?? {}) } }))
-    .catch(err => { console.warn('[content]', err); return DEFAULT_SETTINGS; });
+    .catch(err => {
+      console.warn('[content]', err);
+      settingsPromise = undefined;
+      return { ...DEFAULT_SETTINGS, maintenance: true };
+    });
   return settingsPromise;
 }
 

@@ -5,7 +5,7 @@ import { pick, t } from '../i18n.js';
 import { el } from '../ui.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('gallery');
+const s = await mountShell('gallery', t('nav.gallery'));
 if (s) {
   const params = new URLSearchParams(location.search);
   const albumId = params.get('album');
