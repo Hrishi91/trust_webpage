@@ -40,3 +40,6 @@ v0.11.0 — public shell: css/site.css theme, js/shell.js (header/nav/footer fro
 
 v0.12.0 — home page: hero (name/tagline/theme), puja countdown (bn digits, 'today' state, 60s tick), next 3 upcoming events, latest album card; sections omitted when empty; verified with Playwright.
 Fix: `main.replaceChildren(...)` is the native DOM method, not `el()` — it stringifies non-Node arguments instead of skipping them, so a conditional section written as `cond ? el(...) : null` (or the brief's original `cond && el(...)`) left a literal "null" (or "0") text node in #main when the condition was false. Sections are now built into an array and passed as `main.replaceChildren(...arr.filter(Boolean))`.
+
+v0.13.0 — History admin section (year/title/body/images, draft/publish, preview, soft delete) + About page rendering sanitized rich text (DOMPurify 3.2.4 SRI-pinned); XSS probe (img onerror, script, javascript: href) verified stripped.
+Fix: `el()`'s child loop only skips `null`/`undefined` (not `false`), so the brief's `id !== 'new' && el(...)` inside `history.js`'s toolbar would have rendered a literal "false" text node when creating a new entry — used `id !== 'new' ? el(...) : null` instead, consistent with the v0.12.0 `replaceChildren` fix already applied to `about.js`.
