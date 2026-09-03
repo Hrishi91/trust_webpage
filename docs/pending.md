@@ -25,7 +25,7 @@
 - [x] Task 18 gallery (2026-09-03)
 - [x] Task 19 events (2026-09-03)
 - [x] Task 20 e2e (2026-09-03)
-- [~] Task 21 — docs done; Firestore rules + 9 indexes LIVE 2026-09-03; ⏳ owner: Pages, email verified, App Check key, Blaze+Storage, domain, live checklist
+- [~] Task 21 — docs done; Firestore rules + 9 indexes LIVE 2026-09-03; Pages+Storage live 2026-09-04; ⏳ owner: App Check key, domain, phone upload test, live checklist
 
 ## Deferred minors (from reviews)
 

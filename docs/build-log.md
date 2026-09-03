@@ -90,3 +90,6 @@ Live incident: admin saved Settings on production; Firestore denied the write (s
 
 ## 2026-09-03 — v0.20.3 dummy content on production
 Admin email verified (throwaway local page → sendEmailVerification; auth:export confirms). Owner's first Settings save had silently failed (stale token, no toast) → v0.20.2 fix. Dummy content written via Firestore REST with the firebase-tools owner OAuth token (bypasses rules — dummy only; real content goes through /admin/): settings/site, history ×2, committee ×3, events ×3 (1 past), albums/a2025 + 3 photos (placehold.co images — no Storage bucket yet). Live verified in browser: home (hero, theme, bn countdown, 2 upcoming, album card), gallery album page renders 3 photos; photos composite index confirmed via REST. Still ⏳ owner: App Check key, Blaze + Storage, domain.
+
+## 2026-09-04 — v0.21.0 storage LIVE
+Owner upgraded to Blaze. Via firebasestorage API (owner OAuth): enabled API, created default bucket ganesh-puja-trust.firebasestorage.app in asia-south1 (matches config). Deployed storage.rules. Live REST: anon read public/* → 404 (allowed), anon read private/* → 403, anon upload → 403. Budget alert ₹100 (50/90/100%) attempted via Billing Budgets API — see next entry for result.
