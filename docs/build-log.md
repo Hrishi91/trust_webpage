@@ -17,3 +17,5 @@ Fix: settings/site delete denied; committee/photo deleted guards, hasDeletedFlag
 
 v0.4.0 — Storage rules (public/ read-all, admin write via firestore.exists, under 5 MB, image/pdf only) + 4 emulator tests; scripts/deploy-rules.sh (tests gate deploy). Mutations: dropping okType fails .exe test; dropping firestore.exists fails other-user upload.
 Fix: update-op, anon-delete, admin-private-read, list, exact-5MB, anchored-type tests; clearStorage in _env; size mutation verified; deploy script pins --project.
+
+v0.5.0 — js/firebase.js single entry (SDK 12.18.0 CDN, persistent local cache, App Check when key set, emulator wiring on localhost); smoke-tested against emulator with Playwright.
