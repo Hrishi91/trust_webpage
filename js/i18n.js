@@ -38,6 +38,7 @@ export const STRINGS = {
   'common.loading': { bn: 'লোড হচ্ছে…', en: 'Loading…' },
   'common.empty': { bn: 'এখনও কিছু নেই', en: 'Nothing here yet' },
   'common.error': { bn: 'কিছু ভুল হয়েছে, আবার চেষ্টা করুন', en: 'Something went wrong, please retry' },
+  'common.richUnavailable': { bn: 'লেখা দেখানো যাচ্ছে না', en: 'Text could not be shown' },
   'footer.maintenance': { bn: 'সাইটে কাজ চলছে, একটু পরে আসুন', en: 'Site under maintenance, please come back shortly' },
   // admin
   'admin.login': { bn: 'অ্যাডমিন লগইন', en: 'Admin login' },

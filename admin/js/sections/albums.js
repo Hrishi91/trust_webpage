@@ -36,6 +36,11 @@ registerSection(COLL, {
     };
     const save = publish => async e => {
       e.preventDefault();
+      // "Save draft" is type=button and bypasses the input's `required` validation, so an empty
+      // or non-numeric year would otherwise reach Number('') === 0 / Number('abc') === NaN and
+      // save a nonsense year (and order, which is derived from it) silently.
+      const year = f.year.read();
+      if (!year || Number.isNaN(Number(year))) { toast(t('common.error'), 'err'); return; }
       const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, read(), { publish });
       ctx.navigate(`#${COLL}/${newId}`);
     };

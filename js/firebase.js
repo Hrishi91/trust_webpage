@@ -27,6 +27,8 @@ if (IS_LOCAL) {
   self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 } else if (APPCHECK_SITE_KEY && APPCHECK_SITE_KEY !== 'PASTE') {
   initializeAppCheck(app, { provider: new ReCaptchaV3Provider(APPCHECK_SITE_KEY), isTokenAutoRefreshEnabled: true });
+} else {
+  console.warn('[firebase] App Check site key not set — do not enable enforcement');
 }
 
 // Repeat visits paint from cache; persistentLocalCache is the SDK-12 replacement

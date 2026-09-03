@@ -44,10 +44,10 @@ await db.doc('history/h1').set({ ...base, year: 2025, title: bi('২০২৫', 
 await db.doc('history/h2').set({ ...base, year: 2024, title: bi('ড্রাফট', 'Draft'), body: bi('', ''), images: [], order: 2024, published: false });
 await db.doc('events/e1').set({ ...base, title: bi('আগামী', 'Upcoming'), venue: bi('মণ্ডপ', 'Pandal'), desc: bi('', ''), start: new Date(Date.now() + 5 * 86400000).toISOString(), end: '', order: 1, published: true });
 await db.doc('events/e2').set({ ...base, title: bi('ড্রাফট', 'Draft event'), venue: bi('', ''), desc: bi('', ''), start: new Date().toISOString(), end: '', order: 2, published: false });
-await db.doc('albums/a1').set({ ...base, title: bi('২০২৫ পুজো', 'Puja 2025'), year: 2025, coverUrl: 'https://placehold.co/400x300', order: 1, published: true });
+await db.doc('albums/a1').set({ ...base, title: bi('২০২৫ পুজো', 'Puja 2025'), year: 2025, coverUrl: 'https://placehold.co/400x300', order: 2025000, published: true });
 await db.doc('albums/a1/photos/p1').set({ ...base, url: 'https://placehold.co/800x600', caption: bi('', ''), order: 1 });
 await db.doc('albums/a1/photos/p2').set({ ...base, url: 'https://placehold.co/801x600', caption: bi('', ''), order: 2 });
-await db.doc('albums/a2').set({ ...base, title: bi('ড্রাফট', 'Draft album'), year: 2024, coverUrl: '', order: 2, published: false });
+await db.doc('albums/a2').set({ ...base, title: bi('ড্রাফট', 'Draft album'), year: 2024, coverUrl: '', order: 2024000, published: false });
 await db.doc('committee/c1').set({ ...base, name: bi('সভাপতি', 'President'), post: bi('সভাপতি', 'President'), photoUrl: '', order: 1, isPublic: true });
 await db.doc('committee/c2').set({ ...base, name: bi('গোপন', 'Hidden'), post: bi('', ''), photoUrl: '', order: 2, isPublic: false });
 console.log('seeded; admin uid', admin.uid);

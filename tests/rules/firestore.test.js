@@ -63,6 +63,7 @@ test('committee: isPublic gates read', async () => {
   await assertSucceeds(E.anon.firestore().collection('committee').where('isPublic', '==', true).where('deleted', '==', false).get());
   await assertFails(E.anon.firestore().collection('committee').get());
   await assertFails(E.other.firestore().doc('committee/p').update({ post: 'hacked' }));
+  await assertSucceeds(E.admin.firestore().collection('committee').get()); // admin list includes non-public/deleted rows — Export depends on this
   await assertSucceeds(E.admin.firestore().doc('committee/h').update({ isPublic: true }));
   await assertFails(E.admin.firestore().doc('committee/nodel').set({ name: { bn: 'x', en: 'x' }, post: { bn: 'y', en: 'y' }, isPublic: true, order: 9 }));
   await assertFails(E.admin.firestore().doc('committee/h').update({ deleted: 'yes' }));
@@ -110,6 +111,7 @@ test('audit: admin create with own uid only; append-only', async () => {
   await assertFails(E.admin.firestore().doc('audit/a1').delete());
   await assertFails(E.other.firestore().doc('audit/a1').get());
   await assertSucceeds(E.admin.firestore().doc('audit/a1').get());
+  await assertSucceeds(E.admin.firestore().collection('audit').get()); // admin list — Export depends on this
 });
 
 test('unknown collections are denied even to admin', async () => {

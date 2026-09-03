@@ -3,7 +3,7 @@
 # Install: ln -sf ../../scripts/pre-commit-docs.sh .git/hooks/pre-commit
 set -euo pipefail
 staged=$(git diff --cached --name-only)
-code=$(echo "$staged" | grep -E '^(js|admin|css|tests|scripts|firestore\.rules|storage\.rules|.*\.html)' || true)
+code=$(echo "$staged" | grep -E '^(js|admin|css|tests|scripts|firestore\.rules|storage\.rules|.*\.html|package\.json|firebase\.json|\.firebaserc|firestore\.indexes\.json)' || true)
 if [ -n "$code" ] && ! echo "$staged" | grep -q '^docs/build-log.md$'; then
   echo "pre-commit: code changed but docs/build-log.md is not staged." >&2
   echo "Add a build-log entry (one subject per commit, docs in the same commit)." >&2

@@ -57,7 +57,12 @@ onAuthStateChanged(auth, async u => {
   if (user && u.uid === user.uid) return; // already verified in this tab; don't re-run the gate on a spurious re-fire
   const { ok, admin } = await isAdmin(u);
   if (ok && !admin) { toast(t('admin.notAdmin'), 'err'); await signOut(auth); return; }
-  if (!ok) { toast(t('common.error'), 'err'); return; } // couldn't verify; keep the session, don't sign out
+  // Couldn't verify (both attempts failed with a non-permission-denied error): don't sign out, but
+  // don't leave the admin staring at a blank page either — #adm-login and #adm-main are both
+  // `hidden` by default in the HTML, and neither branch below this one has run yet, so without
+  // this the page shows nothing at all. Show the login form (Auth still has a session; retrying
+  // sign-in or reloading is the recoverable path) with the error surfaced.
+  if (!ok) { $('adm-login').hidden = false; $('adm-main').hidden = true; toast(t('common.error'), 'err'); return; }
   user = u;
   $('adm-login').hidden = true; $('adm-main').hidden = false; $('adm-logout').hidden = false;
   route();

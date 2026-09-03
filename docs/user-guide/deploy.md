@@ -45,11 +45,15 @@ Verify:
 
 ```bash
 gh api repos/Hrishi91/trust-webpage/pages --jq .status
-curl -sI https://hrishi91.github.io/trust-webpage/
+curl -sI https://hrishi91.github.io/trust-webpage/ | head -1           # expect: HTTP/2 200
+curl -s https://hrishi91.github.io/trust-webpage/ | grep -o '<title>[^<]*</title>'   # static <title>
 ```
 
-200 status এবং `<h1>গণেশ পুজো ট্রাস্ট</h1>` পাওয়া গেলে ঠিক আছে (deploy হতে
-~1–2 মিনিট লাগতে পারে)।
+200 status এবং `<title>` ট্যাগ পাওয়া গেলে সার্ভার/deploy ঠিক আছে (deploy
+হতে ~1–2 মিনিট লাগতে পারে)। কিন্তু `<h1>গণেশ পুজো ট্রাস্ট</h1>` heading-টা
+**JS দিয়ে রেন্ডার হয়** (`mountShell` → `#main`), তাই প্লেইন `curl` কখনও
+সেটা দেখতে পাবে না (JS চালায় না) — সেটা verify করতে হয় ব্রাউজারে সাইট
+খুলে চোখে দেখে, অথবা `npx playwright` / headless Chromium দিয়ে।
 
 **routine কাজ — সাইট বদলালে:** শুধু `git push` করলেই Pages auto-deploy করে
 (~1–2 মিনিটের মধ্যে লাইভ হয়)। আলাদা কিছু করার দরকার নেই।

@@ -1,7 +1,7 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc } from '../../../js/firebase.js';
 import { t, pick } from '../../../js/i18n.js';
-import { el } from '../../../js/ui.js';
+import { el, toast } from '../../../js/ui.js';
 import { biField, textField, listView, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'history';
@@ -29,6 +29,11 @@ registerSection(COLL, {
                           images: f.images.read().split(',').map(x => x.trim()).filter(Boolean), order: cur.order ?? Number(f.year.read()) });
     const save = publish => async e => {
       e.preventDefault();
+      // "Save draft" is type=button and bypasses the input's `required` validation, so an empty
+      // or non-numeric year would otherwise reach Number('') === 0 / Number('abc') === NaN and
+      // save a nonsense year silently.
+      const year = f.year.read();
+      if (!year || Number.isNaN(Number(year))) { toast(t('common.error'), 'err'); return; }
       const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, read(), { publish });
       ctx.navigate(`#${COLL}/${newId}`);
     };

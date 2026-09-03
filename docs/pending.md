@@ -31,15 +31,12 @@
 
 Small, non-blocking items noted during code review across Tasks 1–20. None of these gate go-live; revisit opportunistically.
 
-- rules test matrix cells still missing (other-user reads of drafts, updates of existing docs by anon/other, admin list on admins/audit, admin read of unknown collections)
+- rules test matrix cells still missing (other-user reads of drafts, updates of existing docs by anon/other, admin list on admins, admin read of unknown collections) — admin list on audit/committee added in the 2026-09-03 fix wave
 - image/svg+xml passes Storage okType (admin-only upload; revisit if Storage is fronted by our domain)
-- rich.js: ALLOW_DATA_ATTR/ARIA false, RETURN_DOM_FRAGMENT, rel noreferrer, console.warn on missing DOMPurify
-- history/albums Save-draft bypasses `required` year (year 0)
+- rich.js: ALLOW_DATA_ATTR/ARIA false, RETURN_DOM_FRAGMENT, rel noreferrer — console.warn on missing DOMPurify added in the 2026-09-03 fix wave
 - reauth uses unmasked prompt()
 - captions single-language; history images are URL fields
-- getSettings memo caches a failed fallback for the page life
 - events: upcoming wrapped in div, past not
-- pre-commit hook regex does not cover package.json/firebase.json
 - stale `// Task N` labels in admin.js
 
 ## Phase 2 — Donation + Transparency
