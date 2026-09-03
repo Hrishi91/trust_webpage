@@ -1,4 +1,4 @@
-import { db, collection, doc, getDoc, getDocs, query, where, orderBy } from './firebase.js';
+import { db, collection, doc, getDoc, getDocs, query, where, orderBy, limit, onSnapshot } from './firebase.js';
 
 export const DEFAULT_SETTINGS = {
   name: { bn: 'গণেশ পুজো ট্রাস্ট', en: 'Ganesh Puja Trust' }, tagline: { bn: '', en: '' },
@@ -50,5 +50,79 @@ export async function getPublished(coll, id) {
   } catch (err) {
     console.warn('[content]', err);
     return null;
+  }
+}
+
+export async function listDonorWall(limitN = 50) {
+  try {
+    return rows(await getDocs(query(collection(db, 'donations'),
+      where('showOnWall', '==', true), where('deleted', '==', false), orderBy('date', 'desc'), limit(limitN))));
+  } catch (err) {
+    console.warn('[content]', err);
+    return [];
+  }
+}
+
+export async function listTransparencyYears() {
+  try {
+    return rows(await getDocs(query(collection(db, 'transparency'),
+      where('published', '==', true), where('deleted', '==', false), orderBy('year', 'desc'))));
+  } catch (err) {
+    console.warn('[content]', err);
+    return [];
+  }
+}
+
+export async function getTransparency(year) {
+  try {
+    const s = await getDoc(doc(db, 'transparency', String(year)));
+    return s.exists() && s.data().published === true && s.data().deleted === false ? { id: s.id, ...s.data() } : null;
+  } catch (err) {
+    console.warn('[content]', err);
+    return null;
+  }
+}
+
+// onAnnouncements(cb): realtime, published+!deleted, newest order first, non-expired only,
+// pinned first within that. cb(list, { live }) — live means at least one visible row is isLive.
+export function onAnnouncements(cb) {
+  const q = query(collection(db, 'announcements'),
+    where('published', '==', true), where('deleted', '==', false), orderBy('order', 'desc'), limit(20));
+  return onSnapshot(q, snap => {
+    const now = Date.now();
+    const list = rows(snap)
+      .filter(a => !a.expiresAt || new Date(a.expiresAt).getTime() > now)
+      .sort((x, y) => (y.pinned - x.pinned) || (y.order - x.order));
+    cb(list, { live: list.some(a => a.isLive) });
+  }, err => { console.warn('[content] announcements', err); cb([], { live: false }); });
+}
+
+export async function getMyMember(phone) {
+  try {
+    const s = await getDoc(doc(db, 'members', phone));
+    return s.exists() ? { id: s.id, ...s.data() } : null;
+  } catch (err) {
+    console.warn('[content]', err);
+    return null;
+  }
+}
+
+export async function listNotices() {
+  try {
+    return rows(await getDocs(query(collection(db, 'notices'),
+      where('published', '==', true), where('deleted', '==', false), orderBy('order', 'desc'))));
+  } catch (err) {
+    console.warn('[content]', err);
+    return [];
+  }
+}
+
+export async function listMyRoster(phone) {
+  try {
+    return rows(await getDocs(query(collection(db, 'roster'),
+      where('memberPhones', 'array-contains', phone), where('published', '==', true), where('deleted', '==', false), orderBy('date'))));
+  } catch (err) {
+    console.warn('[content]', err);
+    return [];
   }
 }

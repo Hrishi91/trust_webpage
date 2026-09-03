@@ -8,6 +8,9 @@ const NAV = [
   ['committee', 'committee.html', 'nav.committee', 'committee'],
   ['gallery', 'gallery.html', 'nav.gallery', 'gallery'],
   ['events', 'events.html', 'nav.events', 'events'],
+  ['donate', 'donate.html', 'nav.donate', 'donate'],
+  ['transparency', 'transparency.html', 'nav.transparency', 'transparency'],
+  ['members', 'members.html', 'nav.members', 'members'],
 ];
 
 export async function mountShell(active, pageTitle) {

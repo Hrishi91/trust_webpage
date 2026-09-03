@@ -1,5 +1,5 @@
 import { ref, uploadBytesResumable, getDownloadURL } from '../../js/firebase.js';
-import { pick } from '../../js/i18n.js';
+import { pick, t } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
 import { fitDims } from './resize.js';
 
@@ -44,6 +44,32 @@ export function imageField(ctx, label, currentUrl = '', { folder, max = 1600 } =
   // its first upload as the album cover) without going through the widget's own file input.
   const set = newUrl => { url = newUrl; img.src = url || ''; img.hidden = !url; };
   return { node: el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'row' }, img, input), bar), read: () => url, set };
+}
+
+const docFname = (folder, file) => `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.name}`;
+
+// fileField: like imageField but for a raw non-image file (PDF documents) — no resize, uploaded
+// with the file's own type; a link preview instead of a thumbnail.
+export function fileField(ctx, label, currentUrl = '', { folder, accept = 'application/pdf', maxBytes = 5 * 1024 * 1024 } = {}) {
+  let url = currentUrl;
+  const link = el('a', { class: 'file-link', href: url || '#', target: '_blank', rel: 'noopener', text: url ? 'PDF' : '', hidden: !url });
+  const bar = el('progress', { max: 1, value: 0, hidden: true });
+  const input = el('input', { type: 'file', accept });
+  input.onchange = async () => {
+    const file = input.files[0]; if (!file) return;
+    if (file.size > maxBytes) {
+      toast(t('common.error'), 'err');
+      input.value = '';
+      return;
+    }
+    try {
+      bar.hidden = false;
+      url = await uploadPublic(ctx, file, docFname(folder, file), p => { bar.value = p; });
+      link.href = url; link.textContent = file.name; link.hidden = false; bar.hidden = true;
+    } catch (e) { console.error(e); toast(t('common.error'), 'err'); bar.hidden = true; }
+    finally { input.value = ''; }
+  };
+  return { node: el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'row' }, link, input), bar), read: () => url };
 }
 
 export function multiImageField(ctx, label, { folder, max = 1600, onEach }) {
