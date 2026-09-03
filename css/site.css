@@ -47,4 +47,10 @@ table.ledger td { padding:.4rem .3rem; border-bottom:1px solid #eee; }
 table.ledger td.amt { text-align:right; white-space:nowrap; }
 .summary { display:flex; gap:1rem; flex-wrap:wrap; }
 .summary .neg { color:#b91c1c; }
+.live-strip { background:#fff3cd; border-left:4px solid #b91c1c; border-radius:12px; padding:.6rem .9rem; margin-bottom:1rem; }
+.live-strip .ann { padding:.2rem 0; }
+.live-strip .ann small { color:var(--muted); margin-left:.4rem; }
+.pulse { display:inline-block; background:#b91c1c; color:#fff; border-radius:999px; padding:.1rem .6rem; font-size:.85rem; animation:pulse 1.2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+.today-strip { background:#fff; border:1px solid var(--gold); border-radius:12px; padding:.6rem .9rem; margin:1rem 0; }
 @media (min-width:720px) { body { font-size:18px; } .hero { padding:3rem 2rem; } }

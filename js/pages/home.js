@@ -1,5 +1,5 @@
 import { mountShell } from '../shell.js';
-import { listPublished } from '../content.js';
+import { listPublished, onAnnouncements } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, countdown, fmtDate, bnDigits } from '../ui.js';
 
@@ -15,6 +15,7 @@ if (s) {
     events = null;
   }
   if (events !== null) {
+    let annList = [], annLive = false;
     const render = () => {
       const lang = getLang();
       const now = new Date();
@@ -22,7 +23,17 @@ if (s) {
       const latest = albums.at(-1);
       const cd = s.pujaDate ? countdown(s.pujaDate, now) : null;
       const num = n => lang === 'bn' ? bnDigits(n) : String(n);
+      const today = events.filter(e => new Date(e.start).toDateString() === now.toDateString());
       main.replaceChildren(...[
+        annList.length ? el('section', { class: 'live-strip' },
+          annLive ? el('span', { class: 'pulse', text: t('live.badge') }) : null,
+          ...annList.slice(0, 5).map(a => {
+            const created = a.createdAt?.toDate ? a.createdAt.toDate() : a.createdAt;
+            const dateText = created ? fmtDate(created, lang) : '';
+            return el('div', { class: 'ann' },
+              `${a.pinned ? '📌 ' : ''}${pick(a.text)}`,
+              dateText ? el('small', { text: dateText }) : null);
+          })) : null,
         el('section', { class: 'hero' },
           el('h1', { text: pick(s.name) }),
           pick(s.tagline) ? el('p', { text: pick(s.tagline) }) : null,
@@ -34,6 +45,11 @@ if (s) {
                 el('div', {}, el('b', { text: num(cd.hours) }), t('countdown.hours')),
                 el('div', {}, el('b', { text: num(cd.minutes) }), t('countdown.minutes'))))
             : null),
+        today.length ? el('section', { class: 'today-strip' },
+          el('h2', { text: t('live.today') }),
+          ...today.map(e => el('p', {},
+            `${new Date(e.start).toLocaleTimeString(lang === 'bn' ? 'bn-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' })} · ${pick(e.title)}`,
+            pick(e.venue) ? ` · ${pick(e.venue)}` : ''))) : null,
         upcoming.length && s.sectionVisibility.events !== false ? el('section', {},
           el('h2', { text: t('events.upcoming') }),
           ...upcoming.map(e => el('div', { class: 'card event' },
@@ -49,5 +65,7 @@ if (s) {
     render();
     document.addEventListener('langchange', render);
     setInterval(render, 60000);
+    const unsub = onAnnouncements((list, { live }) => { annList = list; annLive = live; render(); });
+    window.addEventListener('pagehide', unsub);
   }
 }
