@@ -59,4 +59,6 @@ Fix: Auth persistence fixed at construction via initializeAuth (no post-hoc setP
 v0.17.0 — Events: admin section (title/start/end/venue/desc, draft/publish, chronological list, soft delete, empty-start guard) + public events page (upcoming/past split, bn/en); verified with Playwright incl. datetime round-trip.
 
 v0.18.0 — emulator seed (firebase-admin, refuses non-emulator hosts) + Playwright e2e (8 specs: public pages, lang persistence, draft isolation, mobile overflow, anon preview error, admin wrong-pw, create+publish event, soft delete with reauth); home/about pages now surface fetch errors.
+
+v0.19.0 — docs: full admin guide, go-live checklist, pending/context/README refreshed to the real state; live steps ⏳ owner.
 Fix: soft-delete e2e asserts history/h1 still exists with deleted:true (mutation-checked against a hard delete); seed guard is a strict host match.

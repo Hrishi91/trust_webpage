@@ -2,43 +2,65 @@
 
 Static vanilla-JS public website + single-admin Firebase backend for the Ganesh Puja Trust.
 
+**Status: Phase 0+1 code complete, awaiting owner go-live steps** (see `docs/user-guide/go-live-checklist.md`).
+
 ## Repo map
 
 ```
 CLAUDE.md                    # Project instructions and working rules
 README.md                    # This file
+index.html, about.html, committee.html, gallery.html, events.html   # Public pages
+firestore.rules, storage.rules, .firebaserc, firebase.json          # Firebase config + security rules
+admin/
+  index.html                 # Admin app shell (unlisted route)
+  js/
+    admin.js                 # Auth gate, hash router, dashboard
+    registry.js               # Section registry (breaks admin.js <-> sections circular import)
+    forms.js                  # biField/textField/boolField/listView/saveDoc/softDelete
+    upload.js                 # resizeImage/uploadPublic/imageField/multiImageField
+    resize.js                 # fitDims (client-side resize math)
+    audit.js                  # logAudit — append-only audit log writes
+    sections/
+      settings.js  history.js  committee.js  albums.js  events.js  export.js
+js/
+  firebase.js                 # Single Firebase SDK entry (pinned CDN version, emulator wiring)
+  firebase-config.js           # Project config (PASTE placeholders until owner's real project)
+  content.js                   # getSettings/listPublished/listCommittee/listPhotos/getPublished
+  i18n.js                       # getLang/setLang/pick/t/STRINGS/onLangChange
+  ui.js                         # el/toast/fmtDate/bnDigits/countdown/escapeHtml
+  shell.js                      # Public header/nav/footer, maintenance mode
+  rich.js                       # DOMPurify-sanitized HTML rendering
+  pages/
+    home.js  about.js  committee.js  gallery.js  events.js
+css/
+  site.css  admin.css
 docs/
-  PROJECT_CONTEXT.md         # Decisions and their causes
-  pending.md                 # Roadmap (phases 0–4)
-  build-log.md               # Append-only development chronicle
+  PROJECT_CONTEXT.md          # Decisions and their causes, current state
+  pending.md                  # Roadmap (phases 0–4) + deferred minors
+  build-log.md                # Append-only development chronicle
   user-guide/
-    admin-guide.md           # Admin panel guide (Bengali)
+    admin-guide.md             # Admin panel guide (Bengali)
+    go-live-checklist.md       # Owner go-live sequence (Bengali)
+    setup-firebase.md          # Firebase project setup guide (Bengali)
+    deploy.md                  # Deploy guide
   superpowers/
-    specs/                   # Approved design specifications
-    plans/                   # Phase plans
+    specs/                    # Approved design specifications
+    plans/                    # Phase plans
 scripts/
-  pre-commit-docs.sh         # Pre-commit hook (docs discipline)
+  pre-commit-docs.sh          # Pre-commit hook (docs discipline)
+  deploy-rules.sh              # Rules deploy (gated by tests)
 tests/
-  unit/                      # Unit tests (run with `npm run test:unit`)
-  rules/                     # Firestore/Storage rules tests (planned)
-  seed/                      # Seed data for emulator (planned)
-  e2e/                       # End-to-end tests (planned)
-package.json                 # Dev dependencies and npm scripts
-
-Planned top-level files:
-  index.html, about.html, committee.html, gallery.html, events.html
-  firestore.rules, storage.rules, .firebaserc
-
-Planned directories:
-  admin/                     # Admin panel (single-admin content panel)
-  js/                        # Shared modules (i18n, ui, firebase, content)
-  css/                       # Stylesheets
+  unit/                       # Unit tests (25) — i18n, ui, resize
+  rules/                      # Firestore/Storage rules tests (15, with mutation checks)
+  seed/                       # Emulator seed data
+  e2e/                        # Playwright end-to-end specs (8)
+package.json                  # Dev dependencies and npm scripts
 ```
 
 ## npm scripts
 
-- `npm run test:unit` — Run unit tests (pure logic: i18n, ui, etc.)
-- `npm run test:rules` — Run Firestore/Storage rules tests against emulator
+- `npm run test:unit` — Run unit tests (pure logic: i18n, ui, resize)
+- `npm run test:rules` — Run Firestore/Storage rules tests against the emulator
 - `npm test` — Full test suite (unit + rules)
 - `npm run emu` — Start Firebase emulator (firestore, storage, auth)
 - `npm run seed` — Seed emulator with test data
