@@ -110,6 +110,9 @@ export const STRINGS = {
   'mem.notices': { bn: 'নোটিশ', en: 'Notices' },
   'mem.duties': { bn: 'আমার দায়িত্ব', en: 'My duties' },
   'mem.logout': { bn: 'লগআউট', en: 'Logout' },
+  'mem.tooMany': { bn: 'অনেকবার চেষ্টা হয়েছে — কয়েক মিনিট পরে আবার', en: 'Too many attempts — wait a few minutes.' },
+  'mem.changeNumber': { bn: 'নম্বর বদলান', en: 'Change number' },
+  'mem.resend': { bn: 'আবার OTP পাঠান', en: 'Resend OTP' },
 };
 export function t(key, lang = current) {
   const e = STRINGS[key];

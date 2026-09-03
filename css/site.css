@@ -57,4 +57,5 @@ table.ledger td.amt { text-align:right; white-space:nowrap; }
 .stat { background:#fff; border-radius:12px; padding:.6rem; text-align:center; }
 .stat b { display:block; font-size:1.3rem; }
 .otp input { font-size:1.4rem; letter-spacing:.3em; text-align:center; }
+.err { color:#b91c1c; min-height:1.2em; }
 @media (min-width:720px) { body { font-size:18px; } .hero { padding:3rem 2rem; } }

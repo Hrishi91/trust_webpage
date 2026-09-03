@@ -59,21 +59,32 @@ if (s) {
 
     function renderLoggedOut() {
       const phoneInput = el('input', { type: 'tel', placeholder: '+91', 'aria-label': t('mem.phone') });
+      const phoneErr = el('p', { class: 'err' });
+      phoneErr.hidden = true;
       const sendBtn = el('button', { class: 'btn', type: 'button', text: t('mem.sendOtp') });
       const otpInput = el('input', { type: 'text', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: t('mem.otp'), 'aria-label': t('mem.otp') });
       const verifyBtn = el('button', { class: 'btn', type: 'button', text: t('mem.verify') });
-      // The inner div carries the 'row' (flex) class; the outer one is the thing we toggle via
+      const resendBtn = el('button', { class: 'btn', type: 'button', text: t('mem.resend') });
+      const changeBtn = el('a', { href: '#', text: t('mem.changeNumber') });
+      // The inner divs carry the 'row' (flex) class; the outer one is the thing we toggle via
       // the `hidden` property. Putting 'row' (display:flex) directly on the toggled element would
       // let that author rule beat the UA's `[hidden] { display:none }` at equal specificity — the
       // element would stay visually flexed even while hidden.
-      const otpRow = el('div', {}, el('div', { class: 'row otp' }, otpInput, verifyBtn));
+      const otpRow = el('div', {},
+        el('div', { class: 'row otp' }, otpInput, verifyBtn),
+        el('div', { class: 'row' }, resendBtn, changeBtn));
       otpRow.hidden = !awaitingOtp;
       if (awaitingOtp) { phoneInput.disabled = true; sendBtn.disabled = true; }
 
-      sendBtn.onclick = async () => {
+      function showPhoneErr(msg) { phoneErr.textContent = msg; phoneErr.hidden = false; }
+      function clearPhoneErr() { phoneErr.hidden = true; }
+
+      async function sendOtp() {
         const phone = normalizePhone(phoneInput.value);
-        if (!phone) { toast(t('common.error'), 'err'); phoneInput.focus(); return; }
+        if (!phone) { showPhoneErr(t('common.error')); toast(t('common.error'), 'err'); phoneInput.focus(); return; }
+        clearPhoneErr();
         sendBtn.disabled = true;
+        resendBtn.disabled = true;
         const v = getVerifier();
         try {
           confirmationResult = await signInWithPhoneNumber(auth, phone, v);
@@ -84,26 +95,58 @@ if (s) {
           otpInput.focus();
         } catch (err) {
           console.warn('[members] sendOtp', err);
-          if (err && err.code === 'auth/invalid-phone-number') { toast(t('common.error'), 'err'); phoneInput.focus(); }
-          else if (err && err.code === 'auth/too-many-requests') { toast(t('admin.tooMany'), 'err'); }
-          else { toast(t('common.error'), 'err'); }
-          sendBtn.disabled = false;
+          if (err && err.code === 'auth/invalid-phone-number') {
+            showPhoneErr(t('common.error'));
+            toast(t('common.error'), 'err');
+            phoneInput.focus();
+          } else if (err && err.code === 'auth/too-many-requests') {
+            toast(t('mem.tooMany'), 'err');
+          } else {
+            toast(t('common.error'), 'err');
+          }
         } finally {
-          // The verifier's only job is producing the assertion signInWithPhoneNumber just sent —
-          // an invisible widget left alive past that point (rather than cleared and rebuilt fresh
-          // next time) was reproduced, in isolation against the Auth emulator with no app code
-          // involved, to cause onAuthStateChanged to fire the freshly-signed-in user and then,
-          // ~1s later, null — the session gone for good, nothing persisted, no error. Clearing it
-          // right here (success or failure) avoids that.
+          // The verifier is rebuilt from scratch after every attempt, success or failure — a
+          // fix-round-1 review argued for reusing one solved instance across Resend/Change-number
+          // instead (to dodge size:'invisible''s clear() not emptying #recaptcha, so a fresh
+          // RecaptchaVerifier on the same non-empty div throws "reCAPTCHA has already been
+          // rendered in this element"), but that was verified false here: a network trace of a
+          // reused verifier's second signInWithPhoneNumber call showed the recaptchaConfig
+          // request re-firing and then nothing — recaptchaParams/accounts:sendVerificationCode
+          // never followed, sendBtn stayed disabled forever, no error thrown anywhere. Rebuilding
+          // fixes both problems at once: clear() the widget, then explicitly empty #recaptcha
+          // (clear() alone doesn't, which is what would trigger "already rendered" on the next
+          // `new RecaptchaVerifier(...)` in getVerifier() above), then null the reference. (Note,
+          // for anyone chasing the *other* symptom this file's history mentions — a session torn
+          // down ~1s after a successful sign-in — that traces to Auth's own ProactiveRefresh:
+          // Firestore's internal token-listener arms it, it calls getIdToken(true) shortly after
+          // sign-in, and when that refresh fails against the emulator, _logoutIfInvalidated
+          // silently signs the user out. Unrelated to this verifier's lifetime either way.)
           try { v.clear(); } catch (clearErr) { console.warn('[members] verifier clear', clearErr); }
+          document.getElementById('recaptcha').replaceChildren();
           verifier = null;
+          sendBtn.disabled = false;
+          resendBtn.disabled = false;
         }
+      }
+
+      sendBtn.onclick = sendOtp;
+      resendBtn.onclick = sendOtp;
+
+      changeBtn.onclick = e => {
+        e.preventDefault();
+        awaitingOtp = false;
+        confirmationResult = null;
+        otpRow.hidden = true;
+        phoneInput.disabled = false;
+        sendBtn.disabled = false;
+        clearPhoneErr();
+        phoneInput.focus();
       };
 
       verifyBtn.onclick = async () => {
         if (!confirmationResult) return;
         const code = otpInput.value.trim();
-        if (!code) { toast(t('common.error'), 'err'); otpInput.focus(); return; }
+        if (!/^\d{6}$/.test(code)) { toast(t('common.error'), 'err'); otpInput.focus(); return; }
         verifyBtn.disabled = true;
         try {
           await confirmationResult.confirm(code);
@@ -119,6 +162,7 @@ if (s) {
         el('h1', { text: t('mem.title') }),
         el('div', { class: 'card' },
           el('div', { class: 'row' }, phoneInput, sendBtn),
+          phoneErr,
           otpRow));
     }
 
