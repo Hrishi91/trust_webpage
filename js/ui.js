@@ -14,14 +14,14 @@ export function countdown(iso, now = new Date()) {
   return { days, hours, minutes, past: false };
 }
 
-const BN_DIGITS = '০१२३४५६७८९';
+const BN_DIGITS = '০১২৩৪৫৬৭৮৯'; // Bengali digits U+09E6–U+09EF (not Devanagari U+0966–)
 export function bnDigits(s) { return String(s).replace(/\d/g, d => BN_DIGITS[d]); }
 const MONTHS = {
   bn: ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'],
   en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
 };
 export function fmtDate(iso, lang = 'bn') {
-  const d = new Date(iso);
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso + 'T00:00:00' : iso);
   if (Number.isNaN(d.getTime())) return '';
   const out = `${d.getDate()} ${MONTHS[lang === 'bn' ? 'bn' : 'en'][d.getMonth()]} ${d.getFullYear()}`;
   return lang === 'bn' ? bnDigits(out) : out;

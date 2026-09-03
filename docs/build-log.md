@@ -9,4 +9,5 @@ v0.0.2 — firebase.json (emulator ports 8080/9099/9199/4000), .firebaserc, fire
 
 v0.1.0 — i18n module (getLang/setLang/pick/t/STRINGS/onLangChange), 11 unit tests.
 
-v0.2.0 — ui helpers (escapeHtml, countdown, bnDigits, fmtDate, el, toast), 8 unit tests.
+v0.2.0 — ui helpers (escapeHtml, countdown, bnDigits, fmtDate, el, toast), 9 unit tests.
+Fix: Bengali digit codepoints (was Devanagari 1–9), date-only fmtDate parses as local, 9 tests.

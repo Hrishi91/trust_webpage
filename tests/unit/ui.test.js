@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { escapeHtml, countdown, fmtDate } from '../../js/ui.js';
+import { escapeHtml, countdown, fmtDate, bnDigits } from '../../js/ui.js';
 
 test('escapeHtml escapes the five', () =>
   assert.equal(escapeHtml(`<a href="x" title='y'>&</a>`), '&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;'));
@@ -14,6 +14,7 @@ test('countdown past date', () => {
   assert.equal(r.past, true); assert.equal(r.days, 0);
 });
 test('countdown invalid date', () => assert.equal(countdown('nope').past, true));
-test('fmtDate bn uses Bengali digits and month', () => assert.equal(fmtDate('2026-09-20', 'bn'), '२০ সেপ্টেম্বর २০२६'));
+test('fmtDate bn uses Bengali digits and month', () => assert.equal(fmtDate('2026-09-20', 'bn'), "২০ সেপ্টেম্বর ২০২৬"));
 test('fmtDate en', () => assert.equal(fmtDate('2026-09-20', 'en'), '20 September 2026'));
 test('fmtDate garbage', () => assert.equal(fmtDate('x', 'en'), ''));
+test('bnDigits maps 0-9 to U+09E6..U+09EF', () => assert.equal(bnDigits('0123456789'), "০১২৩৪৫৬৭৮৯"));
