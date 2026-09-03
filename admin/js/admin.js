@@ -102,6 +102,7 @@ async function route() {
 window.addEventListener('hashchange', route);
 
 // Sections register themselves on import (order = dashboard order).
+import './sections/announcements.js'; // Phase 3
 import './sections/settings.js'; // Task 9
 import './sections/history.js'; // Task 15
 import './sections/committee.js'; // Task 16
