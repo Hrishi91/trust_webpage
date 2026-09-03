@@ -4,7 +4,7 @@ import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator,
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
-  serverTimestamp, onSnapshot, Timestamp,
+  serverTimestamp, onSnapshot, Timestamp, writeBatch,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 import {
   getAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged,
@@ -45,7 +45,7 @@ if (IS_LOCAL) {
 
 export {
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
-  serverTimestamp, onSnapshot, Timestamp,
+  serverTimestamp, onSnapshot, Timestamp, writeBatch,
   signInWithEmailAndPassword, signOut, onAuthStateChanged, reauthenticateWithCredential,
   EmailAuthProvider, setPersistence, browserLocalPersistence,
   ref, uploadBytesResumable, getDownloadURL, deleteObject,

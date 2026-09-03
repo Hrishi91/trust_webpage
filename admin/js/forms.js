@@ -1,7 +1,12 @@
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, query, where, orderBy, serverTimestamp } from '../../js/firebase.js';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, query, where, orderBy, serverTimestamp, writeBatch } from '../../js/firebase.js';
 import { t, pick } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
 import { logAudit } from './audit.js';
+
+// ISO string (possibly with seconds + Z, as stored in Firestore) -> the local
+// "yyyy-MM-ddThh:mm" string an <input type="datetime-local"> accepts as its value.
+// Reused by events (Task 19) — keep the name.
+export const toLocalInput = iso => iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
 
 export function biField(label, name, value = {}, { multiline = false } = {}) {
   const mk = (lang) => el(multiline ? 'textarea' : 'input', { name: `${name}.${lang}`, placeholder: lang.toUpperCase(), value: multiline ? undefined : (value[lang] || '') });
@@ -60,8 +65,10 @@ export async function listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reo
       const swap = async (j) => {
         if (j < 0 || j >= docs.length) return;
         const a = docs[i], c = docs[j];
-        await updateDoc(doc(ctx.db, coll, a.id), { order: c.order });
-        await updateDoc(doc(ctx.db, coll, c.id), { order: a.order });
+        const batch = writeBatch(ctx.db);
+        batch.update(doc(ctx.db, coll, a.id), { order: c.order });
+        batch.update(doc(ctx.db, coll, c.id), { order: a.order });
+        await batch.commit();
         await logAudit(ctx, 'reorder', `${coll}/${a.id}`, { order: a.order }, { order: c.order });
         box.replaceWith(await listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reorder }));
       };

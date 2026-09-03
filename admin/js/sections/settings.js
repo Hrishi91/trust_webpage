@@ -2,7 +2,7 @@ import { registerSection } from '../admin.js';
 import { doc, getDoc, setDoc, serverTimestamp } from '../../../js/firebase.js';
 import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
-import { biField, textField, boolField } from '../forms.js';
+import { biField, textField, boolField, toLocalInput } from '../forms.js';
 import { logAudit } from '../audit.js';
 
 const SECTIONS = ['about', 'committee', 'gallery', 'events', 'donate', 'transparency', 'members'];
@@ -26,7 +26,7 @@ registerSection('settings', {
       has80G: boolField({ bn: '80G আছে', en: 'Has 80G' }, 'has80G', cur.has80G),
       upiId: textField({ bn: 'UPI ID', en: 'UPI ID' }, 'upiId', cur.upiId),
       upiQrUrl: textField({ bn: 'UPI QR ছবির URL', en: 'UPI QR image URL' }, 'upiQrUrl', cur.upiQrUrl),
-      pujaDate: textField({ bn: 'পুজোর তারিখ-সময়', en: 'Puja date-time' }, 'pujaDate', cur.pujaDate, { type: 'datetime-local' }),
+      pujaDate: textField({ bn: 'পুজোর তারিখ-সময়', en: 'Puja date-time' }, 'pujaDate', toLocalInput(cur.pujaDate), { type: 'datetime-local' }),
       theme: biField({ bn: 'এই বছরের থিম', en: "This year's theme" }, 'theme', cur.theme),
       maintenance: boolField({ bn: 'Maintenance mode (সাইট বন্ধ)', en: 'Maintenance mode' }, 'maintenance', cur.maintenance),
     };
