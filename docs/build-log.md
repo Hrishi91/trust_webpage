@@ -46,3 +46,5 @@ Fix: `el()`'s child loop only skips `null`/`undefined` (not `false`), so the bri
 
 v0.14.0 — image upload: resize.js fitDims (5 tests) + upload.js (client-side resize to WebP, resumable upload to public/, imageField/multiImageField widgets with progress); el() now skips false children; verified against Storage emulator with Playwright (admin ok, non-admin denied).
 Fix: EXIF orientation honoured (from-image); imageField input reset for retry; capture attr intentionally omitted.
+
+v0.15.0 — Committee: admin section (name/post/photo upload/show-on-website, reorder, soft delete) + public committee page (grid of persons, placeholder avatar, bn/en); verified with Playwright.

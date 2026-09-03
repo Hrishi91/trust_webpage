@@ -84,7 +84,7 @@ window.addEventListener('hashchange', route);
 // Sections register themselves on import (order = dashboard order).
 import './sections/settings.js'; // Task 9
 import './sections/history.js'; // Task 15
-// import './sections/committee.js'; // Task 15
+import './sections/committee.js'; // Task 16
 // import './sections/albums.js'; // Task 16
 // import './sections/events.js'; // Task 18
 import './sections/export.js'; // Task 19
