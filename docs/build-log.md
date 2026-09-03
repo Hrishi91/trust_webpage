@@ -93,3 +93,5 @@ Admin email verified (throwaway local page → sendEmailVerification; auth:expor
 
 ## 2026-09-04 — v0.21.0 storage LIVE
 Owner upgraded to Blaze. Via firebasestorage API (owner OAuth): enabled API, created default bucket ganesh-puja-trust.firebasestorage.app in asia-south1 (matches config). Deployed storage.rules. Live REST: anon read public/* → 404 (allowed), anon read private/* → 403, anon upload → 403. Budget alert ₹100 (50/90/100%) attempted via Billing Budgets API — see next entry for result.
+
+Budget via Billing Budgets API → 404 (billing-account scope); owner sets it in GCP console instead.
