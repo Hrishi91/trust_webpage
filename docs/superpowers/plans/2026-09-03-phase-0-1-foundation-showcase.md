@@ -86,7 +86,7 @@ TRUST_webPage/
 - Modify: `.gitignore` (already exists)
 
 **Interfaces:**
-- Produces: `npm run test:unit` = `node --test tests/unit/`; pre-commit hook installed at `.git/hooks/pre-commit`.
+- Produces: `npm run test:unit` = `node --test 'tests/unit/**/*.test.js'`; pre-commit hook installed at `.git/hooks/pre-commit`.
 
 - [ ] **Step 1: Write `package.json` (dev-only)**
 
@@ -98,15 +98,15 @@ TRUST_webPage/
   "description": "Ganesh Puja Trust website — static site + Firebase. Dev tooling only; the site has no build step.",
   "scripts": {
     "test": "npm run test:unit && npm run test:rules",
-    "test:unit": "node --test tests/unit/",
-    "test:rules": "firebase emulators:exec --only firestore,storage,auth --project demo-trust \"node --test tests/rules/\"",
+    "test:unit": "node --test 'tests/unit/**/*.test.js'",
+    "test:rules": "firebase emulators:exec --only firestore,storage,auth --project demo-trust \"node --test 'tests/rules/**/*.test.js'\"",
     "emu": "firebase emulators:start --only firestore,storage,auth --project demo-trust",
     "seed": "node tests/seed/seed.js",
     "serve": "python3 -m http.server 5500 --bind 127.0.0.1",
     "e2e": "playwright test"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^4.0.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.50.0",
     "firebase": "^12.18.0",
     "firebase-admin": "^13.0.0",
@@ -118,7 +118,7 @@ TRUST_webPage/
 - [ ] **Step 2: Install and verify**
 
 Run: `npm install && npx firebase --version && node --test tests/unit/`
-Expected: firebase-tools prints a 14.x version; `node --test` reports 0 tests, exit 0. If `@firebase/rules-unit-testing@^4` does not resolve, use `^3.0.0` (API identical for what we use).
+Expected: firebase-tools prints a 14.x version; `node --test` reports 0 tests, exit 0. (`@firebase/rules-unit-testing` 5.x is the line whose peer is `firebase@^12`; Node 24's test runner needs a glob, not a directory.)
 
 - [ ] **Step 3: Write `scripts/pre-commit-docs.sh`**
 
