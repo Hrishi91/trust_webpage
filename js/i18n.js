@@ -84,6 +84,7 @@ export const STRINGS = {
   'donate.anonymous': { bn: 'নাম প্রকাশে অনিচ্ছুক', en: 'Anonymous' },
   'donate.soon': { bn: 'অনলাইন দান শীঘ্রই চালু হবে — WhatsApp-এ যোগাযোগ করুন', en: 'Online donation opens soon — contact us on WhatsApp' },
   'donate.tax80g': { bn: '80G-এর আওতায় কর ছাড়যোগ্য', en: 'Tax-deductible under 80G' },
+  'donate.copied': { bn: 'কপি হয়েছে', en: 'Copied' },
   // transparency
   'tr.title': { bn: 'আয়-ব্যয়ের হিসাব', en: 'Income & expense' },
   'tr.income': { bn: 'আয়', en: 'Income' },
