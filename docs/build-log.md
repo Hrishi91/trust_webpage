@@ -98,3 +98,6 @@ Budget via Billing Budgets API → 404 (billing-account scope); owner sets it in
 
 ## 2026-09-04 — v0.21.1 storage read path verified with a real object
 Dummy 600px WebP (canvas via Playwright) uploaded to public/committee/dummy-c2.webp with the owner OAuth token (GCS JSON API), committee/c2.photoUrl set to the Firebase download URL. Anon GET → 200 image/webp 5824B; committee.html renders it (naturalWidth 600). Upload-through-admin-panel still to be tested by the owner on a phone.
+
+## 2026-09-04 — v0.21.2 full demo dataset on production
+Owner asked for a full presentation. Generated canvas WebP placeholders (Playwright) → Storage public/{site,history,committee,albums}; Firestore: settings (logo, address, contacts), history 2021–2025 (rich HTML, 7 images), committee ×8 (Storage portraits), albums 2023/2024/2025 × 6 photos, events ×8 (5 upcoming, 3 past). 43 docs via owner OAuth REST (dummy only). Live verified per page in the browser pane (counts + Storage image hosts). All of it is replaceable from /admin/.
