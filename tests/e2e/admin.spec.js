@@ -9,7 +9,7 @@ async function login(page) {
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(10);
+  await expect(page.locator('.grid .tile')).toHaveCount(12);
 }
 test('wrong password fails', async ({ page }) => {
   await page.goto('/admin/');
