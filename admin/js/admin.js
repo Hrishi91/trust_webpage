@@ -108,3 +108,4 @@ import './sections/committee.js'; // Task 16
 import './sections/albums.js'; // Task 18
 import './sections/events.js'; // Task 19
 import './sections/export.js'; // Task 19
+import './sections/donations.js'; // Phase 2
