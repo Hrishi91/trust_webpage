@@ -13,7 +13,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST;
 const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
-const looksLocal = h => !!h && (h.includes('127.0.0.1') || h.includes('localhost'));
+const looksLocal = h => !!h && /^(127\.0\.0\.1|localhost)(:\d+)?$/.test(h);
 if (!looksLocal(firestoreHost) || !looksLocal(authHost)) {
   throw new Error('seed refuses to run outside the emulator');
 }

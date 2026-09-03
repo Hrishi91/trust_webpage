@@ -46,4 +46,12 @@ test('soft delete asks confirm + reauth and hides the row', async ({ page }) => 
   await expect(page).toHaveURL(/#history$/);
   await page.goto('/about.html');
   await expect(page.locator('article')).toHaveCount(0);
+  // The About page hiding the row is also what a hard delete would produce — assert the
+  // underlying write directly against the Firestore emulator's REST API so a regression from
+  // updateDoc({deleted:true}) to deleteDoc() (which would still make the row disappear
+  // publicly) fails this test instead of passing it silently.
+  const res = await fetch('http://127.0.0.1:8080/v1/projects/demo-trust/databases/(default)/documents/history/h1', { headers: { Authorization: 'Bearer owner' } });
+  expect(res.status).toBe(200);                       // doc still exists — not hard-deleted
+  const body = await res.json();
+  expect(body.fields.deleted.booleanValue).toBe(true); // soft-deleted
 });
