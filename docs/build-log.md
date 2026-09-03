@@ -37,3 +37,6 @@ v0.9.0 — Pages placeholder index + .nojekyll; deploy guide. GitHub repo creati
 v0.10.0 — js/content.js: DEFAULT_SETTINGS, getSettings (memoised, merged defaults), listPublished/listCommittee/listPhotos/getPublished — published-only queries; smoke-tested in browser against emulator.
 
 v0.11.0 — public shell: css/site.css theme, js/shell.js (header/nav/footer from settings, lang toggle, maintenance mode, sectionVisibility nav filter), index.html skeleton + home stub; verified with Playwright (bn/en, maintenance, 375px no overflow).
+
+v0.12.0 — home page: hero (name/tagline/theme), puja countdown (bn digits, 'today' state, 60s tick), next 3 upcoming events, latest album card; sections omitted when empty; verified with Playwright.
+Fix: `main.replaceChildren(...)` is the native DOM method, not `el()` — it stringifies non-Node arguments instead of skipping them, so a conditional section written as `cond ? el(...) : null` (or the brief's original `cond && el(...)`) left a literal "null" (or "0") text node in #main when the condition was false. Sections are now built into an array and passed as `main.replaceChildren(...arr.filter(Boolean))`.
