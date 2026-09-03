@@ -62,3 +62,5 @@ v0.18.0 — emulator seed (firebase-admin, refuses non-emulator hosts) + Playwri
 
 v0.19.0 — docs: full admin guide, go-live checklist, pending/context/README refreshed to the real state; live steps ⏳ owner.
 Fix: soft-delete e2e asserts history/h1 still exists with deleted:true (mutation-checked against a hard delete); seed guard is a strict host match.
+
+v0.20.0 — fix: declare all nine Firestore composite indexes (firestore.indexes.json, wired into firebase.json/deploy-rules.sh); go-live checklist Step 1 rewritten to the real nine-index list plus the deploy command, and gained the missing owner step (custom domain → Auth Authorized domains + GCP API-key HTTP referrers); js/content.js's three bare catches (getSettings, listPhotos, getPublished) now console.warn the swallowed error before falling back.

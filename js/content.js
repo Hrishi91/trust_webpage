@@ -12,7 +12,7 @@ let settingsPromise;
 export function getSettings() {
   settingsPromise ??= getDoc(doc(db, 'settings', 'site'))
     .then(s => ({ ...DEFAULT_SETTINGS, ...(s.data() ?? {}), sectionVisibility: { ...DEFAULT_SETTINGS.sectionVisibility, ...(s.data()?.sectionVisibility ?? {}) } }))
-    .catch(() => DEFAULT_SETTINGS);
+    .catch(err => { console.warn('[content]', err); return DEFAULT_SETTINGS; });
   return settingsPromise;
 }
 
@@ -27,7 +27,8 @@ export async function listCommittee() {
 export async function listPhotos(albumId) {
   try {
     return rows(await getDocs(query(collection(db, 'albums', albumId, 'photos'), where('deleted', '==', false), orderBy('order'))));
-  } catch {
+  } catch (err) {
+    console.warn('[content]', err);
     return [];
   }
 }
@@ -35,7 +36,8 @@ export async function getPublished(coll, id) {
   try {
     const s = await getDoc(doc(db, coll, id));
     return s.exists() && s.data().published === true && s.data().deleted === false ? { id: s.id, ...s.data() } : null;
-  } catch {
+  } catch (err) {
+    console.warn('[content]', err);
     return null;
   }
 }

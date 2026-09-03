@@ -11,27 +11,30 @@
 
 ## Step 1 — Composite Firestore indexes
 
-লাইভ সাইটের পেজগুলো একবার anon হিসেবে আর একবার admin হিসেবে খুলুন — "index required" console error এলে সেই লিঙ্কে ক্লিক করে index তৈরি করুন। মোট চারটে লাগবে:
+`firestore.indexes.json`-এ ন'টা composite index ইতিমধ্যে declare করা আছে (কোড-এ কমিট করা, console-এ ক্লিক করে বানাতে হবে না):
 
 - [ ] `history` — `published, deleted, order`
+- [ ] `history` — `deleted, order`
 - [ ] `events` — `published, deleted, order`
+- [ ] `events` — `deleted, order`
 - [ ] `albums` — `published, deleted, order`
+- [ ] `albums` — `deleted, order`
 - [ ] `committee` — `isPublic, deleted, order`
+- [ ] `committee` — `deleted, order`
+- [ ] `photos` (প্রতিটা album-এর `photos` subcollection) — `deleted, order`
 
-সব তৈরি হলে:
+Deploy করতে:
 
 ```bash
-npx firebase firestore:indexes > firestore.indexes.json
+npx firebase deploy --only firestore:indexes --project ganesh-puja-trust
 ```
 
-তারপর `firebase.json`-এর `"firestore"` অংশে যোগ করুন:
+`scripts/deploy-rules.sh` এখন `firestore:rules,firestore:indexes,storage` — সব একসাথে deploy করে (আগে `npm test` green হওয়া বাধ্যতামূলক)। Firebase console → Firestore → Indexes-এ ন'টা index "Enabled" status দেখা গেলে এই ধাপ শেষ।
 
-```json
-"firestore": {
-  "rules": "firestore.rules",
-  "indexes": "firestore.indexes.json"
-}
-```
+### Owner-only: Authorized domains + API key referrer (custom domain লাইভ হওয়ার সাথেই করতে হবে)
+
+- [ ] Firebase console → Authentication → Settings → **Authorized domains** → custom domain যোগ করুন (নাহলে সেই domain থেকে sign-in ব্লক হবে)
+- [ ] GCP console → APIs & Services → Credentials → Browser API key → **HTTP referrers** list-এ `https://<domain>/*` যোগ করুন (`docs/user-guide/deploy.md`-এর Step 4-এও এটা আছে — এখানে repeat করা হলো যাতে go-live checklist একাই যথেষ্ট হয়)
 
 ## Step 2 — Live checklist (custom domain-এ, mobile emulation-এ)
 

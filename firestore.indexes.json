@@ -1,0 +1,45 @@
+{
+  "indexes": [
+    { "collectionGroup": "history", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "history", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "albums", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "albums", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "committee", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "isPublic", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "committee", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "photos", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] }
+  ],
+  "fieldOverrides": []
+}
