@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin</title>
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+<header class="adm-top">
+  <strong id="adm-title">Admin</strong>
+  <span class="grow"></span>
+  <button id="adm-lang" class="btn-sm" type="button">EN</button>
+  <button id="adm-logout" class="btn-sm" type="button" hidden></button>
+</header>
+
+<section id="adm-login" hidden>
+  <form id="adm-login-form" class="card">
+    <h2 data-t="admin.login"></h2>
+    <label><span data-t="admin.email"></span><input name="email" type="email" autocomplete="username" required></label>
+    <label><span data-t="admin.password"></span><input name="password" type="password" autocomplete="current-password" minlength="12" required></label>
+    <button class="btn" type="submit" data-t="admin.login"></button>
+    <p id="adm-login-err" class="err" role="alert"></p>
+  </form>
+</section>
+
+<main id="adm-main" hidden></main>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
