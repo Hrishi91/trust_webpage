@@ -30,3 +30,5 @@ These files are the only source of truth for decisions and their causes.
   Firebase imports → `node --test tests/unit/`.
 - Rules tests: `npm run test:rules` (emulator). Local dev: `npm run emu` +
   `npm run seed` + `npm run serve` → http://127.0.0.1:5500
+- Emulator project id is `demo-trust` (js/firebase.js overrides projectId on
+  localhost); seeds and REST calls must target `demo-trust`.

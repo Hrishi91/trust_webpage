@@ -17,7 +17,10 @@ import { firebaseConfig, APPCHECK_SITE_KEY } from './firebase-config.js';
 
 export const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
 
-export const app = initializeApp(firebaseConfig);
+// Emulators are started with --project demo-trust (package.json); the seed and rules tests write there too.
+// singleProjectMode does not merge namespaces, so the real projectId would see an empty database locally.
+const config = IS_LOCAL ? { ...firebaseConfig, projectId: 'demo-trust' } : firebaseConfig;
+export const app = initializeApp(config);
 
 if (IS_LOCAL) {
   // Emulator runs have no App Check; debug token keeps the SDK quiet.

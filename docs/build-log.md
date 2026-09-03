@@ -19,5 +19,6 @@ v0.4.0 — Storage rules (public/ read-all, admin write via firestore.exists, un
 Fix: update-op, anon-delete, admin-private-read, list, exact-5MB, anchored-type tests; clearStorage in _env; size mutation verified; deploy script pins --project.
 
 v0.5.0 — js/firebase.js single entry (SDK 12.18.0 CDN, persistent local cache, App Check when key set, emulator wiring on localhost); smoke-tested against emulator with Playwright.
+Fix: projectId overridden to demo-trust on localhost — singleProjectMode does not merge namespaces; admin gate now sees seeded data.
 
 v0.6.0 — admin shell: email login, admins-doc gate, hash router, dashboard grid, reauth helper, bn/en toggle; verified against emulator with Playwright (wrong pw, admin, non-admin rejected, persistence, logout).
