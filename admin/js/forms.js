@@ -25,27 +25,39 @@ export function boolField(label, name, value = false) {
 }
 
 export async function saveDoc(ctx, coll, id, data, { publish } = {}) {
-  const ref = id ? doc(ctx.db, coll, id) : doc(collection(ctx.db, coll));
-  const before = id ? (await getDoc(ref)).data() ?? null : null;
-  const payload = { ...data, deleted: false, updatedAt: serverTimestamp() };
-  if (publish !== undefined) payload.published = publish;
-  else if (!before) payload.published = false;
-  if (!before) { payload.createdAt = serverTimestamp(); if (payload.order == null) payload.order = Date.now(); }
-  await setDoc(ref, payload, { merge: true });
-  await logAudit(ctx, id ? 'update' : 'create', `${coll}/${ref.id}`, before, data);
-  toast(t('admin.saved'));
-  return ref.id;
+  try {
+    const ref = id ? doc(ctx.db, coll, id) : doc(collection(ctx.db, coll));
+    const before = id ? (await getDoc(ref)).data() ?? null : null;
+    const payload = { ...data, deleted: false, updatedAt: serverTimestamp() };
+    if (publish !== undefined) payload.published = publish;
+    else if (!before) payload.published = false;
+    if (!before) { payload.createdAt = serverTimestamp(); if (payload.order == null) payload.order = Date.now(); }
+    await setDoc(ref, payload, { merge: true });
+    await logAudit(ctx, id ? 'update' : 'create', `${coll}/${ref.id}`, before, data);
+    toast(t('admin.saved'));
+    return ref.id;
+  } catch (err) {
+    console.error(err);
+    toast(err && err.code === 'permission-denied' && !ctx.user.emailVerified ? t('admin.emailUnverified') : t('common.error'), 'err');
+    throw err;
+  }
 }
 
 export async function softDelete(ctx, coll, id) {
   if (!confirm(t('admin.confirmDelete'))) return false;
   if (!(await ctx.reauth())) return false;
-  const ref = doc(ctx.db, coll, id);
-  const before = (await getDoc(ref)).data();
-  await updateDoc(ref, { deleted: true, updatedAt: serverTimestamp() });
-  await logAudit(ctx, 'delete', `${coll}/${id}`, before, { deleted: true });
-  toast(t('admin.saved'));
-  return true;
+  try {
+    const ref = doc(ctx.db, coll, id);
+    const before = (await getDoc(ref)).data();
+    await updateDoc(ref, { deleted: true, updatedAt: serverTimestamp() });
+    await logAudit(ctx, 'delete', `${coll}/${id}`, before, { deleted: true });
+    toast(t('admin.saved'));
+    return true;
+  } catch (err) {
+    console.error(err);
+    toast(err && err.code === 'permission-denied' && !ctx.user.emailVerified ? t('admin.emailUnverified') : t('common.error'), 'err');
+    throw err;
+  }
 }
 
 export async function listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reorder = true }) {

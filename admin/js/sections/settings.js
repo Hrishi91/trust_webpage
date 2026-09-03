@@ -39,19 +39,24 @@ registerSection('settings', {
     form.onsubmit = async e => {
       e.preventDefault();
       if (!(await ctx.reauth())) return;
-      const next = {
-        name: f.name.read(), tagline: f.tagline.read(), address: f.address.read(), theme: f.theme.read(),
-        logoUrl: f.logoUrl.read(), mapUrl: f.mapUrl.read(),
-        contacts: { phone: f.phone.read(), whatsapp: f.whatsapp.read(), email: f.email.read() },
-        regNo: f.regNo.read(), has80G: f.has80G.read(), upiId: f.upiId.read(), upiQrUrl: f.upiQrUrl.read(),
-        pujaDate: f.pujaDate.read() ? new Date(f.pujaDate.read()).toISOString() : '',
-        maintenance: f.maintenance.read(), defaultLang: 'bn',
-        sectionVisibility: Object.fromEntries(SECTIONS.map((s, i) => [s, visFields[i].read()])),
-        updatedAt: serverTimestamp(),
-      };
-      await setDoc(ref, next, { merge: true });
-      await logAudit(ctx, 'update', 'settings/site', cur, next);
-      toast(t('admin.saved'));
+      try {
+        const next = {
+          name: f.name.read(), tagline: f.tagline.read(), address: f.address.read(), theme: f.theme.read(),
+          logoUrl: f.logoUrl.read(), mapUrl: f.mapUrl.read(),
+          contacts: { phone: f.phone.read(), whatsapp: f.whatsapp.read(), email: f.email.read() },
+          regNo: f.regNo.read(), has80G: f.has80G.read(), upiId: f.upiId.read(), upiQrUrl: f.upiQrUrl.read(),
+          pujaDate: f.pujaDate.read() ? new Date(f.pujaDate.read()).toISOString() : '',
+          maintenance: f.maintenance.read(), defaultLang: 'bn',
+          sectionVisibility: Object.fromEntries(SECTIONS.map((s, i) => [s, visFields[i].read()])),
+          updatedAt: serverTimestamp(),
+        };
+        await setDoc(ref, next, { merge: true });
+        await logAudit(ctx, 'update', 'settings/site', cur, next);
+        toast(t('admin.saved'));
+      } catch (err) {
+        console.error(err);
+        toast(err && err.code === 'permission-denied' && !ctx.user.emailVerified ? t('admin.emailUnverified') : t('common.error'), 'err');
+      }
     };
     box.append(form);
   },

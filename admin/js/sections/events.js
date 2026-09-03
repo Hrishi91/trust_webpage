@@ -34,15 +34,17 @@ registerSection(COLL, {
       // "Save draft" is type=button and bypasses the input's `required` validation, so an empty
       // start would otherwise reach `new Date('').toISOString()` (Invalid Date) and throw.
       if (!f.start.read()) { toast(t('common.error'), 'err'); return; }
-      const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, read(), { publish });
-      ctx.navigate(`#${COLL}/${newId}`);
+      try {
+        const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, read(), { publish });
+        ctx.navigate(`#${COLL}/${newId}`);
+      } catch { /* toast shown in saveDoc */ }
     };
     const form = el('form', { class: 'card' }, ...Object.values(f).map(x => x.node),
       el('div', { class: 'row' },
         el('button', { class: 'btn secondary', type: 'button', text: t('admin.saveDraft'), onclick: save(false) }),
         el('button', { class: 'btn', type: 'submit', text: t('admin.publish') }),
         id !== 'new' ? el('button', { class: 'btn danger', type: 'button', text: t('admin.delete'),
-          onclick: async () => { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } }) : null));
+          onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } } }) : null));
     form.onsubmit = save(true);
     box.append(form);
   },

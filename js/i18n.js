@@ -62,6 +62,7 @@ export const STRINGS = {
   'admin.loginFailed': { bn: 'লগইন হয়নি', en: 'Login failed.' },
   'admin.tooMany': { bn: 'অনেকবার চেষ্টা হয়েছে — কয়েক মিনিট পরে আবার', en: 'Too many attempts — wait a few minutes.' },
   'admin.wrongPassword': { bn: 'ভুল পাসওয়ার্ড', en: 'Wrong password' },
+  'admin.emailUnverified': { bn: 'ইমেল verify হয়নি — লগআউট করে আবার লগইন করুন', en: 'Email not verified — log out and log in again' },
 };
 export function t(key, lang = current) {
   const e = STRINGS[key];

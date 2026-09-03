@@ -41,8 +41,10 @@ registerSection(COLL, {
       // save a nonsense year (and order, which is derived from it) silently.
       const year = f.year.read();
       if (!year || Number.isNaN(Number(year))) { toast(t('common.error'), 'err'); return; }
-      const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, read(), { publish });
-      ctx.navigate(`#${COLL}/${newId}`);
+      try {
+        const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, read(), { publish });
+        ctx.navigate(`#${COLL}/${newId}`);
+      } catch { /* toast shown in saveDoc */ }
     };
     const form = el('form', { class: 'card' }, ...Object.values(f).map(x => x.node),
       el('div', { class: 'row' },
@@ -50,7 +52,7 @@ registerSection(COLL, {
         el('button', { class: 'btn', type: 'submit', text: t('admin.publish') }),
         id !== 'new' && el('a', { class: 'btn secondary', href: `../gallery.html?album=${id}&preview=1`, target: '_blank', text: t('admin.preview') }),
         id !== 'new' && el('button', { class: 'btn danger', type: 'button', text: t('admin.delete'),
-          onclick: async () => { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } })));
+          onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } } })));
     form.onsubmit = save(true);
     box.append(form);
     if (id === 'new') return;

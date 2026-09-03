@@ -29,12 +29,14 @@ registerSection(COLL, {
       el('div', { class: 'row' },
         el('button', { class: 'btn', type: 'submit', text: t('admin.saveDraft') }),
         id !== 'new' && el('button', { class: 'btn danger', type: 'button', text: t('admin.delete'),
-          onclick: async () => { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } })));
+          onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } } })));
     form.onsubmit = async e => {
       e.preventDefault();
       const data = { name: f.name.read(), post: f.post.read(), photoUrl: f.photo.read(), isPublic: f.isPublic.read(), order: cur.order ?? Date.now() };
-      const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, data);
-      ctx.navigate(`#${COLL}/${newId}`);
+      try {
+        const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, data);
+        ctx.navigate(`#${COLL}/${newId}`);
+      } catch { /* toast shown in saveDoc */ }
     };
     box.append(form);
   },
