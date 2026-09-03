@@ -30,3 +30,4 @@ Fix: pujaDate round-trips into datetime-local (toLocalInput helper); reorder swa
 
 v0.8.0 — admin Export: all collections + album photos as one JSON download (audit row logged); verified with Playwright download against emulator.
 Includes settings, history, committee, albums (with nested photos), events, and audit collections. Timestamps serialize as {seconds, nanoseconds}. Object URL revoked after download to prevent memory leak.
+Fix: export errors surface as a toast; button disabled while running.
