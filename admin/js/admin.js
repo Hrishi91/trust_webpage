@@ -4,9 +4,12 @@ import {
 } from '../../js/firebase.js';
 import { t, getLang, setLang, onLangChange, pick } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
-
-const sections = new Map();
-export function registerSection(key, def) { sections.set(key, def); }
+// sections/registerSection live in registry.js, not here — see that file for why:
+// admin.js and every section file reference each other, and keeping the Map directly in
+// this module makes a section's top-level registerSection() call crash (or, with a
+// dynamic import, deadlock) on the circular reference back into this module.
+import { sections, registerSection } from './registry.js';
+export { registerSection };
 
 const $ = id => document.getElementById(id);
 let user = null;
@@ -27,7 +30,7 @@ $('adm-login-form').onsubmit = async e => {
     await setPersistence(auth, browserLocalPersistence);
     await signInWithEmailAndPassword(auth, f.get('email'), f.get('password'));
   } catch (err) {
-    $('adm-login-err').textContent = err.code === 'auth/too-many-requests' ? 'Too many attempts — wait a few minutes.' : 'Login failed.';
+    $('adm-login-err').textContent = err.code === 'auth/too-many-requests' ? t('admin.tooMany') : t('admin.loginFailed');
   }
 };
 $('adm-logout').onclick = () => signOut(auth);
@@ -50,7 +53,7 @@ async function reauth() {
   const pw = prompt(t('admin.reauth'));
   if (!pw) return false;
   try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, pw)); return true; }
-  catch { toast('Wrong password', 'err'); return false; }
+  catch { toast(t('admin.wrongPassword'), 'err'); return false; }
 }
 
 const ctx = () => ({ db, storage, user, lang: getLang(), navigate: h => { location.hash = h; }, reauth });
@@ -64,7 +67,7 @@ function dashboard() {
   return grid;
 }
 
-function route() {
+async function route() {
   if (!user) return;
   const main = $('adm-main'); main.replaceChildren();
   const key = location.hash.replace(/^#/, '').split('/')[0];
@@ -73,7 +76,8 @@ function route() {
   if (!def) { main.append(dashboard()); return; }
   main.append(el('a', { class: 'back', href: '#', text: '‹ ' + pick({ bn: 'ড্যাশবোর্ড', en: 'Dashboard' }) }));
   const box = el('div'); main.append(box);
-  Promise.resolve(def.render(box, ctx())).catch(err => { console.error(err); toast(t('common.error'), 'err'); });
+  try { await def.render(box, ctx()); }
+  catch (err) { console.error(err); box.replaceChildren(el('p', { class: 'err', text: t('common.error') })); toast(t('common.error'), 'err'); }
 }
 window.addEventListener('hashchange', route);
 
