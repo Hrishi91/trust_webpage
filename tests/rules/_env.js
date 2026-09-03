@@ -21,6 +21,9 @@ export async function setup() {
     testEnv,
     anon: testEnv.unauthenticatedContext(),
     admin: testEnv.authenticatedContext(ADMIN_UID, { email: 'admin@example.com', email_verified: true }),
+    // Same uid as the admin — the admins/{uid} doc exists either way — only the email_verified
+    // claim differs, so this isolates the verified-email gate from the admins-doc gate.
+    unverified: testEnv.authenticatedContext(ADMIN_UID, { email: 'admin@example.com', email_verified: false }),
     other: testEnv.authenticatedContext(OTHER_UID, { email: 'x@example.com' }),
     seed: fn => testEnv.withSecurityRulesDisabled(ctx => fn(ctx.firestore(), ctx.storage())),
   };

@@ -19,6 +19,8 @@ const meta = { contentType: 'image/png' };
 test('storage: anon cannot write, admin can; anyone reads public/', async () => {
   await assertFails(E.anon.storage().ref('public/a.png').put(png, meta));
   await assertFails(E.other.storage().ref('public/a.png').put(png, meta));
+  // Same uid as admin, admins/{uid} doc exists — only email_verified differs; gate must still deny.
+  await assertFails(E.unverified.storage().ref('public/unverified.png').put(png, meta));
   await assertSucceeds(E.admin.storage().ref('public/a.png').put(png, meta));
   await assertSucceeds(E.anon.storage().ref('public/a.png').getMetadata());
 });

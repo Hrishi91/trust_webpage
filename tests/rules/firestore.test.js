@@ -16,6 +16,8 @@ test('settings: anyone reads, only admin writes', async () => {
   await assertSucceeds(E.anon.firestore().doc('settings/site').get());
   await assertFails(E.anon.firestore().doc('settings/site').set({ name: 'x' }));
   await assertFails(E.other.firestore().doc('settings/site').set({ name: 'x' }));
+  // Same uid as admin, admins/{uid} doc exists — only email_verified differs; gate must still deny.
+  await assertFails(E.unverified.firestore().doc('settings/site').set({ name: { bn: 'a', en: 'b' } }));
   await assertSucceeds(E.admin.firestore().doc('settings/site').set({ name: { bn: 'a', en: 'b' } }));
   await assertFails(E.admin.firestore().doc('settings/site').delete());
 });

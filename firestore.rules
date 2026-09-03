@@ -4,7 +4,8 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null; }
     function isAdmin() {
-      return signedIn() && exists(/databases/$(db)/documents/admins/$(request.auth.uid));
+      return signedIn() && request.auth.token.email_verified == true
+        && exists(/databases/$(db)/documents/admins/$(request.auth.uid));
     }
     // Public content: must be explicitly published and explicitly not deleted.
     function isLive() { return resource.data.published == true && resource.data.deleted == false; }

@@ -8,6 +8,9 @@
 4. Build → Storage → Get started (production mode, same region)।
 5. Build → Authentication → Sign-in method → Email/Password enable।
    Users → Add user: আপনার admin email + ≥12-char password। **UID copy করুন।**
+   তারপর ওই user row-এ ক্লিক করে **Email verified** টিক করে দিন — rules-এর
+   admin gate (`isAdmin()`) এখন `email_verified == true` চেক করে, টিক না
+   থাকলে অ্যাডমিন প্যানেলের কোনো write (এমনকি নিজের settings save-ও) permission-denied দেবে।
 6. Firestore → Data → Start collection `admins` → Document ID = ওই UID →
    field `createdAt` (timestamp, now)। এটাই admin gate।
 7. Project settings → General → Your apps → Web app (</>) → নাম `trust-site`,
