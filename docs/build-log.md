@@ -75,3 +75,6 @@ v0.24.0 — fix wave polish: js/rich.js now console.warn('[rich] DOMPurify not l
 
 ## 2026-09-03 — v0.19.1 repo live
 GitHub repo `Hrishi91/trust_webpage` (underscore — owner created it manually; token cannot create repos) — main pushed (47 commits). Pages enable via API 403 (token lacks Administration on this repo) → owner enables in Settings → Pages. deploy.md paths updated to `/trust_webpage/`.
+
+## 2026-09-03 — v0.19.2 real firebase config
+Real web config for `ganesh-puja-trust` pasted into js/firebase-config.js (public by design). App Check key still PASTE.
