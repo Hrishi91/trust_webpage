@@ -1,6 +1,6 @@
 import { getSettings } from './content.js';
 import { getLang, setLang, onLangChange, pick, t } from './i18n.js';
-import { el } from './ui.js';
+import { el, digits } from './ui.js';
 
 const NAV = [
   ['home', 'index.html', 'nav.home', null],
@@ -32,7 +32,7 @@ export async function mountShell(active, pageTitle) {
       el('footer', { class: 'site-footer' },
         el('p', { text: pick(s.address) }),
         s.contacts.phone ? el('p', {}, el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone })) : null,
-        s.contacts.whatsapp ? el('p', {}, el('a', { href: `https://wa.me/${s.contacts.whatsapp}`, text: 'WhatsApp' })) : null,
+        digits(s.contacts.whatsapp) ? el('p', {}, el('a', { href: `https://wa.me/${digits(s.contacts.whatsapp)}`, text: 'WhatsApp' })) : null,
         s.mapUrl ? el('p', {}, el('a', { href: s.mapUrl, target: '_blank', rel: 'noopener', text: pick({ bn: 'মানচিত্রে দেখুন', en: 'View on map' }) })) : null,
         s.regNo ? el('p', { class: 'muted', text: `Reg. No. ${s.regNo}` }) : null,
         el('p', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` })));

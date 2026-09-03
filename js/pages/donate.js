@@ -1,7 +1,7 @@
 import { mountShell } from '../shell.js';
 import { listDonorWall } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
-import { el, fmtDate, toast } from '../ui.js';
+import { el, fmtDate, toast, digits } from '../ui.js';
 import { inr } from '../money.js';
 
 const COPY_LABEL = { bn: 'কপি করুন', en: 'Copy' };
@@ -25,9 +25,10 @@ if (s) {
 
     const upiCard = () => {
       if (!s.upiId) {
+        const wa = digits(s.contacts.whatsapp);
         return el('div', { class: 'notice' },
           el('p', { text: t('donate.soon') }),
-          s.contacts.whatsapp ? el('a', { class: 'btn', href: `https://wa.me/${s.contacts.whatsapp}`, target: '_blank', rel: 'noopener', text: 'WhatsApp' }) : null);
+          wa ? el('a', { class: 'btn', href: `https://wa.me/${wa}`, target: '_blank', rel: 'noopener', text: 'WhatsApp' }) : null);
       }
       const payHref = `upi://pay?pa=${encodeURIComponent(s.upiId)}&pn=${encodeURIComponent(pick(s.name))}&cu=INR`;
       return el('div', { class: 'card' },
@@ -48,7 +49,8 @@ if (s) {
     };
 
     const confirmCard = () => {
-      if (!s.contacts.whatsapp) return null;
+      const wa = digits(s.contacts.whatsapp);
+      if (!wa) return null;
       const nameField = el('input', { type: 'text', placeholder: pick(NAME_LABEL), 'aria-label': pick(NAME_LABEL) });
       const amountField = el('input', { type: 'number', min: '0', placeholder: pick(AMOUNT_LABEL), 'aria-label': pick(AMOUNT_LABEL) });
       const refField = el('input', { type: 'text', placeholder: pick(REF_LABEL), 'aria-label': pick(REF_LABEL) });
@@ -59,11 +61,9 @@ if (s) {
             e.preventDefault();
             const name = nameField.value.trim(), amount = Number(amountField.value), ref = refField.value.trim();
             if (!(amount > 0)) { toast(t('common.error'), 'err'); return; }
-            const msg = t('donate.confirmMsg')
-              .replace('{amount}', String(amount))
-              .replace('{ref}', ref || '—')
-              .replace('{name}', name || '—');
-            window.open(`https://wa.me/${s.contacts.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+            const vals = { amount: String(amount), ref: ref || '—', name: name || '—' };
+            const msg = t('donate.confirmMsg').replace(/\{(amount|ref|name)\}/g, (_, k) => vals[k]);
+            window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
           },
         },
           el('div', { class: 'row' }, nameField),

@@ -14,6 +14,8 @@ export function countdown(iso, now = new Date()) {
   return { days, hours, minutes, past: false };
 }
 
+export const digits = s => String(s ?? '').replace(/\D/g, '');
+
 const BN_DIGITS = '০১২৩৪৫৬৭৮৯'; // Bengali digits U+09E6–U+09EF (not Devanagari U+0966–)
 export function bnDigits(s) { return String(s).replace(/\d/g, d => BN_DIGITS[d]); }
 const MONTHS = {
