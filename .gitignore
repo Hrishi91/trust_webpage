@@ -1,0 +1,15 @@
+# Secrets — never commit
+*.serviceaccount.json
+service-account*.json
+.env
+.env.*
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Dev tooling
+node_modules/
+.firebase/
+
+# OS
+.DS_Store
