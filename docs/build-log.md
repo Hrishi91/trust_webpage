@@ -78,3 +78,6 @@ GitHub repo `Hrishi91/trust_webpage` (underscore — owner created it manually; 
 
 ## 2026-09-03 — v0.19.2 real firebase config
 Real web config for `ganesh-puja-trust` pasted into js/firebase-config.js (public by design). App Check key still PASTE.
+
+## 2026-09-03 — v0.20.0 firestore rules + indexes LIVE
+Owner: Firestore (default, Native), Auth email/password, admin user + admins/{uid} doc, web app config, `firebase login`. Deployed after `npm test` (unit 25, rules 15): firestore.rules + 9 composite indexes to ganesh-puja-trust. Live REST verification: anon read settings/site → 404 (allowed, no doc yet), anon read admins/{uid} → 403, anon write settings/site → 403. Pending owner: Pages enable (404), Email verified on admin user, App Check key, Blaze + Storage bucket (storage.rules not deployable until then).

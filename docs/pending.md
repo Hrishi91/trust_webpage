@@ -25,7 +25,7 @@
 - [x] Task 18 gallery (2026-09-03)
 - [x] Task 19 events (2026-09-03)
 - [x] Task 20 e2e (2026-09-03)
-- [ ] Task 21 go-live — docs done (admin guide, go-live checklist, this file, PROJECT_CONTEXT, README, build-log); ⏳ live checklist (indexes, real-project verification, App Check enforcement) after owner completes Task 11's prerequisites — see `docs/user-guide/go-live-checklist.md`
+- [~] Task 21 — docs done; Firestore rules + 9 indexes LIVE 2026-09-03; ⏳ owner: Pages, email verified, App Check key, Blaze+Storage, domain, live checklist
 
 ## Deferred minors (from reviews)
 
