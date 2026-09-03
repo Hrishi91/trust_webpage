@@ -43,3 +43,5 @@ Fix: `main.replaceChildren(...)` is the native DOM method, not `el()` — it str
 
 v0.13.0 — History admin section (year/title/body/images, draft/publish, preview, soft delete) + About page rendering sanitized rich text (DOMPurify 3.2.4 SRI-pinned); XSS probe (img onerror, script, javascript: href) verified stripped.
 Fix: `el()`'s child loop only skips `null`/`undefined` (not `false`), so the brief's `id !== 'new' && el(...)` inside `history.js`'s toolbar would have rendered a literal "false" text node when creating a new entry — used `id !== 'new' ? el(...) : null` instead, consistent with the v0.12.0 `replaceChildren` fix already applied to `about.js`.
+
+v0.14.0 — image upload: resize.js fitDims (5 tests) + upload.js (client-side resize to WebP, resumable upload to public/, imageField/multiImageField widgets with progress); el() now skips false children; verified against Storage emulator with Playwright (admin ok, non-admin denied).

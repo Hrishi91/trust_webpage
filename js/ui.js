@@ -36,7 +36,8 @@ export function el(tag, attrs = {}, ...children) {
     else if (k === 'text') n.textContent = v;
     else if (v !== false && v != null) n.setAttribute(k, v);
   }
-  for (const c of children.flat()) if (c != null) n.append(c.nodeType ? c : document.createTextNode(String(c)));
+  // skips null/undefined/false so `cond && el(...)` is safe
+  for (const c of children.flat()) if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c)));
   return n;
 }
 export function toast(msg, kind = 'ok') {
