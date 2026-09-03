@@ -1,6 +1,19 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+    function okType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType == 'application/pdf';
+    }
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAdmin() && okType() && request.resource.size < 5 * 1024 * 1024;
+      allow delete: if isAdmin();
+    }
     match /{allPaths=**} {
       allow read, write: if false;
     }
