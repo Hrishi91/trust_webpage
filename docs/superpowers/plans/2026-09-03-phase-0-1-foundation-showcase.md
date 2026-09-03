@@ -701,10 +701,12 @@ service cloud.firestore {
     // Public content: must be explicitly published and explicitly not deleted.
     function isLive() { return resource.data.published == true && resource.data.deleted == false; }
     function hasDeletedFlag() { return request.resource.data.deleted is bool; }
+    function albumLive(a) { return a.published == true && a.deleted == false; }
 
     match /settings/site {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;   // singleton — never hard-deleted
     }
 
     match /history/{id} {
@@ -733,8 +735,7 @@ service cloud.firestore {
       match /photos/{photoId} {
         allow read: if isAdmin() || (
           resource.data.deleted == false &&
-          get(/databases/$(db)/documents/albums/$(albumId)).data.published == true &&
-          get(/databases/$(db)/documents/albums/$(albumId)).data.deleted == false
+          albumLive(get(/databases/$(db)/documents/albums/$(albumId)).data)
         );
         allow create, update: if isAdmin() && hasDeletedFlag();
         allow delete: if false;
@@ -763,7 +764,7 @@ service cloud.firestore {
 
 - [ ] **Step 6: Run tests** — `npm run test:rules` → all Firestore tests pass (storage tests not yet present).
 
-- [ ] **Step 7: Mutation check (verify-the-verifier)** — temporarily change `isLive()` to `resource.data.published == true` (drop the deleted clause), run `npm run test:rules`, confirm the `history/events/albums` tests **fail** on the `g` doc. Revert. Then change `allow create: if isAdmin()` on audit (drop uid check), confirm the spoof test fails. Revert. Note both in build-log.
+- [ ] **Step 7: Mutation checks (verify-the-verifier)** — three mutations, each: apply → `npm run test:rules` → confirm the named tests fail → revert. (1) `isLive()` without the deleted clause → history/events/albums `g` docs; (2) audit create without the uid check → spoof test; (3) remove `&& hasDeletedFlag()` everywhere → the no-deleted-field / non-bool writes. Every soft-delete guard (committee, photos, soft-deleted parent album) and the legacy doc without a `deleted` field must have its own failing read assertion — a guard no test holds in place is not a guard. Note all in build-log.
 
 - [ ] **Step 8: Commit**
 
