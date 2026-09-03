@@ -84,7 +84,8 @@ registerSection(COLL, {
           el('button', { class: 'btn-sm', type: 'button', text: '↓', onclick: () => swap(i + 1) }),
           el('button', { class: 'btn-sm', type: 'button', text: '🗑', onclick: async () => {
             if (!confirm(t('admin.confirmDelete'))) return;
-            await updateDoc(doc(photosColl, p.id), { deleted: true });
+            if (!(await ctx.reauth())) return;
+            await updateDoc(doc(photosColl, p.id), { deleted: true, updatedAt: serverTimestamp() });
             await logAudit(ctx, 'delete', `${COLL}/${id}/photos/${p.id}`, { url: p.url }, { deleted: true });
             await renderPhotos();
           } }));
