@@ -62,17 +62,24 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    function isMember() { return signedIn() && request.auth.token.phone_number is string; }
+    function isMember() {
+      return signedIn() && request.auth.token.phone_number is string
+        && request.auth.token.phone_number.matches('^\\+[0-9]{10,14}$');
+    }
     function myPhone() { return request.auth.token.phone_number; }
+    // Rules cache get()/exists() by path within one evaluation, so calling me()
+    // more than once for the same phone is a single billed read.
+    function me() { return get(/databases/$(db)/documents/members/$(myPhone())).data; }
     function activeMember() {
       return isMember()
         && exists(/databases/$(db)/documents/members/$(myPhone()))
-        && get(/databases/$(db)/documents/members/$(myPhone())).data.active == true;
+        && me().active == true && me().deleted == false;
     }
 
     match /donations/{id} {
       allow read: if isAdmin() || (resource.data.showOnWall == true && resource.data.deleted == false);
-      allow create, update: if isAdmin() && hasDeletedFlag() && !('phone' in request.resource.data);
+      allow create, update: if isAdmin() && hasDeletedFlag() && !('phone' in request.resource.data)
+        && request.resource.data.keys().hasOnly(['donorName','amount','date','mode','receiptNo','year','isAnonymous','showOnWall','note','order','published','deleted','createdAt','updatedAt']);
       allow delete: if false;
     }
     match /transparency/{year} {
@@ -86,7 +93,7 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /members/{phone} {
-      allow read: if isAdmin() || (isMember() && myPhone() == phone);
+      allow read: if isAdmin() || (isMember() && myPhone() == phone && resource.data.deleted == false);
       allow create, update: if isAdmin() && hasDeletedFlag();
       allow delete: if false;
     }

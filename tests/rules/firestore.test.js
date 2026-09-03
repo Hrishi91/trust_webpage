@@ -114,9 +114,9 @@ test('audit: admin create with own uid only; append-only', async () => {
   await assertSucceeds(E.admin.firestore().collection('audit').get()); // admin list — Export depends on this
 });
 
-test('unknown collections are denied even to admin', async () => {
-  await assertFails(E.admin.firestore().doc('donations/x').set({ amount: 1 }));
-  await assertFails(E.anon.firestore().doc('members/x').get());
+test('collections without rules are denied even to admin (uses a truly unmatched path)', async () => {
+  await assertFails(E.admin.firestore().doc('zzz_unknown/x').set({ amount: 1 }));
+  await assertFails(E.anon.firestore().doc('zzz_unknown/x').get());
 });
 
 // ---- Phase 2: donations ----
@@ -133,7 +133,12 @@ test('donations: public reads only wall rows; admin all; no phone field ever; no
   await assertSucceeds(E.admin.firestore().collection('donations').get());
   await assertFails(a.doc('donations/new').set(row));
   await assertFails(E.admin.firestore().doc('donations/p').set({ ...row, phone: '9800000000' }));   // phone field forbidden
+  await assertFails(E.admin.firestore().doc('donations/p2').set({ ...row, contact: { phone: '98' } }));  // nested phone forbidden — closed key set
+  await assertFails(E.admin.firestore().doc('donations/p3').set({ ...row, mobile: '98' }));               // any unlisted key forbidden
+  const { deleted: _d, ...rowNoDeleted } = row;
+  await assertFails(E.admin.firestore().doc('donations/nodel').set(rowNoDeleted));                        // hasDeletedFlag
   await assertSucceeds(E.admin.firestore().doc('donations/new').set(row));
+  await assertFails(E.admin.firestore().doc('donations/new').update({ deleted: 'yes' }));                 // hasDeletedFlag
   await assertFails(E.admin.firestore().doc('donations/new').delete());
 });
 
@@ -147,6 +152,9 @@ test('transparency: published only for public; admin all', async () => {
   await assertFails(E.anon.firestore().collection('transparency').get());
   await assertFails(E.other.firestore().doc('transparency/2025').update({ published: false }));
   await assertSucceeds(E.admin.firestore().doc('transparency/2024').update({ published: true }));
+  const { deleted: _d, ...docNoDeleted } = doc;
+  await assertFails(E.admin.firestore().doc('transparency/nodel').set(docNoDeleted));   // hasDeletedFlag
+  await assertFails(E.admin.firestore().doc('transparency/2025').update({ deleted: 'yes' }));   // hasDeletedFlag
   await assertFails(E.admin.firestore().doc('transparency/2024').delete());
 });
 
@@ -159,34 +167,55 @@ test('announcements: published only; admin writes; no delete', async () => {
   await assertSucceeds(E.anon.firestore().collection('announcements').where('published', '==', true).where('deleted', '==', false).get());
   await assertFails(E.anon.firestore().collection('announcements').get());
   await assertFails(E.member.firestore().doc('announcements/new').set(an));
+  const { deleted: _d, ...anNoDeleted } = an;
+  await assertFails(E.admin.firestore().doc('announcements/nodel').set(anNoDeleted));   // hasDeletedFlag
   await assertSucceeds(E.admin.firestore().doc('announcements/new').set(an));
+  await assertFails(E.admin.firestore().doc('announcements/new').update({ deleted: 'yes' }));   // hasDeletedFlag
   await assertFails(E.admin.firestore().doc('announcements/new').delete());
 });
 
 // ---- Phase 4: members / notices / roster ----
-test('members: own doc only; inactive still reads own; nobody else; admin writes only', async () => {
+test('members: own doc only; inactive still reads own; removed (soft-deleted) cannot; nobody else; admin writes only', async () => {
   await assertSucceeds(E.member.firestore().doc('members/+919999999999').get());
   await assertFails(E.member.firestore().doc('members/+918888888888').get());
   await assertSucceeds(E.inactive.firestore().doc('members/+917777777777').get());
+  await assertFails(E.removed.firestore().doc('members/+916666666666').get());        // deleted:true own doc — own-doc read requires deleted==false
   await assertFails(E.anon.firestore().doc('members/+919999999999').get());
   await assertFails(E.other.firestore().doc('members/+919999999999').get());          // email-only user
   await assertFails(E.member.firestore().collection('members').get());
   await assertSucceeds(E.admin.firestore().collection('members').get());
+  await assertSucceeds(E.admin.firestore().doc('members/+916666666666').get());       // admin still sees deleted rows
   await assertFails(E.member.firestore().doc('members/+919999999999').update({ pledge: 0 }));
   await assertSucceeds(E.admin.firestore().doc('members/+919999999999').update({ pledge: 6000 }));
+  await assertFails(E.admin.firestore().doc('members/+915555555555').set({ name: { bn: 'x', en: 'x' }, role: { bn: '', en: '' }, pledge: 0, payments: [], active: true, order: 9 }));   // hasDeletedFlag
+  await assertFails(E.admin.firestore().doc('members/+919999999999').update({ deleted: 'yes' }));   // hasDeletedFlag
   await assertFails(E.admin.firestore().doc('members/+919999999999').delete());
 });
-test('notices + roster: active members and admin read; inactive/anon denied; admin writes', async () => {
+test('notices + roster: active members and admin read; inactive/removed/other/anon denied; isLive() enforced; admin writes', async () => {
   await E.seed(async db => {
     await db.doc('notices/n1').set({ title: { bn: 'x', en: 'x' }, body: { bn: '', en: '' }, published: true, deleted: false, order: 1 });
+    await db.doc('notices/draft').set({ title: { bn: 'x', en: 'x' }, body: { bn: '', en: '' }, published: false, deleted: false, order: 2 });
+    await db.doc('notices/gone').set({ title: { bn: 'x', en: 'x' }, body: { bn: '', en: '' }, published: true, deleted: true, order: 3 });
     await db.doc('roster/r1').set({ date: '2026-09-15', duty: { bn: 'গেট', en: 'Gate' }, memberPhones: ['+919999999999'], note: '', published: true, deleted: false, order: 1 });
+    await db.doc('roster/draft').set({ date: '2026-09-16', duty: { bn: 'x', en: 'x' }, memberPhones: [], note: '', published: false, deleted: false, order: 2 });
+    await db.doc('roster/gone').set({ date: '2026-09-17', duty: { bn: 'x', en: 'x' }, memberPhones: [], note: '', published: true, deleted: true, order: 3 });
   });
+  const existingId = { notices: 'n1', roster: 'r1' };
   for (const c of ['notices', 'roster']) {
     await assertSucceeds(E.member.firestore().collection(c).where('published', '==', true).where('deleted', '==', false).get());
     await assertSucceeds(E.otherMember.firestore().collection(c).where('published', '==', true).where('deleted', '==', false).get());
     await assertFails(E.inactive.firestore().collection(c).where('published', '==', true).where('deleted', '==', false).get());
+    await assertFails(E.removed.firestore().collection(c).where('published', '==', true).where('deleted', '==', false).get());   // soft-deleted member — activeMember() must exclude
+    await assertFails(E.other.firestore().collection(c).where('published', '==', true).where('deleted', '==', false).get());     // email-only, not a member at all
     await assertFails(E.anon.firestore().collection(c).where('published', '==', true).where('deleted', '==', false).get());
+    // isLive(): draft and soft-deleted rows are never readable, even direct-get by an active member
+    await assertFails(E.member.firestore().doc(`${c}/draft`).get());
+    await assertFails(E.member.firestore().doc(`${c}/gone`).get());
+    // a list query missing the `published` constraint must be rejected outright (rules can't filter it)
+    await assertFails(E.member.firestore().collection(c).where('deleted', '==', false).get());
     await assertFails(E.member.firestore().doc(`${c}/x`).set({ published: true, deleted: false, order: 9 }));
+    await assertFails(E.admin.firestore().doc(`${c}/nodel`).set({ published: true, order: 9 }));                    // hasDeletedFlag
+    await assertFails(E.admin.firestore().doc(`${c}/${existingId[c]}`).update({ deleted: 'yes' }));                  // hasDeletedFlag
     await assertSucceeds(E.admin.firestore().collection(c).get());
   }
   await assertSucceeds(E.member.firestore().collection('roster').where('memberPhones', 'array-contains', '+919999999999').where('published', '==', true).where('deleted', '==', false).get());

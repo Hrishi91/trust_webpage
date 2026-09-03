@@ -95,6 +95,22 @@
     { "collectionGroup": "members", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "deleted", "order": "ASCENDING" },
       { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "notices", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "roster", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
+    { "collectionGroup": "donations", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "date", "order": "DESCENDING" }
+    ] },
+    { "collectionGroup": "announcements", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
     ] }
   ],
   "fieldOverrides": []

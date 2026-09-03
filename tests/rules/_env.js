@@ -19,6 +19,7 @@ export async function setup() {
     await ctx.firestore().doc('members/+919999999999').set({ name: { bn: 'ম', en: 'M' }, role: { bn: '', en: '' }, pledge: 5000, payments: [], active: true, deleted: false, order: 1 });
     await ctx.firestore().doc('members/+918888888888').set({ name: { bn: 'অ', en: 'O' }, role: { bn: '', en: '' }, pledge: 1000, payments: [], active: true, deleted: false, order: 2 });
     await ctx.firestore().doc('members/+917777777777').set({ name: { bn: 'ই', en: 'I' }, role: { bn: '', en: '' }, pledge: 0, payments: [], active: false, deleted: false, order: 3 });
+    await ctx.firestore().doc('members/+916666666666').set({ name: { bn: 'র', en: 'R' }, role: { bn: '', en: '' }, pledge: 0, payments: [], active: true, deleted: true, order: 4 });
   });
   return {
     testEnv,
@@ -31,6 +32,7 @@ export async function setup() {
     member: testEnv.authenticatedContext('member-uid-1', { phone_number: '+919999999999' }),
     otherMember: testEnv.authenticatedContext('member-uid-2', { phone_number: '+918888888888' }),
     inactive: testEnv.authenticatedContext('member-uid-3', { phone_number: '+917777777777' }),
+    removed: testEnv.authenticatedContext('member-uid-4', { phone_number: '+916666666666' }),
     seed: fn => testEnv.withSecurityRulesDisabled(ctx => fn(ctx.firestore(), ctx.storage())),
   };
 }
