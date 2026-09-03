@@ -7,8 +7,8 @@ import {
   serverTimestamp, onSnapshot, Timestamp, writeBatch,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 import {
-  getAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence,
+  initializeAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  reauthenticateWithCredential, EmailAuthProvider, browserLocalPersistence,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import {
   getStorage, connectStorageEmulator, ref, uploadBytesResumable, getDownloadURL, deleteObject,
@@ -34,7 +34,16 @@ if (IS_LOCAL) {
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
 });
-export const auth = getAuth(app);
+// Persistence is fixed at construction (not set post-hoc) so every tab — admin or public — uses
+// the same backend from the first instant Auth exists. getAuth() defaults to
+// indexedDBLocalPersistence; a page that later called setPersistence(browserLocalPersistence) left
+// a window where a second same-origin tab could initialise Auth against the default IndexedDB
+// backend before the switch happened. The SDK's cross-tab persistence sync then cleared the first
+// tab's session outright — onAuthStateChanged(null) fired there with no error, no isAdmin() call,
+// no network request (reproduced with Playwright: /admin/ login, then open committee.html in the
+// same context — #adm-main.hidden flipped true and auth.currentUser went null within ~1s and
+// stayed null). initializeAuth's persistence option applies before any tab can race ahead of it.
+export const auth = initializeAuth(app, { persistence: browserLocalPersistence, popupRedirectResolver: undefined });
 export const storage = getStorage(app);
 
 if (IS_LOCAL) {
@@ -43,21 +52,10 @@ if (IS_LOCAL) {
   connectStorageEmulator(storage, '127.0.0.1', 9199);
 }
 
-// Pin every tab to the same persistence backend. getAuth() defaults to indexedDBLocalPersistence;
-// admin/js/admin.js separately requests browserLocalPersistence (window.localStorage) on login.
-// A public page opened in a second same-origin tab therefore initialised Auth against a different
-// backend than the admin tab — the SDK's cross-tab persistence sync/migration then cleared the
-// admin tab's session, firing onAuthStateChanged(null) there with no error, no isAdmin() call, and
-// no network request (reproduced with Playwright: /admin/ login, then open committee.html in the
-// same context — #adm-main.hidden flips true and auth.currentUser goes null within ~1s, and stays
-// null — not a transient blip). Setting the same persistence unconditionally here, before any page
-// touches auth, keeps every tab on one backend and removes the mismatch.
-setPersistence(auth, browserLocalPersistence);
-
 export {
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
   serverTimestamp, onSnapshot, Timestamp, writeBatch,
   signInWithEmailAndPassword, signOut, onAuthStateChanged, reauthenticateWithCredential,
-  EmailAuthProvider, setPersistence, browserLocalPersistence,
+  EmailAuthProvider,
   ref, uploadBytesResumable, getDownloadURL, deleteObject,
 };

@@ -1,6 +1,6 @@
 import {
   db, storage, auth, doc, getDoc, signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence,
+  reauthenticateWithCredential, EmailAuthProvider,
 } from '../../js/firebase.js';
 import { t, getLang, setLang, onLangChange, pick } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
@@ -27,7 +27,6 @@ $('adm-login-form').onsubmit = async e => {
   const f = new FormData(e.target);
   $('adm-login-err').textContent = '';
   try {
-    await setPersistence(auth, browserLocalPersistence);
     await signInWithEmailAndPassword(auth, f.get('email'), f.get('password'));
   } catch (err) {
     $('adm-login-err').textContent = err.code === 'auth/too-many-requests' ? t('admin.tooMany') : t('admin.loginFailed');
@@ -47,9 +46,9 @@ async function isAdmin(u) {
     catch (err) {
       if (err && err.code === 'permission-denied') return { ok: true, admin: false };
       if (attempt === 0) { await sleep(500); continue; }
-      return { ok: false, admin: false };
     }
   }
+  return { ok: false, admin: false }; // both attempts failed with a non-permission-denied error
 }
 
 onAuthStateChanged(auth, async u => {

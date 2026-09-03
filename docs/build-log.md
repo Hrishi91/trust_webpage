@@ -54,3 +54,4 @@ Fix: cover-photo auto-set from the first uploaded photo was fragile — `f.cover
 Fix: multi-upload widget persists across photo re-renders (no mid-upload teardown); cover auto-set reflected in form via imageField.set().
 
 v0.16.1 — admin gate: opening a second same-origin tab initialised Auth with the SDK's default indexedDBLocalPersistence while the admin tab used explicit browserLocalPersistence, and the SDK's cross-tab persistence sync then cleared the admin tab's session outright (`onAuthStateChanged(null)`, no error, no `isAdmin()` call, no network request) — `js/firebase.js` now pins every tab to `browserLocalPersistence` unconditionally, removing the mismatch — transient Firestore errors no longer sign the admin out; only permission-denied does; gate not re-run for the same uid.
+Fix: Auth persistence fixed at construction via initializeAuth (no post-hoc setPersistence window).
