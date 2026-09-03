@@ -13,3 +13,4 @@ v0.2.0 — ui helpers (escapeHtml, countdown, bnDigits, fmtDate, el, toast), 9 u
 Fix: Bengali digit codepoints (was Devanagari 1–9), date-only fmtDate parses as local, 9 tests.
 
 v0.3.0 — Firestore rules (default deny; published+deleted gates; admins console-only; audit append-only) + emulator test matrix (9 tests). Mutation checks: dropping the deleted clause fails history/events/albums; dropping audit uid check fails audit.
+Fix: settings/site delete denied; committee/photo deleted guards, hasDeletedFlag and legacy-doc reads now under test; mutation 3 (hasDeletedFlag) verified.

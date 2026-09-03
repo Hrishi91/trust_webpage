@@ -8,11 +8,13 @@ service cloud.firestore {
     }
     // Public content: must be explicitly published and explicitly not deleted.
     function isLive() { return resource.data.published == true && resource.data.deleted == false; }
+    function albumLive(a) { return a.published == true && a.deleted == false; }
     function hasDeletedFlag() { return request.resource.data.deleted is bool; }
 
     match /settings/site {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
     }
 
     match /history/{id} {
@@ -41,8 +43,7 @@ service cloud.firestore {
       match /photos/{photoId} {
         allow read: if isAdmin() || (
           resource.data.deleted == false &&
-          get(/databases/$(db)/documents/albums/$(albumId)).data.published == true &&
-          get(/databases/$(db)/documents/albums/$(albumId)).data.deleted == false
+          albumLive(get(/databases/$(db)/documents/albums/$(albumId)).data)
         );
         allow create, update: if isAdmin() && hasDeletedFlag();
         allow delete: if false;
