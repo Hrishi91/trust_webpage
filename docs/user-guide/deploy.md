@@ -17,7 +17,7 @@ fine-grained personal access token-এ **repo-create permission নেই**।
 তারপর:
 
 ```bash
-gh repo create Hrishi91/trust-webpage --public --source=. --remote=origin --push
+gh repo create Hrishi91/trust_webpage --public --source=. --remote=origin --push
 ```
 
 Confirm: `git remote -v` এ origin দেখাবে, `git log origin/main --oneline | head -1`
@@ -35,7 +35,7 @@ Repo-টা একবার তৈরি হয়ে গেলে সাধা�
 একবারই দরকার, repo তৈরি হওয়ার পরে:
 
 ```bash
-gh api -X POST repos/Hrishi91/trust-webpage/pages -f build_type=legacy \
+gh api -X POST repos/Hrishi91/trust_webpage/pages -f build_type=legacy \
   -f 'source[branch]=main' -f 'source[path]=/'
 ```
 
@@ -44,9 +44,9 @@ gh api -X POST repos/Hrishi91/trust-webpage/pages -f build_type=legacy \
 Verify:
 
 ```bash
-gh api repos/Hrishi91/trust-webpage/pages --jq .status
-curl -sI https://hrishi91.github.io/trust-webpage/ | head -1           # expect: HTTP/2 200
-curl -s https://hrishi91.github.io/trust-webpage/ | grep -o '<title>[^<]*</title>'   # static <title>
+gh api repos/Hrishi91/trust_webpage/pages --jq .status
+curl -sI https://hrishi91.github.io/trust_webpage/ | head -1           # expect: HTTP/2 200
+curl -s https://hrishi91.github.io/trust_webpage/ | grep -o '<title>[^<]*</title>'   # static <title>
 ```
 
 200 status এবং `<title>` ট্যাগ পাওয়া গেলে সার্ভার/deploy ঠিক আছে (deploy
@@ -58,7 +58,7 @@ curl -s https://hrishi91.github.io/trust-webpage/ | grep -o '<title>[^<]*</title
 **routine কাজ — সাইট বদলালে:** শুধু `git push` করলেই Pages auto-deploy করে
 (~1–2 মিনিটের মধ্যে লাইভ হয়)। আলাদা কিছু করার দরকার নেই।
 
-**Path note:** project-pages URL-এ সাইট থাকে `/trust-webpage/`-এর নিচে;
+**Path note:** project-pages URL-এ সাইট থাকে `/trust_webpage/`-এর নিচে;
 custom domain-এ থাকে `/`-এ। তাই HTML-এর সব internal link অবশ্যই
 **relative** হতে হবে (যেমন `css/site.css`, `../js/firebase.js`) — কখনও
 root-absolute (`/css/...`) না।
