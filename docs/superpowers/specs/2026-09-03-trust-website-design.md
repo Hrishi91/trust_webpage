@@ -60,13 +60,14 @@ Admin phone ──► same site /admin/ ──► same Firebase; writes allowed 
 - **Rich text:** admin editor output sanitized with pinned DOMPurify before
   render; no raw `innerHTML` anywhere
 
-### Firebase plan — open item, decided at setup
+### Firebase plan — decided 2026-09-03: Blaze
 
-Belief (to verify with WebSearch on setup day): new Firebase projects since
-late 2024 need the **Blaze** (pay-as-you-go) plan to use Storage and phone
-OTP. Free quotas still apply, so expected bill is ₹0 at this scale; a **₹100
-budget alert** will be set. If Hrishi declines to add a card: photos →
-Cloudinary free tier, member login → email link instead of OTP. Hrishi's call.
+Verified by web search on 2026-09-03: Cloud Storage for Firebase requires the
+Blaze plan since 2026-02-03 (Spark projects get no bucket at all), and phone
+OTP has required Blaze since 2024 (first 10 SMS/day free). Free quotas are
+unchanged, so the expected bill at this scale is ₹0; a **₹100 budget alert**
+is set at project creation. Hrishi adds the card during setup (Task 2 of the
+Phase 0/1 plan).
 
 ## 5. Data model (Firestore)
 
