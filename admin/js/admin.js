@@ -35,14 +35,30 @@ $('adm-login-form').onsubmit = async e => {
 };
 $('adm-logout').onclick = () => signOut(auth);
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Only a real "not an admin" (Firestore denies the read) should sign the admin out. Any other
+// error — e.g. a transient 'unavailable'/'failed-precondition' during Firestore's multi-tab
+// primary-lease handoff — gets one retry, then is treated as "can't tell right now" rather than
+// "not admin": it keeps the session and surfaces a generic error instead of logging the admin out.
 async function isAdmin(u) {
-  try { return (await getDoc(doc(db, 'admins', u.uid))).exists(); } catch { return false; }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try { return { ok: true, admin: (await getDoc(doc(db, 'admins', u.uid))).exists() }; }
+    catch (err) {
+      if (err && err.code === 'permission-denied') return { ok: true, admin: false };
+      if (attempt === 0) { await sleep(500); continue; }
+      return { ok: false, admin: false };
+    }
+  }
 }
 
 onAuthStateChanged(auth, async u => {
   applyStrings();
   if (!u) { user = null; $('adm-login').hidden = false; $('adm-main').hidden = true; $('adm-logout').hidden = true; return; }
-  if (!(await isAdmin(u))) { toast(t('admin.notAdmin'), 'err'); await signOut(auth); return; }
+  if (user && u.uid === user.uid) return; // already verified in this tab; don't re-run the gate on a spurious re-fire
+  const { ok, admin } = await isAdmin(u);
+  if (ok && !admin) { toast(t('admin.notAdmin'), 'err'); await signOut(auth); return; }
+  if (!ok) { toast(t('common.error'), 'err'); return; } // couldn't verify; keep the session, don't sign out
   user = u;
   $('adm-login').hidden = true; $('adm-main').hidden = false; $('adm-logout').hidden = false;
   route();

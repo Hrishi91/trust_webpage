@@ -43,6 +43,17 @@ if (IS_LOCAL) {
   connectStorageEmulator(storage, '127.0.0.1', 9199);
 }
 
+// Pin every tab to the same persistence backend. getAuth() defaults to indexedDBLocalPersistence;
+// admin/js/admin.js separately requests browserLocalPersistence (window.localStorage) on login.
+// A public page opened in a second same-origin tab therefore initialised Auth against a different
+// backend than the admin tab — the SDK's cross-tab persistence sync/migration then cleared the
+// admin tab's session, firing onAuthStateChanged(null) there with no error, no isAdmin() call, and
+// no network request (reproduced with Playwright: /admin/ login, then open committee.html in the
+// same context — #adm-main.hidden flips true and auth.currentUser goes null within ~1s, and stays
+// null — not a transient blip). Setting the same persistence unconditionally here, before any page
+// touches auth, keeps every tab on one backend and removes the mismatch.
+setPersistence(auth, browserLocalPersistence);
+
 export {
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
   serverTimestamp, onSnapshot, Timestamp, writeBatch,
