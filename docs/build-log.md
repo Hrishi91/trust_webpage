@@ -95,3 +95,6 @@ Admin email verified (throwaway local page → sendEmailVerification; auth:expor
 Owner upgraded to Blaze. Via firebasestorage API (owner OAuth): enabled API, created default bucket ganesh-puja-trust.firebasestorage.app in asia-south1 (matches config). Deployed storage.rules. Live REST: anon read public/* → 404 (allowed), anon read private/* → 403, anon upload → 403. Budget alert ₹100 (50/90/100%) attempted via Billing Budgets API — see next entry for result.
 
 Budget via Billing Budgets API → 404 (billing-account scope); owner sets it in GCP console instead.
+
+## 2026-09-04 — v0.21.1 storage read path verified with a real object
+Dummy 600px WebP (canvas via Playwright) uploaded to public/committee/dummy-c2.webp with the owner OAuth token (GCS JSON API), committee/c2.photoUrl set to the Firebase download URL. Anon GET → 200 image/webp 5824B; committee.html renders it (naturalWidth 600). Upload-through-admin-panel still to be tested by the owner on a phone.
