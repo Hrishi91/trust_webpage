@@ -10,11 +10,11 @@
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { isHostname } from './lib/hostname.mjs';
 
 const FIREBASE_TOOLS_CLIENT_ID = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
 const FIREBASE_TOOLS_CLIENT_SECRET = 'j9iVZfS8kkCEFUPaAeJV0sAi';
 const TEST_PHONE_NUMBERS = { '+919999999999': '123456' };
-const BASE_DOMAINS = ['localhost', 'ganesh-puja-trust.firebaseapp.com', 'ganesh-puja-trust.web.app', 'hrishi91.github.io'];
 
 const configstorePath = join(homedir(), '.config/configstore/firebase-tools.json');
 let configstore;
@@ -42,10 +42,26 @@ if (!projectId) {
   console.error('auth-config: could not read projects.default from .firebaserc.');
   process.exit(1);
 }
+// The Firebase-hosted domains are always <projectId>.firebaseapp.com / <projectId>.web.app;
+// the GitHub Pages domain isn't derivable from the project id, so it stays a literal.
+const BASE_DOMAINS = ['localhost', `${projectId}.firebaseapp.com`, `${projectId}.web.app`, 'hrishi91.github.io'];
 
-// Extra domain for the future custom domain, e.g. --domain trust.example.org
+// Extra domain for the future custom domain, e.g. --domain trust.example.org. Validated as a
+// bare hostname (no scheme/path/port) before anything touches the network or production config —
+// a malformed or malicious value here must never reach an authorizedDomains write.
 const domainArgIdx = process.argv.indexOf('--domain');
-const extraDomain = domainArgIdx !== -1 ? process.argv[domainArgIdx + 1] : null;
+let extraDomain = null;
+if (domainArgIdx !== -1) {
+  extraDomain = process.argv[domainArgIdx + 1];
+  if (extraDomain === undefined) {
+    console.error('auth-config: --domain requires a value, e.g. --domain example.org');
+    process.exit(1);
+  }
+  if (!isHostname(extraDomain)) {
+    console.error('auth-config: --domain must be a bare hostname, e.g. example.org');
+    process.exit(1);
+  }
+}
 
 async function getAccessToken() {
   const res = await fetch('https://oauth2.googleapis.com/token', {
