@@ -100,12 +100,26 @@ git push
 GitHub → repo Settings → Pages → Custom domain-এ domain দেখাবে; cert issue
 হতে (~1 ঘণ্টা) সময় লাগতে পারে, হয়ে গেলে **Enforce HTTPS** tick করুন।
 
-Firebase console → Authentication → Settings → Authorized domains → নতুন
-domain add করুন। GCP console → APIs & Services → Credentials → API key →
-referrer list-এ `https://<domain>/*` add করুন।
+Firebase Authorized domains আপডেট করতে console-এ ম্যানুয়ালি ঢোকার দরকার
+নেই — `scripts/auth-config.mjs` (owner-run, production project-এ
+`signIn.phoneNumber.enabled` + `authorizedDomains` লেখে) নতুন domain সমেত
+আবার চালান:
 
-**routine কাজ — domain বদলালে:** উপরের DNS + CNAME + Authorized domains +
-referrer list — এই চারটাই আবার করতে হবে নতুন domain-এর জন্য।
+```bash
+node scripts/auth-config.mjs --domain <domain>
+```
+
+এটা existing authorized domains-এর সাথে নতুন domain **merge** করে (কিছু
+মুছে দেয় না), phone-auth test number (`+919999999999` → `123456`)
+অপরিবর্তিত রাখে, এবং শেষে `signIn.phoneNumber.enabled`, test number,
+আর পুরো domain list প্রিন্ট করে (কোনো token print করে না) — সেটা দিয়ে
+verify করবেন। GCP console → APIs & Services → Credentials → API key →
+referrer list-এ `https://<domain>/*` add করুন (এটা এখনও ম্যানুয়াল, script
+এই অংশ করে না)।
+
+**routine কাজ — domain বদলালে:** উপরের DNS + CNAME + `scripts/auth-config.mjs
+--domain <domain>` (Authorized domains) + referrer list — এই চারটাই আবার
+করতে হবে নতুন domain-এর জন্য।
 
 ## Step 5: App Check enforce ⏳ Task 21-এর live verify পাশ হলে
 
@@ -121,5 +135,5 @@ Enforce।
 |---|---|
 | সাইটের কোড/content বদল | `git push` |
 | Firestore/Storage rules বদল | `scripts/deploy-rules.sh` |
-| Custom domain সেটআপ/বদল | CNAME file + DNS + Authorized domains + referrer list (Step 4) |
+| Custom domain সেটআপ/বদল | CNAME file + DNS + `scripts/auth-config.mjs --domain <domain>` + referrer list (Step 4) |
 | App Check enforce | শুধু Task 21 live-verify পাশ হওয়ার পরে (Step 5) |
