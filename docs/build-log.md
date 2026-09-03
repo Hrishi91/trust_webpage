@@ -81,3 +81,6 @@ Real web config for `ganesh-puja-trust` pasted into js/firebase-config.js (publi
 
 ## 2026-09-03 — v0.20.0 firestore rules + indexes LIVE
 Owner: Firestore (default, Native), Auth email/password, admin user + admins/{uid} doc, web app config, `firebase login`. Deployed after `npm test` (unit 25, rules 15): firestore.rules + 9 composite indexes to ganesh-puja-trust. Live REST verification: anon read settings/site → 404 (allowed, no doc yet), anon read admins/{uid} → 403, anon write settings/site → 403. Pending owner: Pages enable (404), Email verified on admin user, App Check key, Blaze + Storage bucket (storage.rules not deployable until then).
+
+## 2026-09-03 — v0.20.1 site LIVE on GitHub Pages
+Owner enabled Pages → https://hrishi91.github.io/trust_webpage/ 200 on all 5 pages + /admin/. Indexes finished building ~6 min after deploy (until then home showed the loud error state — as designed). Home renders hero from real Firestore defaults; admin login form renders. Next: owner login test, App Check key, Blaze+Storage.
