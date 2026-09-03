@@ -27,3 +27,6 @@ Fix: sections/registerSection moved from admin.js into new admin/js/registry.js.
 
 v0.7.0 — admin forms toolkit (biField/textField/boolField/listView/saveDoc/softDelete), audit log helper, Settings section (trust info, contacts, reg/80G/UPI, puja date, theme, section visibility, maintenance); verified against emulator with Playwright (save → reauth → audit row).
 Fix: pujaDate round-trips into datetime-local (toLocalInput helper); reorder swap is one writeBatch.
+
+v0.8.0 — admin Export: all collections + album photos as one JSON download (audit row logged); verified with Playwright download against emulator.
+Includes settings, history, committee, albums (with nested photos), events, and audit collections. Timestamps serialize as {seconds, nanoseconds}. Object URL revoked after download to prevent memory leak.
