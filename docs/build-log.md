@@ -48,3 +48,6 @@ v0.14.0 — image upload: resize.js fitDims (5 tests) + upload.js (client-side r
 Fix: EXIF orientation honoured (from-image); imageField input reset for retry; capture attr intentionally omitted.
 
 v0.15.0 — Committee: admin section (name/post/photo upload/show-on-website, reorder, soft delete) + public committee page (grid of persons, placeholder avatar, bn/en); verified with Playwright.
+
+v0.16.0 — Gallery: albums admin (title/year/cover, draft/publish/preview, multi-photo upload with progress, captions, photo reorder via batch, soft-delete photo) + public gallery (album grid newest-first, album page, lightbox); verified with Playwright incl. draft isolation.
+Fix: cover-photo auto-set from the first uploaded photo was fragile — `f.cover.read()` never reflects that auto-set (only the cover widget's own upload), so every photo (not just the first) overwrote `coverUrl`, and a later Save/Publish click in the same session stomped it back to `''`. A local `coverAutoSet` flag now gates the auto-set to once, and `read()` omits `coverUrl` from the save payload unless the widget was actually used, letting `setDoc({merge:true})` leave the auto-set value alone.
