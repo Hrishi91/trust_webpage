@@ -1,0 +1,37 @@
+:root {
+  --saffron:#e07a1f; --deep:#8b1e1e; --gold:#c9a227;
+  --bg:#fffaf3; --ink:#2b2118; --muted:#7a6a5c; --card:#fff;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.6 "Noto Serif Bengali", Georgia, serif; }
+.container { max-width:960px; margin:0 auto; padding:1rem; }
+.site-top { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem; background:var(--deep); color:#fff; }
+.brand { display:flex; align-items:center; gap:.5rem; color:#fff; text-decoration:none; font-weight:700; font-size:1.15rem; }
+.logo { height:36px; width:auto; }
+.lang { background:transparent; border:1px solid rgba(255,255,255,.6); color:#fff; border-radius:999px; padding:.2rem .7rem; font:inherit; }
+.site-nav { display:flex; gap:.25rem; overflow-x:auto; background:var(--saffron); padding:.4rem .5rem; }
+.site-nav a { color:#fff; text-decoration:none; padding:.4rem .8rem; border-radius:999px; white-space:nowrap; }
+.site-nav a.active { background:rgba(0,0,0,.2); }
+.site-footer { background:var(--deep); color:#fff; padding:1.5rem 1rem; text-align:center; margin-top:3rem; }
+.site-footer a { color:var(--gold); }
+.muted { color:var(--muted); }
+.site-footer .muted { color:rgba(255,255,255,.7); }
+.notice { background:#fff3cd; padding:1rem; border-radius:12px; }
+.card { background:var(--card); border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.08); padding:1rem; margin-bottom:1rem; }
+h1, h2 { font-weight:700; color:var(--deep); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:.75rem; }
+img.cover { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:12px; }
+.hero { background:linear-gradient(135deg,var(--deep),var(--saffron)); color:#fff; padding:2rem 1rem; border-radius:16px; text-align:center; }
+.hero h1 { color:#fff; margin:.25rem 0; }
+.countdown { display:flex; justify-content:center; gap:1rem; margin-top:1rem; }
+.countdown div { background:rgba(255,255,255,.15); border-radius:12px; padding:.5rem .9rem; min-width:70px; }
+.countdown b { display:block; font-size:1.6rem; }
+.person { text-align:center; }
+.person img { width:110px; height:110px; border-radius:50%; object-fit:cover; }
+.event { border-left:4px solid var(--gold); padding-left:.75rem; }
+.event time { color:var(--muted); font-size:.9rem; }
+.lightbox { position:fixed; inset:0; background:rgba(0,0,0,.92); display:flex; align-items:center; justify-content:center; }
+.lightbox img { max-width:96vw; max-height:90vh; }
+.rich img { max-width:100%; border-radius:12px; }
+@media (min-width:720px) { body { font-size:18px; } .hero { padding:3rem 2rem; } }

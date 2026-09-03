@@ -35,3 +35,5 @@ Fix: export errors surface as a toast; button disabled while running.
 v0.9.0 — Pages placeholder index + .nojekyll; deploy guide. GitHub repo creation ⏳ owner (token lacks repo-create permission); Pages/rules deploy/domain/App Check follow.
 
 v0.10.0 — js/content.js: DEFAULT_SETTINGS, getSettings (memoised, merged defaults), listPublished/listCommittee/listPhotos/getPublished — published-only queries; smoke-tested in browser against emulator.
+
+v0.11.0 — public shell: css/site.css theme, js/shell.js (header/nav/footer from settings, lang toggle, maintenance mode, sectionVisibility nav filter), index.html skeleton + home stub; verified with Playwright (bn/en, maintenance, 375px no overflow).
