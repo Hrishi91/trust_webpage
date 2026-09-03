@@ -40,7 +40,10 @@ export function imageField(ctx, label, currentUrl = '', { folder, max = 1600 } =
     } catch (e) { console.error(e); toast('Upload failed', 'err'); bar.hidden = true; }
     finally { input.value = ''; }
   };
-  return { node: el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'row' }, img, input), bar), read: () => url };
+  // set(): lets a caller sync this widget's displayed state (e.g. a photo list that auto-picks
+  // its first upload as the album cover) without going through the widget's own file input.
+  const set = newUrl => { url = newUrl; img.src = url || ''; img.hidden = !url; };
+  return { node: el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'row' }, img, input), bar), read: () => url, set };
 }
 
 export function multiImageField(ctx, label, { folder, max = 1600, onEach }) {

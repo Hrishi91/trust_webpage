@@ -52,54 +52,59 @@ registerSection(COLL, {
 
     // ---- photos ----
     const photosColl = collection(ctx.db, COLL, id, 'photos');
-    const photosBox = el('div', { class: 'card' });
     // f.cover.read() only reflects a cover chosen through the imageField's own input, not this
     // auto-set — track it separately so the very first photo (and only the first) becomes the
     // cover when none was picked manually, instead of every upload overwriting it in turn.
     let coverAutoSet = !!f.cover.read();
+    const heading = el('h3', {});
+    const listBox = el('div');
     const renderPhotos = async () => {
       const snap = await getDocs(query(photosColl, where('deleted', '==', false), orderBy('order')));
       const photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      photosBox.replaceChildren(
-        el('h3', { text: `${pick({ bn: 'ছবি', en: 'Photos' })} (${photos.length})` }),
-        multiImageField(ctx, { bn: 'ছবি যোগ করুন (একাধিক)', en: 'Add photos (multiple)' }, {
-          folder: `public/albums/${id}`,
-          onEach: async url => {
-            const pref = doc(photosColl);
-            await setDoc(pref, { url, caption: { bn: '', en: '' }, order: Date.now(), deleted: false, createdAt: serverTimestamp() });
-            await logAudit(ctx, 'create', `${COLL}/${id}/photos/${pref.id}`, null, { url });
-            if (!coverAutoSet) { await updateDoc(doc(ctx.db, COLL, id), { coverUrl: url }); coverAutoSet = true; }
+      heading.textContent = `${pick({ bn: 'ছবি', en: 'Photos' })} (${photos.length})`;
+      listBox.replaceChildren(...photos.map((p, i) => {
+        const cap = el('input', { value: pick(p.caption), placeholder: 'caption' });
+        cap.onchange = async () => {
+          const val = cap.value.trim();
+          await updateDoc(doc(photosColl, p.id), { caption: { bn: val, en: val } });
+          toast(t('admin.saved'));
+        };
+        const swap = async j => {
+          if (j < 0 || j >= photos.length) return;
+          const other = photos[j];
+          const batch = writeBatch(ctx.db);
+          batch.update(doc(photosColl, p.id), { order: other.order });
+          batch.update(doc(photosColl, other.id), { order: p.order });
+          await batch.commit();
+          await logAudit(ctx, 'reorder', `${COLL}/${id}/photos/${p.id}`, { order: p.order }, { order: other.order });
+          await renderPhotos();
+        };
+        return el('div', { class: 'list-item' }, el('img', { class: 'thumb', src: p.url, alt: '' }), cap,
+          el('button', { class: 'btn-sm', type: 'button', text: '↑', onclick: () => swap(i - 1) }),
+          el('button', { class: 'btn-sm', type: 'button', text: '↓', onclick: () => swap(i + 1) }),
+          el('button', { class: 'btn-sm', type: 'button', text: '🗑', onclick: async () => {
+            if (!confirm(t('admin.confirmDelete'))) return;
+            await updateDoc(doc(photosColl, p.id), { deleted: true });
+            await logAudit(ctx, 'delete', `${COLL}/${id}/photos/${p.id}`, { url: p.url }, { deleted: true });
             await renderPhotos();
-          },
-        }),
-        ...photos.map((p, i) => {
-          const cap = el('input', { value: pick(p.caption), placeholder: 'caption' });
-          cap.onchange = async () => {
-            const val = cap.value.trim();
-            await updateDoc(doc(photosColl, p.id), { caption: { bn: val, en: val } });
-            toast(t('admin.saved'));
-          };
-          const swap = async j => {
-            if (j < 0 || j >= photos.length) return;
-            const other = photos[j];
-            const batch = writeBatch(ctx.db);
-            batch.update(doc(photosColl, p.id), { order: other.order });
-            batch.update(doc(photosColl, other.id), { order: p.order });
-            await batch.commit();
-            await logAudit(ctx, 'reorder', `${COLL}/${id}/photos/${p.id}`, { order: p.order }, { order: other.order });
-            await renderPhotos();
-          };
-          return el('div', { class: 'list-item' }, el('img', { class: 'thumb', src: p.url, alt: '' }), cap,
-            el('button', { class: 'btn-sm', type: 'button', text: '↑', onclick: () => swap(i - 1) }),
-            el('button', { class: 'btn-sm', type: 'button', text: '↓', onclick: () => swap(i + 1) }),
-            el('button', { class: 'btn-sm', type: 'button', text: '🗑', onclick: async () => {
-              if (!confirm(t('admin.confirmDelete'))) return;
-              await updateDoc(doc(photosColl, p.id), { deleted: true });
-              await logAudit(ctx, 'delete', `${COLL}/${id}/photos/${p.id}`, { url: p.url }, { deleted: true });
-              await renderPhotos();
-            } }));
-        }));
+          } }));
+      }));
     };
+    // Built once, outside renderPhotos — renderPhotos only ever touches `heading`/`listBox` now,
+    // so the multiImageField widget (its progress bar, status text, and in-flight <input> element)
+    // stays attached across the whole multi-select upload instead of being torn down and rebuilt
+    // after every single photo, which used to leave an idle-looking picker mid-upload.
+    const uploader = multiImageField(ctx, { bn: 'ছবি যোগ করুন (একাধিক)', en: 'Add photos (multiple)' }, {
+      folder: `public/albums/${id}`,
+      onEach: async url => {
+        const pref = doc(photosColl);
+        await setDoc(pref, { url, caption: { bn: '', en: '' }, order: Date.now(), deleted: false, createdAt: serverTimestamp() });
+        await logAudit(ctx, 'create', `${COLL}/${id}/photos/${pref.id}`, null, { url });
+        if (!coverAutoSet) { await updateDoc(doc(ctx.db, COLL, id), { coverUrl: url }); coverAutoSet = true; f.cover.set(url); }
+        await renderPhotos();
+      },
+    });
+    const photosBox = el('div', { class: 'card' }, heading, uploader, listBox);
     await renderPhotos();
     box.append(photosBox);
   },
