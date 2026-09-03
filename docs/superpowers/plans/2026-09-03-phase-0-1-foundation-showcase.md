@@ -894,7 +894,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/fireba
 import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app-check.js';
 import {
   getFirestore, connectFirestoreEmulator, enableIndexedDbPersistence,
-  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, writeBatch, query, where, orderBy, limit,
   serverTimestamp, onSnapshot, Timestamp,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 import {
@@ -931,7 +931,7 @@ if (IS_LOCAL) {
 enableIndexedDbPersistence(db).catch(() => {});
 
 export {
-  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, writeBatch, query, where, orderBy, limit,
   serverTimestamp, onSnapshot, Timestamp,
   signInWithEmailAndPassword, signOut, onAuthStateChanged, reauthenticateWithCredential,
   EmailAuthProvider, setPersistence, browserLocalPersistence,
@@ -1179,10 +1179,13 @@ export async function logAudit(ctx, action, path, before = null, after = null) {
 - [ ] **Step 2: Write `admin/js/forms.js`**
 
 ```js
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, query, where, orderBy, serverTimestamp } from '../../js/firebase.js';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, writeBatch, query, where, orderBy, serverTimestamp } from '../../js/firebase.js';
 import { t, pick } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
 import { logAudit } from './audit.js';
+
+/** ISO string → value for a datetime-local input (local wall time). */
+export const toLocalInput = iso => iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
 
 export function biField(label, name, value = {}, { multiline = false } = {}) {
   const mk = (lang) => el(multiline ? 'textarea' : 'input', { name: `${name}.${lang}`, placeholder: lang.toUpperCase(), value: multiline ? undefined : (value[lang] || '') });
@@ -1241,8 +1244,10 @@ export async function listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reo
       const swap = async (j) => {
         if (j < 0 || j >= docs.length) return;
         const a = docs[i], c = docs[j];
-        await updateDoc(doc(ctx.db, coll, a.id), { order: c.order });
-        await updateDoc(doc(ctx.db, coll, c.id), { order: a.order });
+        const b = writeBatch(ctx.db);
+        b.update(doc(ctx.db, coll, a.id), { order: c.order });
+        b.update(doc(ctx.db, coll, c.id), { order: a.order });
+        await b.commit();
         await logAudit(ctx, 'reorder', `${coll}/${a.id}`, { order: a.order }, { order: c.order });
         box.replaceWith(await listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reorder }));
       };
@@ -1264,7 +1269,7 @@ import { registerSection } from '../admin.js';
 import { doc, getDoc, setDoc, serverTimestamp } from '../../../js/firebase.js';
 import { t } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
-import { biField, textField, boolField } from '../forms.js';
+import { biField, textField, boolField, toLocalInput } from '../forms.js';
 import { logAudit } from '../audit.js';
 
 const SECTIONS = ['about', 'committee', 'gallery', 'events', 'donate', 'transparency', 'members'];
@@ -1288,7 +1293,7 @@ registerSection('settings', {
       has80G: boolField({ bn: '80G আছে', en: 'Has 80G' }, 'has80G', cur.has80G),
       upiId: textField({ bn: 'UPI ID', en: 'UPI ID' }, 'upiId', cur.upiId),
       upiQrUrl: textField({ bn: 'UPI QR ছবির URL', en: 'UPI QR image URL' }, 'upiQrUrl', cur.upiQrUrl),
-      pujaDate: textField({ bn: 'পুজোর তারিখ-সময়', en: 'Puja date-time' }, 'pujaDate', cur.pujaDate, { type: 'datetime-local' }),
+      pujaDate: textField({ bn: 'পুজোর তারিখ-সময়', en: 'Puja date-time' }, 'pujaDate', toLocalInput(cur.pujaDate), { type: 'datetime-local' }),
       theme: biField({ bn: 'এই বছরের থিম', en: "This year's theme" }, 'theme', cur.theme),
       maintenance: boolField({ bn: 'Maintenance mode (সাইট বন্ধ)', en: 'Maintenance mode' }, 'maintenance', cur.maintenance),
     };
@@ -2179,11 +2184,9 @@ import { registerSection } from '../admin.js';
 import { doc, getDoc } from '../../../js/firebase.js';
 import { t, pick } from '../../../js/i18n.js';
 import { el, fmtDate } from '../../../js/ui.js';
-import { biField, textField, listView, saveDoc, softDelete } from '../forms.js';
+import { biField, textField, listView, saveDoc, softDelete, toLocalInput as toLocal } from '../forms.js';
 
 const COLL = 'events';
-// datetime-local wants local wall time; shift by the zone offset before slicing.
-const toLocal = iso => iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
 registerSection(COLL, {
   title: { bn: 'অনুষ্ঠান', en: 'Events' }, icon: '📅',
   async render(box, ctx) {
