@@ -57,3 +57,5 @@ v0.16.1 — admin gate: opening a second same-origin tab initialised Auth with t
 Fix: Auth persistence fixed at construction via initializeAuth (no post-hoc setPersistence window).
 
 v0.17.0 — Events: admin section (title/start/end/venue/desc, draft/publish, chronological list, soft delete, empty-start guard) + public events page (upcoming/past split, bn/en); verified with Playwright incl. datetime round-trip.
+
+v0.18.0 — emulator seed (firebase-admin, refuses non-emulator hosts) + Playwright e2e (8 specs: public pages, lang persistence, draft isolation, mobile overflow, anon preview error, admin wrong-pw, create+publish event, soft delete with reauth); home/about pages now surface fetch errors.

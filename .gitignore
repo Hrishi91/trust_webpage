@@ -10,6 +10,8 @@ ui-debug.log
 # Dev tooling
 node_modules/
 .firebase/
+test-results/
+playwright-report/
 
 # OS
 .DS_Store
