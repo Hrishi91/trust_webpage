@@ -8,3 +8,5 @@ Fix: test scripts use globs (Node 24), rules-unit-testing ^5 (firebase 12 peer).
 v0.0.2 — firebase.json (emulator ports 8080/9099/9199/4000), .firebaserc, firebase-config.js placeholder (PASTE), deny-all rules stubs, setup-firebase.md guide (Bengali).
 
 v0.1.0 — i18n module (getLang/setLang/pick/t/STRINGS/onLangChange), 11 unit tests.
+
+v0.2.0 — ui helpers (escapeHtml, countdown, bnDigits, fmtDate, el, toast), 8 unit tests.
