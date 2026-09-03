@@ -177,3 +177,50 @@ Two implementation bugs, both found and fixed during manual verification, not fr
 2. **A stale `onAuthStateChanged` invocation could overwrite a newer one's render.** Fixed with a monotonically increasing `authSeq` counter — each invocation captures its own `seq` on entry and checks `seq === authSeq` immediately before touching the DOM, so if a second firing has started (and thus already bumped `authSeq`) by the time an older one's `await loadData(...)` resolves, the older one silently no-ops instead of clobbering the newer state. This surfaced while chasing bug 3 below and is kept as a general defensive measure even after that bug's real cause was found, since `onAuthStateChanged` firing more than once per logical transition is normal Firebase behaviour (e.g. an optimistic update followed by a server-confirmed one) and the guard is free.
 3. **Local-only, unresolved: a phone-authenticated session is reliably torn down by the SDK/emulator a few hundred ms after sign-in, on this machine's toolchain.** Manually verified end-to-end once (before this was understood, while `authSeq` above was being added for an unrelated reason): logging in as the seeded active member showed the correct card — `pick(name)` "Member One", `pick(role)` "Secretary", stats ৳৫,০০০/৳৩,৫০০/৳১,৫০০ (bn digits, `pledge=5000` minus the two seeded payments), both payment rows `fmtDate · inr`. Chasing why the notices/roster lists then came back `permission-denied` (rather than the expected 1-row lists) led to isolating the actual defect: it is **not** in `members.js`. A bare page importing nothing but `js/firebase.js` (no application code, no Firestore queries at all — just `RecaptchaVerifier` + `signInWithPhoneNumber` + `confirmationResult.confirm()` + `onAuthStateChanged` logging) reproduces it every time against this repo's Auth emulator: `onAuthStateChanged` fires the correctly-signed-in phone user, then ~1 s later fires `null` — permanently (confirmed with 10+ s waits and full page reloads afterward: nothing is ever persisted to `firebaseLocalStorageDb`, no error is thrown anywhere). Bisected across nine throwaway scratch pages (all deleted, none committed): unaffected by which `Auth` persistence class is used (`browserLocalPersistence`, `indexedDBLocalPersistence`, or the SDK default), unaffected by whether the `RecaptchaVerifier` is reused or `.clear()`-ed immediately after `signInWithPhoneNumber` resolves (a genuine improvement kept in `members.js` regardless — see the `finally` block in `sendBtn.onclick` — since a stale invisible-widget instance being reused is bad practice on its own merits), unaffected by whether `Firestore`'s cache is `persistentLocalCache` (with or without `persistentMultipleTabManager`) or the plain in-memory default, and unaffected by whether the `Firestore` client is even connected to an emulator at all. The one variable that flips the outcome: whether a `Firestore` client for the app exists in the page *at all* — `getFirestore(app)`/`initializeFirestore(...)` called anywhere, even with zero queries ever issued against it, is sufficient to reproduce the null-flip after a phone sign-in; a page with no Firestore import never reproduces it, across every persistence-class variant tried. This points at Firestore's internal auth-credential listener (wired at client-construction time, not at first-query time) interacting badly with this SDK version's (12.18.0) phone-sign-in completion against this firebase-tools Auth emulator version — not at anything `members.js`, `firebase.js`'s Firestore cache config, or the rules layer are doing wrong (the exact same `notices`/`roster` queries, replayed through `@firebase/rules-unit-testing` against a hand-built token with `phone_number:'+919999999999'` and no app code involved at all, succeed and return the expected 1 row each). Since every page on this site needs Firestore, there is no in-scope code fix; `js/firebase.js` was left unchanged (an `indexedDBLocalPersistence` experiment was tried and reverted — it did not fix this, and there is no reason to carry an unrelated persistence-backend change for admin's already-working email flow). Flagged here rather than silently claimed as passing: the brief's "send OTP → verify → reload → still logged in" and the notices/roster row-count assertions could not be demonstrated end-to-end in this local environment. What *was* verified end-to-end: the phone form's send/verify/error-toast wiring, the card's own render logic and i18n/digit correctness (via the one successful login above, and separately via a static DOM injection at 375px confirming the `.stats` grid and payment/notice/duty rows lay out correctly with no overflow), `mem.notMember` + logout for a signed-in phone user with no `members/{phone}` doc, and that `/admin/` email login is completely unaffected by any of the member-portal auth activity on the same origin (logged in fine, same tab, after multiple phone sign-in attempts). This is worth a dedicated follow-up (try a firebase-tools upgrade/downgrade, or test against production's real Phone Auth backend rather than the local emulator, where this class of emulator-only inconsistency may simply not exist).
 `npm run test:unit` 39/39 and `npm run test:rules` 20/20 green (no rules/index changes this task). Emulators and static server stopped afterward; ports 8080/9099/9199/5500/4000/4400/4500/9150 confirmed free; no leftover temp/debug files (nine `scratch-authtest*.html` isolation pages, all deleted, none committed).
+
+## 2026-09-04 — v1.5.1 e2e for phases 2–4 + docs
+`tests/e2e/{donate,transparency,live,members}.spec.js` (11 new specs: 2+3+2+4) added on top of the
+existing 8 (`public.spec.js`, `admin.spec.js`), for 19 total. `donate.spec.js`: donor wall renders
+exactly the 3 seeded `showOnWall:true` rows (the plan's Step 1 wording said "2" — the committed
+seed actually has 3 via d1/d2/d4; the test asserts the real count), one shown as anonymous, d3's
+name never rendered; WhatsApp confirm captures `window.open`'s URL (overridden via
+`page.addInitScript`, since a real popup has no route to wa.me in the sandbox) and checks it
+contains the encoded amount. `transparency.spec.js`: 2025 totals in bn digits + PDF link
+(anonymous); 2024 absent for anonymous; 2024 visible via its own admin login + `?year=2024&preview=1`
+(a fresh browser context/admin session inside the test itself, not the shared `admin` project, so
+file ordering doesn't matter). `live.spec.js`: pinned-first + 🔴 badge on the home live strip; a
+second test opens two `browser.newContext()`s (public + admin), posts a new announcement through
+`/admin/#announcements`, and `expect.poll`s the public context for it — no `page.reload()`,
+confirming `onAnnouncements()`'s `onSnapshot` really is live. `members.spec.js`: OTP sign-in (code
+read from the Auth emulator's `verificationCodes` endpoint) → card/notices/roster for the active
+seeded member; an inactive member sees their own pledge/balance but 3× the empty state (payments,
+notices, duties — rules gate the latter two on `activeMember()`); a phone with no `members` doc
+sees `mem.notMember`; and a real, unskipped "reload → still logged in" assertion.
+
+`playwright.config.js` projects now: `public` (public+donate+transparency+live) → `members` →
+`admin` (admin's soft-delete test mutates seed and must run last).
+
+**Investigation verdict (Task 12's "session torn down ~1s after sign-in" concern):** re-tested with
+a throwaway Playwright script against the actual committed `members.html`/`js/pages/members.js`
+(not isolated scratch pages) — sign in as `+919999999999` via the emulator's OTP code, watch
+`onAuthStateChanged` + all `127.0.0.1:9099` traffic for 5s, then reload. **Not reproducible**: 3
+repeated trials, plus a variant leaving the `RecaptchaVerifier` deliberately uncleared and a
+variant with no Firestore client at all, all stayed signed in the whole window and survived reload,
+member card/notices/roster rendering correctly throughout. Most likely explanation: Task 12's own
+`v.clear()`-in-`finally` and `authSeq` stale-invocation guard (both already in the committed
+`members.js`) already fix the exact symptom described — the report's "Concerns" section was
+apparently written against pre-fix isolated scratch pages and never re-verified end-to-end against
+the fixed file. Full write-up: `docs/PROJECT_CONTEXT.md` §5, `.superpowers/sdd/.../task-13-report.md`.
+
+`docs/user-guide/admin-guide.md`: dashboard table extended from 6 to 12 cards; six new bn sections
+(📢 ঘোষণা, 💰 দান, 📊 হিসাব, 🧾 সদস্য, নোটিশ, দায়িত্ব তালিকা) describing real labels/flows read straight
+off the section files. `docs/PROJECT_CONTEXT.md`: new "State as of 2026-09-04" (§5) — what Phases
+2–4 add, their decisions-and-causes, the investigation writeup, e2e coverage summary.
+`docs/pending.md`: Phase 2–4 Tasks 1–13 ticked, Task 14 pending (owner-driven, same blocker class as
+Phase 0's Task 11), deferred minors from this phase's reviews listed, "Later phases" narrowed to the
+payment-gateway idea (post-80G).
+
+`npm run seed && npm run e2e`: 19/19 green, twice. `npm test` (39 unit + 20 rules): green, unchanged
+(no rules/index changes this task). All emulator/server background processes stopped; ports
+8080/9099/9199/5500/4000/4400/4500/9150 confirmed free; throwaway investigation files
+(`scratch-authtest-*.html`, `scratch-investigate*.mjs`) deleted, none committed.

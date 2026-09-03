@@ -82,3 +82,41 @@ See `docs/user-guide/go-live-checklist.md` for the full owner-driven go-live seq
 | Rules tests run with `--test-concurrency=1` | Concurrent rules tests raced against the same emulator project state and produced flaky failures |
 | DOMPurify loaded via SRI-pinned `<script>` tag, checked at call time | `renderRich()` refuses to fall back to raw HTML if `window.DOMPurify` is missing — a degraded XSS-safe feature is acceptable, unsanitised admin HTML reaching a visitor is not |
 | `getSettings()` failure ⇒ maintenance page, not memoised | A failed `settings/site` read now returns `{ ...DEFAULT_SETTINGS, maintenance: true }` (fail CLOSED — the maintenance notice, not a silently-broken "open" site with placeholder content) and resets the module-level `settingsPromise` in the `.catch` so the next call retries the network instead of being stuck on the cached failure for the rest of the page's life |
+
+## 5. State as of 2026-09-04
+
+### What Phase 2–4 add
+
+Plan: `docs/superpowers/plans/2026-09-04-phase-2-4-donation-transparency-live-members.md`. Tasks 1–13 are code-complete on `main`; Task 14 (production rollout) is the only one left, and it's owner-driven for the same reason Phase 0/1's Task 11/21 were (needs the real Firebase project).
+
+- **Donate** (`donate.html`): UPI pay link + QR, a WhatsApp-confirmation form (name/amount/UPI ref → pre-filled `wa.me` message, no online payment gateway), and a public donor wall (`donations` where `showOnWall==true`). Admin section `💰 দান`.
+- **Transparency** (`transparency.html`): year-wise income/expense ledgers with computed totals/balance and PDF documents (`transparency` where `published==true`; `?year=&preview=1` lets a logged-in admin see a draft year). Admin section `📊 হিসাব`.
+- **Live hub**: `announcements` collection, realtime (`onSnapshot`) on the home page's "live strip" — pinned-first, non-expired, 🔴 badge when any visible one has `isLive:true`. Admin section `📢 ঘোষণা` (quick-post, publishes immediately).
+- **Members portal** (`members.html`): phone-OTP sign-in (Firebase Auth phone provider, `RecaptchaVerifier` size `invisible`) → own pledge/paid/due card, notices, and duty-roster rows. Admin sections `🧾 সদস্য` (+ payments), `📋 নোটিশ`, `🗓️ দায়িত্ব তালিকা`.
+
+### Decisions and their causes (Phase 2–4)
+
+| Decision | Cause |
+|---|---|
+| Member doc id = E.164 phone number (unchanged from the Phase 0 design, now actually exercised) | `request.auth.token.phone_number == docId` is a one-line rule; the phone IS the identity, no uid↔phone table to get out of sync |
+| Production Identity Toolkit `testPhoneNumbers`: `+919999999999` → `123456` (Task 14); the Auth emulator has its own `GET /emulator/v1/projects/demo-trust/verificationCodes` for local/e2e | Demo/e2e sign-in must never send a real SMS, on production OR on the emulator |
+| Announcements are realtime (`onSnapshot`), not a periodic poll or a page-load-only fetch | The whole point of a "live strip" is that it updates while someone is already looking at the home page, e.g. during the event itself |
+| No online payment gateway | 80G registration is still in progress (`docs/pending.md` "Later phases"); accepting money online before the trust can issue a proper tax receipt was ruled out. Today's flow is UPI-app-of-choice + a WhatsApp message as an honour-system confirmation, not a processed transaction |
+| `donations` docs never carry a phone field; Firestore rules reject the field outright on write | Same "public collection + PII = one wrong rule away from a leak" reasoning as the original Phase 0 members design — donor phone numbers stay with the admin offline, never in the site DB |
+| Removed/deactivated members lose `notices`/`roster` access immediately, not just dashboard visibility | `notices`/`roster` rules gate on `activeMember()` (a live `get()` on the caller's own `members/{phone}` doc, `active==true`), not on a cached claim — flipping "সক্রিয়" off in the admin panel takes effect on the member's very next query, no token refresh or re-login needed |
+| `getMyMember(phone)` succeeds for an inactive member even though `listNotices()`/`listMyRoster()` don't | Different rule, different collection: reading your OWN `members/{phone}` doc is allowed regardless of `active` (so an inactive member still sees their own pledge/balance and knows why they're inactive); only the notices/roster rules add the `activeMember()` gate |
+| Phone normalisation (`normalizePhone`, duplicated in `js/pages/members.js` and `admin/js/sections/members.js`) accepts a bare 10-digit number (assumed `+91`) or an already-`+`-prefixed 11–14 digit number | Matches how an Indian admin will actually type a number; anything shorter/longer is rejected rather than silently mis-normalised |
+
+### Task 12/13 investigation: the "session torn down ~1s after sign-in" concern
+
+Task 12's report flagged an undemonstrated concern: phone sign-in against the Auth emulator appeared to fire `onAuthStateChanged` with the signed-in user, then flip to `null` roughly a second later, with no error — blamed (in isolated throwaway pages, not the committed `members.js`) on any page merely instantiating a Firestore client.
+
+Task 13 re-investigated with a throwaway Playwright script driving the actual committed `members.html`/`js/pages/members.js` (never the isolated scratch pages) against a freshly seeded emulator: sign in as `+919999999999` via the code read from the Auth emulator's `verificationCodes` endpoint, watch `onAuthStateChanged` + all network traffic to `127.0.0.1:9099` for 5 s, then reload.
+
+**Result: not reproducible.** Across 3 repeated end-to-end trials (plus a variant with the `RecaptchaVerifier` deliberately left uncleared, and a variant with no Firestore client instantiated at all), the session stayed signed in for the full 5 s window and survived a page reload every time, with the member card, notices, and duty roster all rendering correctly throughout. The most likely explanation: the two fixes Task 12's own implementer made to `members.js` during that same task (clearing the invisible `RecaptchaVerifier` in a `finally` block after `signInWithPhoneNumber`, and the `authSeq` guard against a stale `onAuthStateChanged` invocation overwriting a newer render) already resolve the exact symptom described — but Task 12's "Concerns" section was written against isolated scratch pages that predated or excluded those fixes, and was never re-verified against the fixed `members.js` end-to-end before being reported as still-open.
+
+Practical effect: `tests/e2e/members.spec.js` includes the real "sign in → reload → still logged in" assertion, unskipped — it passed in both required `npm run e2e` runs for this task. If it ever proves flaky in CI (a genuinely different environment/firebase-tools version than this one), the fallback is `test.skip` with a comment pointing back to this section, not silently deleting the assertion.
+
+### e2e coverage added
+
+`tests/e2e/{donate,transparency,live,members}.spec.js`, 11 new specs (2+3+2+4) on top of the existing 8, for 19 total. `playwright.config.js` projects now run `public` (public/donate/transparency/live specs) → `members` → `admin`, since `admin.spec.js`'s soft-delete test still mutates seed data and must run last. Both `npm run seed && npm run e2e` runs required by this task were green (19/19), and `npm test` (39 unit + 20 rules) is unchanged and green — no rules/index changes this task.
