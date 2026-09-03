@@ -111,3 +111,4 @@ import './sections/events.js'; // Task 19
 import './sections/export.js'; // Task 19
 import './sections/donations.js'; // Phase 2
 import './sections/transparency.js'; // Phase 2
+import './sections/members.js'; // Phase 4
