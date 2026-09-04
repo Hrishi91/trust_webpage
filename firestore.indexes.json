@@ -92,6 +92,12 @@
       { "fieldPath": "deleted", "order": "ASCENDING" },
       { "fieldPath": "date", "order": "ASCENDING" }
     ] },
+    { "collectionGroup": "roster", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "published", "order": "ASCENDING" },
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "memberPhones", "arrayConfig": "CONTAINS" },
+      { "fieldPath": "date", "order": "ASCENDING" }
+    ] },
     { "collectionGroup": "members", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "deleted", "order": "ASCENDING" },
       { "fieldPath": "order", "order": "ASCENDING" }

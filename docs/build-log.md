@@ -351,3 +351,12 @@ list" message for what could be a real outage. Fixed to show `common.error` inst
 production does) — verified indirectly: `npm run seed && npm run e2e` stays green, i.e. the
 narrowed catch does not turn the existing legitimate-empty-list cases (inactive member's
 notices/roster, anonymous donor wall reads, etc.) into false errors.
+
+**G3 — roster index insurance.** `firestore.indexes.json` gains a second `roster` composite index
+with the equality fields first (`published ASC, deleted ASC, memberPhones CONTAINS, date ASC`),
+alongside the existing `memberPhones CONTAINS, published ASC, deleted ASC, date ASC` shape — cheap
+insurance against Firestore's query planner preferring a different field order than the one
+already declared for `listMyRoster()`'s `array-contains` + two-equality + orderBy query.
+`docs/user-guide/go-live-checklist.md`'s new OTP-login-test bullet (added under G1) gets a note:
+if the first real OTP login shows a FAILED_PRECONDITION/index link in devtools console, create
+that index. `firestore.rules` unchanged this task; index-only change, `npm test` unaffected.

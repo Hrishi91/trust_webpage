@@ -58,6 +58,7 @@ npx firebase deploy --only firestore:indexes --project ganesh-puja-trust
 
 - [ ] **real members load করার আগে**: `node scripts/auth-config.mjs --remove-test-number`, তারপর Firebase console → Authentication → Sign-in method → Phone → 'Phone numbers for testing' খালি কিনা দেখুন
 - [ ] প্রথম real সদস্যের নম্বর দিয়ে OTP login test করুন (send → real SMS আসছে → verify করে member card দেখা যাচ্ছে)
+  - প্রথম real OTP login-এ devtools console-এ FAILED_PRECONDITION/index link এলে সেই index create করুন।
 
 প্রোডাকশন SMS region policy India-only সেট করা হয়েছে (2026-09-04) — শুধু ভারতীয় নম্বরে SMS যাবে, অন্য দেশের নম্বর দিয়ে OTP পাঠানো ব্লক হবে।
 
