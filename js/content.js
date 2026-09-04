@@ -1,5 +1,16 @@
 import { db, collection, doc, getDoc, getDocs, query, where, orderBy, limit, onSnapshot } from './firebase.js';
 
+// A read failure must not look like empty/absent data unless it actually IS an expected access
+// outcome — an inactive member's notices/roster query, or a signed-out visitor hitting an
+// admin-only doc, both legitimately come back permission-denied and the caller (an [] / null
+// fallback) already handles that correctly. Anything else — failed-precondition (a missing
+// composite index), unavailable, a network blip — is a real problem the page must surface as
+// common.error, not silently render as "nothing here yet". `allowNotFound` is for the single-doc
+// getters, where a genuinely absent document is also a legitimate, non-error outcome.
+function isExpectedAccessError(err, { allowNotFound = false } = {}) {
+  return err?.code === 'permission-denied' || (allowNotFound && err?.code === 'not-found');
+}
+
 export const DEFAULT_SETTINGS = {
   name: { bn: 'গণেশ পুজো ট্রাস্ট', en: 'Ganesh Puja Trust' }, tagline: { bn: '', en: '' },
   address: { bn: '', en: '' }, theme: { bn: '', en: '' }, logoUrl: '', mapUrl: '',
@@ -40,6 +51,7 @@ export async function listPhotos(albumId) {
     return rows(await getDocs(query(collection(db, 'albums', albumId, 'photos'), where('deleted', '==', false), orderBy('order'))));
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err)) throw err;
     return [];
   }
 }
@@ -49,6 +61,7 @@ export async function getPublished(coll, id) {
     return s.exists() && s.data().published === true && s.data().deleted === false ? { id: s.id, ...s.data() } : null;
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err, { allowNotFound: true })) throw err;
     return null;
   }
 }
@@ -59,6 +72,7 @@ export async function listDonorWall(limitN = 50) {
       where('showOnWall', '==', true), where('deleted', '==', false), orderBy('date', 'desc'), limit(limitN))));
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err)) throw err;
     return [];
   }
 }
@@ -69,6 +83,7 @@ export async function listTransparencyYears() {
       where('published', '==', true), where('deleted', '==', false), orderBy('year', 'desc'))));
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err)) throw err;
     return [];
   }
 }
@@ -79,6 +94,7 @@ export async function getTransparency(year) {
     return s.exists() && s.data().published === true && s.data().deleted === false ? { id: s.id, ...s.data() } : null;
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err, { allowNotFound: true })) throw err;
     return null;
   }
 }
@@ -103,6 +119,7 @@ export async function getMyMember(phone) {
     return s.exists() ? { id: s.id, ...s.data() } : null;
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err, { allowNotFound: true })) throw err;
     return null;
   }
 }
@@ -113,6 +130,7 @@ export async function listNotices() {
       where('published', '==', true), where('deleted', '==', false), orderBy('order', 'desc'))));
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err)) throw err;
     return [];
   }
 }
@@ -123,6 +141,7 @@ export async function listMyRoster(phone) {
       where('memberPhones', 'array-contains', phone), where('published', '==', true), where('deleted', '==', false), orderBy('date'))));
   } catch (err) {
     console.warn('[content]', err);
+    if (!isExpectedAccessError(err)) throw err;
     return [];
   }
 }

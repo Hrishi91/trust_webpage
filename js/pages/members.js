@@ -225,7 +225,14 @@ if (s) {
         try {
           await loadData(user.phoneNumber);
         } catch (err) {
+          // content.js only swallows permission-denied (and not-found) itself — anything that
+          // reaches here is a real failure (missing index, offline, etc.), not "this member has
+          // no data". Showing renderCard() here anyway would render as "not a member", which is
+          // wrong and misleading; show the same error state every other page shows instead.
           console.warn('[members] loadData', err);
+          if (seq !== authSeq) return;
+          main.replaceChildren(el('p', { class: 'muted', text: t('common.error') }));
+          return;
         }
         if (seq !== authSeq) return;
         renderCard();

@@ -331,3 +331,23 @@ gains a "Step 4 — Members portal: real members + OTP" section: the `--remove-t
 console-check owner step, an OTP-login-test bullet, and a note that the production SMS region
 policy was set to India-only on 2026-09-04. The script itself was NOT run against production this
 task (owner-run only, per the brief).
+
+**G2 — read failures must not look like empty data.** `js/content.js`'s eight read helpers
+(`listDonorWall`, `listTransparencyYears`, `listNotices`, `listMyRoster`, `getMyMember`,
+`getTransparency`, `listPhotos`, `getPublished`) used to swallow every read error into their
+`[]`/`null` fallback. New shared `isExpectedAccessError(err, {allowNotFound})` narrows that to just
+`permission-denied` (the array-returning helpers) or `permission-denied`/`not-found` (the
+single-doc getters) — those stay silent (an inactive member's notices/roster query, or a signed-out
+visitor hitting a gated doc, are legitimate access outcomes the caller already renders as empty).
+Everything else — `failed-precondition` (a missing composite index), `unavailable`, any other
+error — is `console.warn`ed and then rethrown. `donate.js`, `transparency.js`, `gallery.js`,
+`about.js`, `home.js`, `events.js`, `committee.js` already wrap their content.js calls in
+try/catch → `common.error`, verified unchanged. `js/pages/members.js`'s `onAuthStateChanged`
+handler did NOT: a `loadData()` failure was swallowed to a `console.warn` and then `renderCard()`
+ran anyway with `member` still `null`, rendering the misleading "this number is not on the members
+list" message for what could be a real outage. Fixed to show `common.error` instead when
+`loadData()` throws. No index changes needed to reproduce/verify this on the emulator (a genuine
+`failed-precondition` needs a missing index, which the emulator doesn't enforce the same way
+production does) — verified indirectly: `npm run seed && npm run e2e` stays green, i.e. the
+narrowed catch does not turn the existing legitimate-empty-list cases (inactive member's
+notices/roster, anonymous donor wall reads, etc.) into false errors.
