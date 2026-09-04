@@ -46,7 +46,12 @@ export function imageField(ctx, label, currentUrl = '', { folder, max = 1600 } =
   return { node: el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'row' }, img, input), bar), read: () => url, set };
 }
 
-const docFname = (folder, file) => `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.name}`;
+// Storage object paths must be URL-safe and predictable — an admin's original filename can carry
+// spaces, uppercase, unicode, or other characters that are awkward in a Storage/GCS path or a
+// URL. Slugified to lowercase-and-hyphens (dots are kept, so the extension survives) before it's
+// used to build the path.
+const slugify = name => name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+|-+$/g, '');
+const docFname = (folder, file) => `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${slugify(file.name)}`;
 
 // fileField: like imageField but for a raw non-image file (PDF documents) — no resize, uploaded
 // with the file's own type; a link preview instead of a thumbnail.

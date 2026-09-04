@@ -1,8 +1,9 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
 import { t, pick } from '../../../js/i18n.js';
-import { el, toast, digits } from '../../../js/ui.js';
+import { el, toast } from '../../../js/ui.js';
 import { sum, inr, balance } from '../../../js/money.js';
+import { normalizePhone } from '../../../js/phone.js';
 import { biField, textField, boolField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'members';
@@ -26,16 +27,6 @@ registerSection(COLL, {
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));
   },
 });
-
-// Normalises a raw phone input into E.164: strip everything but digits, then
-// 10 digits -> +91-prefixed, 11-14 digits -> '+' prefixed. Anything else is invalid.
-// Exported implicitly via module scope only (kept local per the brief).
-function normalizePhone(raw) {
-  const d = digits(raw);
-  if (d.length === 10) return `+91${d}`;
-  if (d.length >= 11 && d.length <= 14) return `+${d}`;
-  return null;
-}
 
 async function listPane(ctx) {
   const q = query(collection(ctx.db, COLL), where('deleted', '==', false), orderBy('order'));

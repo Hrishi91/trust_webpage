@@ -53,3 +53,39 @@ test('reload after sign-in keeps the session (investigation: not reproducible, s
   await page.reload();
   await expect(page.locator('.card h2')).toHaveText('সদস্য এক');
 });
+
+test('change number returns to an editable phone field with the OTP row hidden', async ({ page }) => {
+  await page.goto('/members.html');
+  const phoneInput = page.locator('input[type=tel]');
+  await phoneInput.fill('+919999999999');
+  await page.click('button:has-text("OTP পাঠান")');
+  const otpInput = page.locator('input[inputmode=numeric]');
+  await expect(otpInput).toBeVisible();
+  await expect(phoneInput).toBeDisabled();
+  await page.click('a:has-text("নম্বর বদলান")');
+  await expect(otpInput).toBeHidden();
+  await expect(phoneInput).toBeEnabled();
+});
+
+test('resend requests a second verification code for the same number', async ({ page }) => {
+  const phone = '+916000000001'; // distinct number: keeps this test's code count independent of others
+  await page.goto('/members.html');
+  await page.fill('input[type=tel]', phone);
+  await page.click('button:has-text("OTP পাঠান")');
+  await expect(page.locator('input[inputmode=numeric]')).toBeVisible();
+  const resendBtn = page.locator('button:has-text("আবার OTP পাঠান")');
+  await resendBtn.click();
+  await expect(resendBtn).toBeEnabled({ timeout: 10000 }); // re-enabled in sendOtp's finally when the resend completes
+  const res = await fetch('http://127.0.0.1:9099/emulator/v1/projects/demo-trust/verificationCodes');
+  const { verificationCodes } = await res.json();
+  const codesForPhone = verificationCodes.filter(c => c.phoneNumber === phone);
+  expect(codesForPhone.length).toBeGreaterThanOrEqual(2);
+});
+
+test('logout returns to the phone entry form', async ({ page }) => {
+  await signInByPhone(page, '+919999999999');
+  await expect(page.locator('.card h2')).toHaveText('সদস্য এক');
+  await page.click('button:has-text("লগআউট")');
+  await expect(page.locator('input[type=tel]')).toBeVisible();
+  await expect(page.locator('input[type=tel]')).toBeEnabled();
+});

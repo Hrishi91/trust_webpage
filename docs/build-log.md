@@ -368,3 +368,23 @@ all published notices and the whole roster, so `memberPhones` is visible to ever
 fixed the "Live: phases 2–4" line's project id typo, `ganeshpuja-trust` → `ganesh-puja-trust`
 (matches `.firebaserc`'s actual `projects.default` and every other reference in the repo).
 Comment-only rules change — `npm run test:rules` (20) confirmed still green, unchanged.
+
+**G5 — SHOULD-FIX-SOON minors.** (a) `normalizePhone` was duplicated in `js/pages/members.js` and
+`admin/js/sections/members.js` and neither rejected a leading zero after normalisation — an
+11-digit input starting with `0` (e.g. `'09800000000'`, a domestic dialing habit) silently became
+the nonsensical `+09800000000` instead of being refused. Extracted to `js/phone.js`
+(`export function normalizePhone(input)`, built on `digits()` from `js/ui.js`) with the leading-
+zero check added up front; both call sites now import it instead of keeping a local copy.
+`tests/unit/phone.test.js` (5 cases: 10-digit with spaces, `+91`-prefixed with punctuation,
+leading-zero rejection, too-short rejection, 12-digit no-`+`). (b) `admin/js/upload.js`'s
+`fileField` (used for transparency PDF documents) now slugifies `file.name`
+(`.toLowerCase().replace(/[^a-z0-9.]+/g,'-').replace(/^-+|-+$/g,'')`, dots kept so the extension
+survives) before it goes into the Storage path — an admin's original filename can carry spaces,
+uppercase, or other characters awkward in a Storage/GCS path; the displayed link text still shows
+the original `file.name`, only the path is slugified. (c) `scripts/auth-config.mjs` printing
+numbers-only was done under G1. (d) `tests/e2e/members.spec.js` gains three specs: change-number
+(send OTP → click "নম্বর বদলান" → phone field re-enabled, OTP row hidden), resend (click "আবার OTP
+পাঠান" → a second verification code appears at the Auth emulator's `verificationCodes` endpoint
+for that phone), logout (click "লগআউট" → back to the phone-entry form). `npm run test:unit` is now
+51 (39 + 7 from G1's `args.test.js` + 5 from this group's `phone.test.js`); `npm run seed && npm
+run e2e` is 22/22, run twice, both green (19 existing + 3 new).

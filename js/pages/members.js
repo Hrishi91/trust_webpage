@@ -4,19 +4,10 @@ import {
   auth, IS_LOCAL, RecaptchaVerifier, signInWithPhoneNumber, signOut, onAuthStateChanged,
 } from '../firebase.js';
 import { t, pick, getLang } from '../i18n.js';
-import { el, toast, fmtDate, digits } from '../ui.js';
+import { el, toast, fmtDate } from '../ui.js';
 import { inr, sum, balance } from '../money.js';
 import { renderRich } from '../rich.js';
-
-// Normalises a raw phone input into E.164 — same rule as admin/js/sections/members.js:
-// strip everything but digits, 10 digits -> +91-prefixed, 11-14 digits -> '+'-prefixed,
-// anything else is invalid.
-function normalizePhone(raw) {
-  const d = digits(raw);
-  if (d.length === 10) return `+91${d}`;
-  if (d.length >= 11 && d.length <= 14) return `+${d}`;
-  return null;
-}
+import { normalizePhone } from '../phone.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('members', t('nav.members'));
