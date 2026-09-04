@@ -85,7 +85,7 @@ See `docs/user-guide/go-live-checklist.md` for the full owner-driven go-live seq
 
 ## 5. State as of 2026-09-04
 
-**Live: phases 2–4 on 2026-09-04** — `ganeshpuja-trust`'s rules/25 indexes are deployed, phone-auth
+**Live: phases 2–4 on 2026-09-04** — `ganesh-puja-trust`'s rules/25 indexes are deployed, phone-auth
 config is live, demo data is seeded, and every page below has been verified against production
 (`https://hrishi91.github.io/trust_webpage/`). Tagged `v2.0.0`. Full rollout write-up: build-log
 "v2.0.0 phases 2–4 LIVE".

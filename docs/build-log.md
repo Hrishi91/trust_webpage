@@ -360,3 +360,11 @@ already declared for `listMyRoster()`'s `array-contains` + two-equality + orderB
 `docs/user-guide/go-live-checklist.md`'s new OTP-login-test bullet (added under G1) gets a note:
 if the first real OTP login shows a FAILED_PRECONDITION/index link in devtools console, create
 that index. `firestore.rules` unchanged this task; index-only change, `npm test` unaffected.
+
+**G4 — rules intent comment + docs typo.** `firestore.rules` gains a comment above the
+`notices`/`roster` matches making explicit what the rules already do: any active member may read
+all published notices and the whole roster, so `memberPhones` is visible to every active member
+(spec §5) — this was implicit in the rule bodies, not stated anywhere. `docs/PROJECT_CONTEXT.md`:
+fixed the "Live: phases 2–4" line's project id typo, `ganeshpuja-trust` → `ganesh-puja-trust`
+(matches `.firebaserc`'s actual `projects.default` and every other reference in the repo).
+Comment-only rules change — `npm run test:rules` (20) confirmed still green, unchanged.
