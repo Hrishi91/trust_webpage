@@ -54,6 +54,13 @@ npx firebase deploy --only firestore:indexes --project ganesh-puja-trust
 - [ ] পাবলিক সাইট রিলোড করে দেখুন এখনও কাজ করছে (reCAPTCHA token issue হচ্ছে)
 - [ ] `curl` দিয়ে সরাসরি Firestore REST endpoint-এ token ছাড়া রিকোয়েস্ট পাঠিয়ে দেখুন → 403 আসছে
 
+## Step 4 — Members portal: real members + OTP (Phase 2–4, owner-only)
+
+- [ ] **real members load করার আগে**: `node scripts/auth-config.mjs --remove-test-number`, তারপর Firebase console → Authentication → Sign-in method → Phone → 'Phone numbers for testing' খালি কিনা দেখুন
+- [ ] প্রথম real সদস্যের নম্বর দিয়ে OTP login test করুন (send → real SMS আসছে → verify করে member card দেখা যাচ্ছে)
+
+প্রোডাকশন SMS region policy India-only সেট করা হয়েছে (2026-09-04) — শুধু ভারতীয় নম্বরে SMS যাবে, অন্য দেশের নম্বর দিয়ে OTP পাঠানো ব্লক হবে।
+
 ## এরপর
 
 সব ধাপ শেষ হলে `docs/build-log.md`-এ go-live entry লিখুন (checklist-এর ফলাফলসহ), `docs/PROJECT_CONTEXT.md`-এ "Live since ..." যোগ করুন, তারপর commit + `v1.0.0` tag + push (brief-এর Step 5, task-21-brief.md দ্রষ্টব্য)।

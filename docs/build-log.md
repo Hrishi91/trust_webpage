@@ -312,3 +312,22 @@ status line updated. Commit `docs: phases 2-4 live on production`, tag `v2.0.0`,
 
 No background processes left running, all emulator/dev ports free (nothing was started this task —
 verification ran against production only), no `.tmp-*` files left in the repo.
+
+## 2026-09-04 — v2.0.1 post-review hardening
+
+Single fix wave from the final whole-branch review of Phases 2–4 (production LIVE, tag `v2.0.0`).
+One group per commit; see each subsection below.
+
+**G1 — test phone number must not be re-added silently.** `scripts/auth-config.mjs` no longer
+merges `{'+919999999999':'123456'}` into `testPhoneNumbers` unconditionally — without a flag it
+now leaves whatever `testPhoneNumbers` the server already has untouched (neither adds nor
+deletes). `--with-test-number` merges the fixed demo pair in; `--remove-test-number` removes it
+(the go-live step, before real members are loaded — if both flags are passed together, removal
+wins). The script now prints only the test numbers themselves, never their OTP codes. Arg parsing
+extracted to `scripts/lib/args.mjs` (`parseArgs(argv) → {domain, withTestNumber,
+removeTestNumber}`), unit-tested in `tests/unit/args.test.js` (7 cases: defaults, `--domain` with
+and without a value, each flag alone, combined, order-independence). `docs/user-guide/go-live-checklist.md`
+gains a "Step 4 — Members portal: real members + OTP" section: the `--remove-test-number` +
+console-check owner step, an OTP-login-test bullet, and a note that the production SMS region
+policy was set to India-only on 2026-09-04. The script itself was NOT run against production this
+task (owner-run only, per the brief).
