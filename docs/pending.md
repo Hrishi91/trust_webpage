@@ -56,7 +56,14 @@ Plan: `docs/superpowers/plans/2026-09-04-phase-2-4-donation-transparency-live-me
 - [x] Task 11 admin notices + roster sections (2026-09-04)
 - [x] Task 12 public members.html (phone OTP portal) (2026-09-04)
 - [x] Task 13 e2e for phases 2–4 (donate/transparency/live/members, 19 specs total) + docs; members-portal "torn down after sign-in" concern investigated, not reproducible against committed code (2026-09-04)
-- [ ] Task 14 pending — production rollout: rules/indexes deploy, `testPhoneNumbers` auth config, demo data, live verification (owner-driven, needs the real Firebase project + Blaze, same blocker as Task 11 in Phase 0)
+- [x] Task 14 production rollout: rules/25 indexes deployed, `testPhoneNumbers` auth config confirmed, demo data (12 donations, 2 transparency years, 4 announcements, 5 more members, 2 more notices, 3 more roster rows) written and live-verified end-to-end (2026-09-04) — **phases 2–4 are LIVE**, tagged `v2.0.0`
+
+### ⏳ Owner still to test (post-launch, phases 2–4)
+
+- **Phone OTP on a real phone**: the `+919999999999` / `123456` test pair was never exercised end-to-end against production from an actual device (only `RecaptchaVerifier`/form-render was checked in this rollout, per plan — reCAPTCHA can't be driven headlessly). Try signing in on `members.html` from a phone.
+- **App Check key**: confirm the production `APPCHECK_SITE_KEY` in `js/firebase-config.js` is the real one and that the App Check console shows verified traffic, not just the "unverified" warning.
+- **Custom domain** (if/when one is added): re-run `node scripts/auth-config.mjs --domain <name>` so phone auth's `authorizedDomains` picks it up — see `docs/user-guide/deploy.md`.
+- **Real donation/transparency/UPI data**: everything written in Task 14 is dummy demo content (`upiId: 'ganeshpujatrust@upi'`, `regNo: 'WB/2026/DEMO'`, placeholder QR, generated PDFs) — replace all of it from `/admin/` before telling real donors to use the page.
 
 ### Deferred minors from Phase 2–4 reviews
 

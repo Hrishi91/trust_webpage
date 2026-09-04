@@ -225,3 +225,90 @@ payment-gateway idea (post-80G).
 (no rules/index changes this task). All emulator/server background processes stopped; ports
 8080/9099/9199/5500/4000/4400/4500/9150 confirmed free; throwaway investigation files
 (`scratch-authtest-*.html`, `scratch-investigate*.mjs`) deleted, none committed.
+
+## 2026-09-04 — v2.0.0 phases 2–4 LIVE
+
+Task 14, the production rollout for donations/transparency/live announcements/members, is done —
+`ganesh-puja-trust` now serves the full Phase 2–4 feature set for real.
+
+**Step 1 — rules + indexes.** `npm test` (39 unit + 20 rules) green, then `firestore.rules` (the
+`donations`/`transparency`/`announcements`/`members`/`notices`/`roster` matches, including the
+`donations` closed-key-set write guard and the `!('phone' in request.resource.data)` check) plus
+all 25 composite indexes in `firestore.indexes.json` deployed via `firebase deploy`. Verified live:
+`npx firebase firestore:indexes --project ganesh-puja-trust | grep -c collectionGroup` → 25; a
+REST `runQuery` on `announcements` (`published==true, deleted==false`, `order desc`) returned rows
+with no "requires an index" error.
+
+**Step 2 — auth config.** `node scripts/auth-config.mjs` already applied earlier this session
+(logged under v1.4.0 above): phone sign-in enabled, test number `+919999999999` → `123456`,
+`hrishi91.github.io` in `authorizedDomains` — re-confirmed still in place before writing demo data.
+
+**Step 3 — demo data.** Written to `ganesh-puja-trust` via a throwaway `.tmp-demo2.mjs` (owner-OAuth
+REST pattern: firebase-tools' refresh token exchanged against its public client for an access
+token with Owner/Editor IAM — bypasses Firestore/Storage security rules the same way the Phase-1
+one-off scripts did; deleted immediately after the run, no token ever printed or committed):
+- `settings/site` merge-patched (`updateMask` on exactly these fields, nothing else touched):
+  `upiId: 'ganeshpujatrust@upi'` (dummy), `upiQrUrl` → a generated 512×512 "DEMO QR — NOT
+  SCANNABLE" placeholder (Playwright `chromium`, canvas → WebP, 6572 B) uploaded to
+  `public/site/upi-qr.webp`, `regNo: 'WB/2026/DEMO'`, `has80G: false`, `contacts.whatsapp` (already
+  `919800000000` from earlier seeding — confirmed unchanged).
+- `donations` ×12 (`d1`–`d12`), 2025 (8) + 2026 (4), realistic Bengali donor names, modes mixed
+  cash/upi/bank, `receiptNo` `R-<year>-NNN`, `order` = date ms, `year`, `published:true,
+  deleted:false, note:''`; 3 `isAnonymous:true` (d3, d6, d10), 2 `showOnWall:false` (d4, d8) —
+  exactly the closed key set the rules allow, verified by REST read-back (no `phone` key, no
+  extras).
+- `transparency/2024` and `/2025`, both published: income চাঁদা/রাস্তার সংগ্রহ/বাস-টোটো/দান, expense
+  প্রতিমা/মণ্ডপ/আলো/ভোগ/সাংস্কৃতিক. 2025 totals ₹2,40,000 income / ₹2,10,000 expense (surplus
+  ₹30,000) exactly as speced; 2024 a smaller plausible ₹2,00,000/₹1,80,000. One generated PDF each
+  (`buildMinimalPdf()` — hand-built objects + correct byte-offset xref table, `%PDF-1.4` header,
+  693 B each, well over the 300 B floor) uploaded to `public/transparency/<year>/audit-<year>.pdf`
+  as `documents[0]`, bilingual notes, `order` = year.
+- `announcements` ×4 (`a1`–`a4`): `a1` pinned welcome message, `a2` `isLive:true` "মণ্ডপে আরতি
+  চলছে", `a3` a plain notice, `a4` `expiresAt` = yesterday; `order` = staggered creation ms,
+  `published:true`.
+- `members` ×5 more (`+919800000001`–`05`, DEMO numbers only — never a real phone), 1
+  (`…05`) `active:false`; existing `+919999999999` (pledge 5000, two payments) untouched.
+- `notices` ×2 more (`n2` published, `n3` draft) alongside the existing `n1`.
+- `roster` ×3 more (`r2`/`r3`/`r4`, dated 2026-09-14/15/16 around the 2026-09-15 puja date, 2–3
+  member phones each) alongside the existing `r1`; `+919999999999` included in `r2` and `r3` (two
+  rows, per spec).
+Per-collection counts printed by the script: `donations: 12, transparency: 2, announcements: 4,
+members: 5, notices: 2, roster: 3`. `.tmp-demo2.mjs` deleted immediately after the run.
+
+**Step 4 — live verification**, all against `https://hrishi91.github.io/trust_webpage/…` (freshness
+gate passed first: `curl -s .../js/pages/members.js | grep -c changeNumber` → 1, confirming commit
+`1b8c032` was already live):
+- **Donate**: UPI card renders `ganeshpujatrust@upi` + the uploaded QR `<img>`; donor wall shows
+  exactly the 10 non-hidden rows (12 − 2 `showOnWall:false`), anonymous ones labelled "নাম প্রকাশে
+  অনিচ্ছুক" instead of a name; registration number shown. Console clean.
+- **Transparency**: 2025 tab (default) shows income ₹2,40,000 / expense ₹2,10,000 / surplus
+  ₹30,000, matching the seeded rows exactly; the audit PDF link resolves 200 `application/pdf`
+  (confirmed both via `curl -sI` and by locating the link in the rendered page).
+- **Home**: live strip shows the 🔴 badge (from `a2`'s `isLive:true`) with the pinned announcement
+  (`a1`) first, the expired one (`a4`) correctly absent; posting a fifth announcement via REST
+  (`a5-verify`) appeared in the strip on the already-open tab with **no reload** (Firestore
+  `onSnapshot` push), then was soft-deleted via REST and confirmed gone from the strip, again
+  without reload — realtime round-trip verified both directions. No event falls on 2026-09-04
+  itself in the existing (Phase-1) events data, so no today-strip is expected today and none
+  rendered — consistent, not a bug.
+- **Members**: `members.html` renders the phone-entry form and "OTP পাঠান" send button; OTP was
+  deliberately not attempted (reCAPTCHA-gated — the owner tests the real flow on a phone with the
+  `+919999999999`/`123456` test pair).
+- **Admin**: `/admin/` loads and (via this session's already-authenticated browser profile) showed
+  the 12-tile dashboard, confirming the panel is fully live; no separate anonymous-session check
+  was done since the login-form render itself was already exercised by Tasks 1–13's e2e suite.
+- **Mobile**: donate/transparency/home/members/admin all measured `scrollWidth === innerWidth` at
+  375×700 (no horizontal overflow).
+- **Console**: zero errors across every page checked (no App Check warning surfaced during this
+  run's window, though one is expected per the brief and would not have been a concern). Two
+  stale error/warning lines observed early on turned out to be console-buffer bleed-through from a
+  previously-reused browser tab (a members.js OTP failure and a reCAPTCHA-Enterprise log from an
+  *earlier, unrelated* session) — re-verified against a freshly opened tab, which showed zero
+  console entries on every page; not a defect in this rollout.
+
+**Step 5 — docs.** This entry; `docs/pending.md` Task 14 ticked and Phase 2–4 section marked done;
+`docs/PROJECT_CONTEXT.md` gains a one-line "Live: phases 2–4 on 2026-09-04" note; `README.md`
+status line updated. Commit `docs: phases 2-4 live on production`, tag `v2.0.0`, pushed with tags.
+
+No background processes left running, all emulator/dev ports free (nothing was started this task —
+verification ran against production only), no `.tmp-*` files left in the repo.

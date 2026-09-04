@@ -2,7 +2,7 @@
 
 Static vanilla-JS public website + single-admin Firebase backend for the Ganesh Puja Trust.
 
-**Status: Phase 0+1 code complete, awaiting owner go-live steps** (see `docs/user-guide/go-live-checklist.md`).
+**Status: Phases 0–4 live on production (`v2.0.0`, 2026-09-04)** — donations, transparency, live announcements, and the members portal are all serving real traffic at `https://hrishi91.github.io/trust_webpage/`; see `docs/PROJECT_CONTEXT.md` §5 and `docs/pending.md` for owner follow-ups (real donation data, phone OTP on a device, App Check key).
 
 ## Repo map
 

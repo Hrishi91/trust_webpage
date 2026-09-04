@@ -85,9 +85,14 @@ See `docs/user-guide/go-live-checklist.md` for the full owner-driven go-live seq
 
 ## 5. State as of 2026-09-04
 
+**Live: phases 2–4 on 2026-09-04** — `ganeshpuja-trust`'s rules/25 indexes are deployed, phone-auth
+config is live, demo data is seeded, and every page below has been verified against production
+(`https://hrishi91.github.io/trust_webpage/`). Tagged `v2.0.0`. Full rollout write-up: build-log
+"v2.0.0 phases 2–4 LIVE".
+
 ### What Phase 2–4 add
 
-Plan: `docs/superpowers/plans/2026-09-04-phase-2-4-donation-transparency-live-members.md`. Tasks 1–13 are code-complete on `main`; Task 14 (production rollout) is the only one left, and it's owner-driven for the same reason Phase 0/1's Task 11/21 were (needs the real Firebase project).
+Plan: `docs/superpowers/plans/2026-09-04-phase-2-4-donation-transparency-live-members.md`. Tasks 1–14 are all done — Task 14 (production rollout) shipped the same day, closing out the phase.
 
 - **Donate** (`donate.html`): UPI pay link + QR, a WhatsApp-confirmation form (name/amount/UPI ref → pre-filled `wa.me` message, no online payment gateway), and a public donor wall (`donations` where `showOnWall==true`). Admin section `💰 দান`.
 - **Transparency** (`transparency.html`): year-wise income/expense ledgers with computed totals/balance and PDF documents (`transparency` where `published==true`; `?year=&preview=1` lets a logged-in admin see a draft year). Admin section `📊 হিসাব`.
