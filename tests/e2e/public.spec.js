@@ -27,7 +27,7 @@ test('drafts and hidden rows never render publicly', async ({ page }) => {
   await page.goto('/gallery.html?album=a2'); await expect(page.locator('h1')).toHaveCount(0);
 });
 test('no horizontal overflow on mobile', async ({ page }) => {
-  for (const p of ['index', 'about', 'committee', 'gallery', 'events']) {
+  for (const p of ['index', 'about', 'committee', 'gallery', 'events', 'donate', 'transparency', 'members']) {
     await page.goto(`/${p}.html`);
     const w = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(w, p).toBeLessThanOrEqual(0);
