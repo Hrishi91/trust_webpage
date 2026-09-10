@@ -406,3 +406,6 @@ Owner: "take it as one" — the homepage concept direction is the one. Extended 
 
 ## 2026-09-10 — Phase 5 spec addition + implementation plan
 docs/superpowers/specs/2026-09-10-phase-5-design-system.md (theme stored as settings.design — `theme` already means "this year's theme"; rules whitelist; ?theme= preview never persists; localStorage cache + inline head script against FOUC; ticker moves into the shell; new flags officer/featured/donatePurposes/culture) and docs/superpowers/plans/2026-09-10-phase-5-design-system.md (13 tasks: theme.js → rules → CSS+contrast test → art.js → shell → home ×2 → about/committee/gallery → events/donate → transparency/members → admin fields → 🎨 card → shots+docs+deploy). Execution: subagent-driven with per-task review, ledger under .superpowers/sdd/.
+
+## 2026-09-10 — Phase 5 Task 1 — js/theme.js + head cache script
+Pure theme resolver (THEMES, DEFAULT_THEME, THEME_META, resolveTheme, isPreview, applyTheme); inline head script (localStorage-backed, no FOUC); eight public HTML pages wired with Google Fonts + themes.css link. 5 new tests (56 total).
