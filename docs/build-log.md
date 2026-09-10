@@ -391,3 +391,6 @@ run e2e` is 22/22, run twice, both green (19 existing + 3 new).
 
 ## 2026-09-10 — design reference scan (Phase 5 prep)
 Owner asked for 5 selectable modern designs, admin-chosen. Scanned lalbaugcharaja.com, gsbsevamandal.org, mumbaicharaja.co, akshayapatra.org, giveindia.org, goonj.org + our site; findings and five token-system directions (Utsav, Nirmal, Ratri, Mati, Prabhat) in docs/design/reference-scan-2026-09-10.md. No code change.
+
+## 2026-09-10 — design thinking doc + theme sample
+docs/design/design-thinking-2026-09-10.md: culture→design-material table (alpona, marigold, kumkum, diya, kantha/gamcha, Ganesh iconography, Malda mango/silk/Gambhira), 2026 UI patterns kept/dropped, shared skeleton wireframe, five themes as decisions with one signature each, self-critique, a11y/perf floor. Visual sample (5 hero mockups, real Google Fonts, real bn copy) published as an Artifact for the owner to review.
