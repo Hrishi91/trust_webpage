@@ -388,3 +388,6 @@ numbers-only was done under G1. (d) `tests/e2e/members.spec.js` gains three spec
 for that phone), logout (click "লগআউট" → back to the phone-entry form). `npm run test:unit` is now
 51 (39 + 7 from G1's `args.test.js` + 5 from this group's `phone.test.js`); `npm run seed && npm
 run e2e` is 22/22, run twice, both green (19 existing + 3 new).
+
+## 2026-09-10 — design reference scan (Phase 5 prep)
+Owner asked for 5 selectable modern designs, admin-chosen. Scanned lalbaugcharaja.com, gsbsevamandal.org, mumbaicharaja.co, akshayapatra.org, giveindia.org, goonj.org + our site; findings and five token-system directions (Utsav, Nirmal, Ratri, Mati, Prabhat) in docs/design/reference-scan-2026-09-10.md. No code change.
