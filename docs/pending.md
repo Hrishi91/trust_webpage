@@ -107,18 +107,4 @@ Plan: `docs/superpowers/plans/2026-09-10-phase-5-design-system.md`. Spec: `docs/
 
 ### Deferred minors from Phase 5 reviews
 
-Small, non-blocking items noted during Tasks 1–12 review. None gate Task 13 or go-live; revisit opportunistically.
-
-- `applyTheme()` has no unit test; the theme regex is duplicated in all 8 HTML page heads plus `theme.js` (inherent to the inline-only FOUC-guard script); `</head>` shares a line with the last `<link>` tag in the 8 HTML files
-- rules tests are missing a case for: doc already has `design:'mukha'`, a merge-write of an unrelated field should still succeed (merge semantics)
-- `js/art.js`'s Ganesh SVG element actually closes a few lines later than the brief's cited line range (doc nit only)
-- home page's `albums`/`history`/`people` are re-fetched on every render rather than cached; the single `Promise.all` blanks the whole home page on any one read failure (both spec'd patterns, not bugs)
-- `donutArcs`'s per-slice 2dp rounding can overshoot the circle's circumference by hundredths of a degree; the initial-letter avatar fallback uses `slice(0,1)` (safe for Bengali since it stays within the Basic Multilingual Plane)
-- the documents accordion on transparency has a duplicate ↓ glyph (`summary::after` plus the link's own text); the render layer has no URL guard on document links (the admin write path already filters what can be uploaded)
-- Task 8's fix report described a listener-leak fix (in `pageHeader()`) without stating how many stray listeners it actually found — same pattern as Task 6's leak fix, which was verified with an exact count
-- `donatePurposes` field placement in the settings form is a little arbitrary (cosmetic ordering only)
-- the 🎨 ডিজাইন card's Apply button has no in-flight guard against a double-click (same pre-existing gap as the settings form's save button); `theme.spec.js`'s apply test doesn't restore `design:'siddhi'` on failure
-
-## Later phases (spec §8)
-
-Payment gateway (real online UPI/card checkout, not the current "pay via UPI app + WhatsApp confirm" flow) once 80G registration lands and the trust can accept it directly.
+- dhokra theme: `.pulse`, `.tabs button.active`, `.chips i.on`, `.days button[aria-pressed="true"]` still hardcode `#fff6e8` on `--sindoor` (3.2:1 after the final-review token change); switch them to `var(--ticker-ink)` and add the pair to `tests/unit/contrast.test.js` (found by the final-review re-review, 2026-09-11).
