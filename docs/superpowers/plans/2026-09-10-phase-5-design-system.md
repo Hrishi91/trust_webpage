@@ -702,6 +702,7 @@ git commit -m "feat(home): hero with Ganesh art and countdown, credibility strip
 **Interfaces:**
 - Produces (`js/ledger.js`, pure): `barWidths(rows: {amount}[]) → number[]` (percent of the max, 0–100, 2 dp); `donutArcs(income: rows, expense: rows) → { pct: number, arcs: [{ key:'idol'|'other', dasharray: string, dashoffset: string }] }` — simpler: `donutArcs(rows, circumference=440) → [{dasharray, dashoffset}]` proportional slices; `parsePurposes(text) → [{ title:{bn,en}, amounts:number[] }]`.
 - Produces (`js/ledger-view.js`, DOM): `barsView(rows, lang, {kind:'income'|'expense'}) → .bars`, `donutView(rows, lang, centreLabel) → .donut`.
+- Produces (`js/ui.js`, pure, amended after review): `isLiveEvent(e, now = new Date(), defaultMs = 2*3600000) → boolean` — true when `start <= now <= (end || start + defaultMs)`; invalid `start` → false. Unit test in `tests/unit/ui.test.js`: `{start:'2026-09-14T08:00:00+05:30', end:''}` is live at 09:30 IST and not at 10:30 IST; with `end:'…T12:00:00+05:30'` it is live at 11:00.
 
 - [ ] **Step 1: Write the failing unit test**
 
@@ -815,7 +816,7 @@ export function donutView(rows, lang, centre) {
       if (!up.length) return null;
       const time = iso => new Date(iso).toLocaleTimeString(getLang() === 'bn' ? 'bn-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
       return section(sectionHead(t('events.upcoming'), el('a', { href: 'events.html', text: t('nav.events') + ' →' })),
-        el('div', { class: 'timeline' }, ...up.map(e => { const live = new Date(e.start) <= now && now <= new Date(e.end || e.start);
+        el('div', { class: 'timeline' }, ...up.map(e => { const live = isLiveEvent(e, now);   // js/ui.js: end || start+2h (amended after Task 7 review)
           return el('div', { class: live ? 'ev live' : 'ev' }, el('time', { text: `${fmtDate(e.start, getLang())} · ${time(e.start)}` }),
             el('div', {}, el('b', { text: pick(e.title) }), el('span', { text: pick(e.venue) }), live ? el('span', { class: 'pulse', text: t('live.badge') }) : null)); })));
     };
@@ -826,7 +827,7 @@ export function donutView(rows, lang, centre) {
       const pct = sum(exp) ? Math.round((topE[0]?.amount ?? 0) / sum(exp) * 100) : 0;
       return section(sectionHead(`${num(y.year)} · ${t('tr.title')}`, el('a', { href: 'transparency.html', text: t('tr.docs') + ' →' })),
         el('div', { class: 'ledger' }, el('div', {}, barsView(top, getLang()), barsView(topE, getLang(), { kind: 'expense' })),
-          donutView(topE, getLang(), { big: `${num(pct)}%`, small: topE[0] ? pick(topE[0].category) : '' })));
+          donutView(exp, getLang(), { big: `${num(pct)}%`, small: topE[0] ? pick(topE[0].category) : '' })));   // full list, so the ring and the centre % agree (amended after Task 7 review)
     };
     committee = () => {
       if (s.sectionVisibility.committee === false || !people.length) return null;
@@ -945,7 +946,7 @@ git commit -m "feat(pages): history timeline, committee officers+grid, gallery b
       const days = [...new Set(up.map(dayKey))];
       if (!days.includes(selectedDay)) selectedDay = days[0] ?? null;
       const time = iso => new Date(iso).toLocaleTimeString(lang === 'bn' ? 'bn-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
-      const row = e => { const live = new Date(e.start) <= now && now <= new Date(e.end || e.start);
+      const row = e => { const live = isLiveEvent(e, now);   // js/ui.js (amended after Task 7 review)
         return el('div', { class: live ? 'ev live' : 'ev' }, el('time', { text: time(e.start) }),
           el('div', {}, el('b', { text: pick(e.title) }), el('span', { text: [pick(e.venue), pick(e.desc)].filter(Boolean).join(' · ') }), live ? el('span', { class: 'pulse', text: t('live.badge') }) : null)); };
       main.replaceChildren(pageHeader({ crumb: t('nav.events'), title: t('events.upcoming') }),
