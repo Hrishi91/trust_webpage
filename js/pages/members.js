@@ -1,4 +1,4 @@
-import { mountShell } from '../shell.js';
+import { mountShell, pageHeader, section } from '../shell.js';
 import { getMyMember, listNotices, listMyRoster } from '../content.js';
 import {
   auth, IS_LOCAL, RecaptchaVerifier, signInWithPhoneNumber, signOut, onAuthStateChanged,
@@ -150,20 +150,21 @@ if (s) {
       };
 
       main.replaceChildren(
-        el('h1', { text: t('mem.title') }),
-        el('div', { class: 'card' },
+        pageHeader({ crumb: t('mem.title'), title: t('mem.phone') }),
+        section(el('div', { class: 'mem' }, el('div', { class: 'otp card' },
           el('div', { class: 'row' }, phoneInput, sendBtn),
           phoneErr,
-          otpRow));
+          otpRow))));
     }
 
     function renderCard() {
       const lang = getLang();
       if (!member) {
         main.replaceChildren(
-          el('h1', { text: t('mem.title') }),
-          el('p', { text: t('mem.notMember') }),
-          el('button', { class: 'btn', type: 'button', text: t('mem.logout'), onclick: () => signOut(auth) }));
+          pageHeader({ crumb: t('mem.title'), title: t('mem.title') }),
+          section(el('div', { class: 'dash' },
+            el('p', { text: t('mem.notMember') }),
+            el('button', { class: 'btn', type: 'button', text: t('mem.logout'), onclick: () => signOut(auth) }))));
         return;
       }
       const payments = member.payments ?? [];
@@ -186,17 +187,18 @@ if (s) {
         : el('p', { class: 'muted', text: t('common.empty') });
 
       main.replaceChildren(
-        el('h1', { text: t('mem.title') }),
-        el('div', { class: 'card' },
-          el('h2', { text: pick(member.name, lang) }),
-          member.role ? el('p', { class: 'muted', text: pick(member.role, lang) }) : null,
-          statsEl,
-          paymentsList),
-        el('h2', { text: t('mem.notices') }),
-        noticesList,
-        el('h2', { text: t('mem.duties') }),
-        rosterList,
-        el('button', { class: 'btn', type: 'button', text: t('mem.logout'), onclick: () => signOut(auth) }));
+        pageHeader({ crumb: t('mem.title'), title: t('mem.title') }),
+        section(el('div', { class: 'dash' },
+          el('div', { class: 'card' },
+            el('h2', { text: pick(member.name, lang) }),
+            member.role ? el('p', { class: 'muted', text: pick(member.role, lang) }) : null,
+            statsEl,
+            paymentsList),
+          el('h2', { text: t('mem.notices') }),
+          noticesList,
+          el('h2', { text: t('mem.duties') }),
+          rosterList,
+          el('button', { class: 'btn', type: 'button', text: t('mem.logout'), onclick: () => signOut(auth) }))));
     }
 
     document.addEventListener('langchange', () => {

@@ -349,3 +349,14 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 .masonry a:hover img{transform:scale(1.04)}
 .masonry a.big{grid-column:span 2;grid-row:span 2}
 .masonry a .cap{position:absolute;left:0;right:0;bottom:0;padding:.55rem .8rem;font-size:13px;color:#fff6e8;background:linear-gradient(transparent,rgba(0,0,0,.65))}
+/* Task 10 bridge: generic .card concept was never given a base rule — only the scoped .tl .card
+   existed, so bare .card blocks (transparency income/expense tables, members' own-info block)
+   rendered with no background/border/padding at all. Mirrors the background/border/radius/padding
+   already used everywhere else (.tile, .ccard, .otp, .stat, .notice, .tl .card). */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.3rem}
+/* table.ledger (the income/expense breakdown table, pre-existing) and .ledger (this task's
+   bars+donut grid wrapper) collide on the same class name — .ledger's display:grid was winning on
+   the table too (no display declared in table.ledger), turning each <tr> into a grid item and
+   laying rows out two-per-line instead of one column. table.ledger already outranks .ledger on
+   specificity, so restoring its own display is enough; no id/class rename needed. */
+table.ledger{display:table}

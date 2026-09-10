@@ -1,9 +1,10 @@
-import { mountShell } from '../shell.js';
+import { mountShell, pageHeader, section } from '../shell.js';
 import { listTransparencyYears } from '../content.js';
 import { db, doc, getDoc } from '../firebase.js';
 import { t, pick, getLang } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
 import { sum, inr } from '../money.js';
+import { barsView, donutView } from '../ledger-view.js';
 
 const TOTAL_LABEL = { bn: 'মোট', en: 'Total' };
 
@@ -73,39 +74,30 @@ if (s) {
       const headerParts = [];
       if (s.regNo) headerParts.push(`${t('tr.regNo')} ${s.regNo}`);
       if (s.has80G) headerParts.push(t('donate.tax80g'));
-      const headerLine = headerParts.length ? el('p', { class: 'muted', text: headerParts.join(' · ') }) : null;
 
       const data = selectedYear ? dataFor(selectedYear) : null;
 
-      let body;
-      if (errored) {
-        body = el('p', { class: 'muted', text: t('common.error') });
-      } else if (!data) {
-        body = el('p', { class: 'muted', text: t('common.empty') });
-      } else {
-        const incomeTotal = sum(data.income ?? []);
-        const expenseTotal = sum(data.expense ?? []);
-        const bal = incomeTotal - expenseTotal;
-        const docs = data.documents ?? [];
-        body = el('div', {},
-          el('div', { class: 'card' }, el('h2', { text: t('tr.income') }), ledgerTable(data.income ?? [], lang)),
-          el('div', { class: 'card' }, el('h2', { text: t('tr.expense') }), ledgerTable(data.expense ?? [], lang)),
-          el('div', { class: 'card summary' },
-            el('span', { text: `${t('tr.income')}: ${inr(incomeTotal, lang)}` }),
-            el('span', { text: `${t('tr.expense')}: ${inr(expenseTotal, lang)}` }),
-            el('span', { class: bal < 0 ? 'neg' : '', text: `${t('tr.balance')}: ${inr(bal, lang)}` })),
-          docs.length ? el('div', { class: 'card' },
-            el('h2', { text: t('tr.docs') }),
-            ...docs.map(d => el('p', {}, el('a', { href: d.url, target: '_blank', rel: 'noopener', text: pick(d.title, lang) })))) : null,
-          data.notes && pick(data.notes, lang) ? el('p', { text: pick(data.notes, lang) }) : null);
-      }
+      const body = errored ? el('p', { class: 'muted', text: t('common.error') }) : !data ? el('p', { class: 'muted', text: t('common.empty') }) : (() => {
+        const inc = data.income ?? [], exp = data.expense ?? [], it = sum(inc), et = sum(exp), bal = it - et, docs = data.documents ?? [];
+        const top = [...exp].sort((a, b) => b.amount - a.amount)[0];
+        return el('div', {},
+          el('div', { class: 'summary sum' }, el('div', {}, el('small', { text: t('tr.income') }), el('b', { text: inr(it, lang) })),
+            el('div', {}, el('small', { text: t('tr.expense') }), el('b', { text: inr(et, lang) })),
+            el('div', {}, el('small', { text: t('tr.balance') }), el('b', { class: bal < 0 ? 'neg' : 'g', text: inr(bal, lang) }))),
+          el('div', { class: 'ledger' }, el('div', {}, el('h2', { text: t('tr.income') }), barsView(inc, lang), el('h2', { text: t('tr.expense') }), barsView(exp, lang, { kind: 'expense' })),
+            exp.length ? donutView(exp, lang, { big: `${yearLabel(et ? Math.round((top.amount / et) * 100) : 0)}%`, small: top ? pick(top.category, lang) : '' }) : null),
+          el('div', { class: 'card' }, el('h2', { text: t('tr.income') }), ledgerTable(inc, lang)),
+          el('div', { class: 'card' }, el('h2', { text: t('tr.expense') }), ledgerTable(exp, lang)),
+          docs.length ? el('div', { class: 'acc' }, ...docs.map((d, i) => el('details', i === 0 ? { open: '' } : {}, el('summary', { text: pick(d.title, lang) }),
+            el('p', {}, el('a', { href: d.url, target: '_blank', rel: 'noopener', text: pick({ bn: 'ডাউনলোড ↓', en: 'Download ↓' }) }))))) : null,
+          el('div', { class: 'legal' }, el('b', { text: pick({ bn: 'আইনি তথ্য', en: 'Legal' }) }),
+            el('div', {}, t('tr.regNo'), el('span', { text: s.regNo || pick({ bn: 'প্রক্রিয়াধীন', en: 'in progress' }) })),
+            el('div', {}, '80G', el('span', { text: s.has80G ? t('donate.tax80g') : pick({ bn: 'রেজিস্ট্রেশনের পরে', en: 'after registration' }) })),
+            el('div', {}, pick({ bn: 'ঠিকানা', en: 'Address' }), el('span', { text: pick(s.address) }))),
+          data.notes && pick(data.notes, lang) ? el('p', { class: 'muted', text: pick(data.notes, lang) }) : null);
+      })();
 
-      main.replaceChildren(...[
-        el('h1', { text: t('tr.title') }),
-        headerLine,
-        tabsEl,
-        body,
-      ].filter(Boolean));
+      main.replaceChildren(pageHeader({ crumb: t('nav.transparency'), title: t('tr.title'), lead: headerParts.join(' · ') }), section(tabsEl, body));
     };
     render();
     document.addEventListener('langchange', render);

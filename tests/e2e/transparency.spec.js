@@ -10,7 +10,9 @@ test('2025 is visible with correct totals and a document link (anonymous)', asyn
   await expect(summary).toContainText('৫৫,০০০'); // income
   await expect(summary).toContainText('৩৫,০০০'); // expense
   await expect(summary).toContainText('২০,০০০'); // balance
-  await expect(page.locator('a', { hasText: 'অডিট ২০২৫' })).toHaveAttribute('href', 'https://example.com/audit-2025.pdf');
+  await expect(page.locator('.acc details summary', { hasText: 'অডিট ২০২৫' })).toBeVisible();
+  await expect(page.locator('.acc details a', { hasText: 'ডাউনলোড' })).toHaveAttribute('href', 'https://example.com/audit-2025.pdf');
+  await expect(page.locator('.legal')).toContainText('WB/2026/DEMO');
 });
 
 test('2024 (draft) is absent for anonymous visitors', async ({ page }) => {
