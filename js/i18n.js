@@ -72,6 +72,11 @@ export const STRINGS = {
   'admin.members': { bn: 'সদস্য', en: 'Members' },
   'admin.notices': { bn: 'নোটিশ', en: 'Notices' },
   'admin.roster': { bn: 'দায়িত্ব তালিকা', en: 'Duty roster' },
+  'admin.design': { bn: 'ডিজাইন', en: 'Design' },
+  'admin.designApply': { bn: 'চালু করুন', en: 'Apply' },
+  'admin.designCurrent': { bn: 'চালু আছে', en: 'Current' },
+  'admin.designPreview': { bn: 'প্রিভিউ', en: 'Preview' },
+  'admin.designHint': { bn: 'যেটা বাছবেন সেটাই সবার কাছে দেখাবে। প্রিভিউ শুধু আপনার ট্যাবে।', en: 'The one you apply is what everyone sees. Preview affects only your tab.' },
   'admin.addRow': { bn: '+ সারি', en: '+ Row' },
   'admin.addPayment': { bn: '+ পেমেন্ট', en: '+ Payment' },
   // donate

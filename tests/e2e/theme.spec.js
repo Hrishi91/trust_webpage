@@ -20,3 +20,23 @@ test('about page uses the shared page header', async ({ page }) => {
   await page.goto('/about.html');
   await expect(page.locator('.ph h1')).toHaveText('ইতিহাস');
 });
+test('admin applies a theme from the 🎨 card; the public site reflects it; audit row written', async ({ page }) => {
+  await page.goto('/admin/');
+  await page.fill('input[name=email]', 'admin@example.com');
+  await page.fill('input[name=password]', 'password12345');
+  await page.click('button[type=submit]');
+  await expect(page.locator('.grid .tile')).toHaveCount(13);
+  await page.goto('/admin/#design');
+  await expect(page.locator('.theme-tile')).toHaveCount(5);
+  await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');
+  page.on('dialog', d => d.accept('password12345'));
+  await page.click('.theme-tile[data-theme-name="atreyee"] button.apply');
+  await expect(page.locator('.toast')).toBeVisible();
+  await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'atreyee');
+  await page.goto('/index.html');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'atreyee');
+  // restore for the other specs (theme.spec runs inside the 'public' project before 'admin')
+  await page.goto('/admin/#design');
+  await page.click('.theme-tile[data-theme-name="siddhi"] button.apply');
+  await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');
+});

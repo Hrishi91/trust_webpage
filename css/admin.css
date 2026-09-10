@@ -26,3 +26,9 @@ input, textarea, select { width:100%; padding:.6rem; border:1px solid #ccc; bord
 .toast-err { background:var(--err); }
 .thumb { width:72px; height:72px; object-fit:cover; border-radius:8px; }
 progress { width:100%; }
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem}
+.theme-tile.current{outline:3px solid var(--accent)}
+.swatch{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;height:56px;border-radius:8px;overflow:hidden;margin-bottom:.5rem}
+.swatch .s1{background:var(--bg)}.swatch .s2{background:var(--sindoor)}.swatch .s3{background:var(--pitambar)}.swatch .s4{background:var(--ivory)}
+/* siddhi is the default theme; its tokens live in css/site.css :root, which admin doesn't load */
+.swatch[data-theme="siddhi"]{--bg:#0f1230;--sindoor:#e2401c;--pitambar:#f7b733;--ivory:#fff7ea}
