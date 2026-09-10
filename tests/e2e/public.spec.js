@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
-test('home shows name, countdown, upcoming event, latest album', async ({ page }) => {
+test('home shows name, countdown, hero art, next event tile, latest album', async ({ page }) => {
   await page.goto('/index.html');
   await expect(page.locator('.brand')).toContainText('গণেশ পুজো ট্রাস্ট');
   await expect(page.locator('.countdown b').first()).toHaveText(/[০-৯]+/);
-  await expect(page.locator('.event h3')).toHaveText('আগামী');
+  await expect(page.locator('.hero svg.ganesh')).toBeVisible();
+  const painted = await page.locator('canvas#heroBg').evaluate(c => c.width > 0 && c.height > 0);
+  expect(painted).toBe(true);
+  await expect(page.locator('.bento .tile b').nth(1)).toHaveText('আগামী');       // next event
   await expect(page.locator('a[href^="gallery.html?album=a1"]')).toBeVisible();
+  await expect(page.locator('.donate .upi code')).toHaveText('trust@upi');
 });
 test('language toggle switches to English and persists', async ({ page }) => {
   await page.goto('/index.html');
