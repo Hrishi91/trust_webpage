@@ -5,7 +5,7 @@ import { el, toast } from '../../../js/ui.js';
 import { biField, textField, boolField, toLocalInput } from '../forms.js';
 import { logAudit } from '../audit.js';
 
-const SECTIONS = ['about', 'committee', 'gallery', 'events', 'donate', 'transparency', 'members'];
+const SECTIONS = ['about', 'committee', 'gallery', 'events', 'donate', 'transparency', 'members', 'culture'];
 
 registerSection('settings', {
   title: { bn: 'সেটিংস', en: 'Settings' }, icon: '⚙️',
@@ -29,6 +29,7 @@ registerSection('settings', {
       pujaDate: textField({ bn: 'পুজোর তারিখ-সময়', en: 'Puja date-time' }, 'pujaDate', toLocalInput(cur.pujaDate), { type: 'datetime-local' }),
       theme: biField({ bn: 'এই বছরের থিম', en: "This year's theme" }, 'theme', cur.theme),
       maintenance: boolField({ bn: 'Maintenance mode (সাইট বন্ধ)', en: 'Maintenance mode' }, 'maintenance', cur.maintenance),
+      donatePurposes: textField({ bn: 'দানের খাত — প্রতি লাইনে: বাংলা | English | 501,1101', en: 'Donation purposes — per line: bn | en | 501,1101' }, 'donatePurposes', cur.donatePurposes ?? '', { multiline: true }),
     };
     const visFields = SECTIONS.map(s => boolField({ bn: `দেখাও: ${s}`, en: `Show: ${s}` }, `vis.${s}`, vis[s] !== false));
     const form = el('form', { class: 'card' },
@@ -47,6 +48,7 @@ registerSection('settings', {
           regNo: f.regNo.read(), has80G: f.has80G.read(), upiId: f.upiId.read(), upiQrUrl: f.upiQrUrl.read(),
           pujaDate: f.pujaDate.read() ? new Date(f.pujaDate.read()).toISOString() : '',
           maintenance: f.maintenance.read(), defaultLang: 'bn',
+          donatePurposes: f.donatePurposes.read(),
           sectionVisibility: Object.fromEntries(SECTIONS.map((s, i) => [s, visFields[i].read()])),
           updatedAt: serverTimestamp(),
         };

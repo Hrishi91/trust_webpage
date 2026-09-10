@@ -24,6 +24,7 @@ registerSection(COLL, {
       post: biField({ bn: 'পদ', en: 'Post' }, 'post', cur.post),
       photo: imageField(ctx, { bn: 'ছবি', en: 'Photo' }, cur.photoUrl, { folder: 'public/committee', max: 600 }),
       isPublic: boolField({ bn: 'ওয়েবসাইটে দেখাও', en: 'Show on website' }, 'isPublic', cur.isPublic ?? true),
+      officer: boolField({ bn: 'পদাধিকারী (সামনে দেখাও)', en: 'Office-bearer (show first)' }, 'officer', cur.officer ?? false),
     };
     const form = el('form', { class: 'card' }, ...Object.values(f).map(x => x.node),
       el('div', { class: 'row' },
@@ -32,7 +33,7 @@ registerSection(COLL, {
           onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } } })));
     form.onsubmit = async e => {
       e.preventDefault();
-      const data = { name: f.name.read(), post: f.post.read(), photoUrl: f.photo.read(), isPublic: f.isPublic.read(), order: cur.order ?? Date.now() };
+      const data = { name: f.name.read(), post: f.post.read(), photoUrl: f.photo.read(), isPublic: f.isPublic.read(), officer: f.officer.read(), order: cur.order ?? Date.now() };
       try {
         const newId = await saveDoc(ctx, COLL, id === 'new' ? null : id, data);
         ctx.navigate(`#${COLL}/${newId}`);

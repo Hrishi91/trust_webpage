@@ -2,7 +2,7 @@ import { registerSection } from '../admin.js';
 import { doc, getDoc, getDocs, collection, query, where, orderBy, setDoc, updateDoc, writeBatch, serverTimestamp } from '../../../js/firebase.js';
 import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
-import { biField, textField, listView, saveDoc, softDelete } from '../forms.js';
+import { biField, textField, boolField, listView, saveDoc, softDelete } from '../forms.js';
 import { imageField, multiImageField } from '../upload.js';
 import { logAudit } from '../audit.js';
 
@@ -23,6 +23,7 @@ registerSection(COLL, {
       title: biField({ bn: 'অ্যালবামের নাম', en: 'Album title' }, 'title', cur.title),
       year: textField({ bn: 'বছর', en: 'Year' }, 'year', cur.year ?? new Date().getFullYear(), { type: 'number', required: true }),
       cover: imageField(ctx, { bn: 'কভার ছবি', en: 'Cover photo' }, cur.coverUrl, { folder: `public/albums/${id}`, max: 1200 }),
+      featured: boolField({ bn: 'সেরা মুহূর্ত strip-এ দেখাও', en: 'Show in best-moments strip' }, 'featured', cur.featured ?? false),
     };
     // f.cover.read() only changes when the admin picks a file through the cover widget itself —
     // it never reflects the photos list's own auto-set cover (below). Omitting coverUrl here when
@@ -30,6 +31,7 @@ registerSection(COLL, {
     // instead of stomping it back to '' on the next Save/Publish click in the same session.
     const read = () => {
       const data = { title: f.title.read(), year: Number(f.year.read()), order: cur.order ?? Number(f.year.read()) * 1000 };
+      data.featured = f.featured.read();
       const coverVal = f.cover.read();
       if (coverVal) data.coverUrl = coverVal;
       return data;

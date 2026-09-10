@@ -21,6 +21,7 @@ test('drafts and hidden rows never render publicly', async ({ page }) => {
   await page.goto('/about.html');  await expect(page.locator('article')).toHaveCount(1);
   await page.goto('/events.html'); await expect(page.locator('.ev')).toHaveCount(1);
   await page.goto('/gallery.html'); await expect(page.locator('.albums a')).toHaveCount(1);
+  await expect(page.locator('.best a')).toHaveCount(1);
   await page.goto('/committee.html'); await expect(page.locator('.person')).toHaveCount(1);
   await page.goto('/committee.html'); await expect(page.locator('.officers .officer, .mgrid .mrow')).toHaveCount(1);
   await page.goto('/gallery.html?album=a2'); await expect(page.locator('h1')).toHaveCount(0);

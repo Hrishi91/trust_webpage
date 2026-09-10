@@ -15,8 +15,9 @@ export function biField(label, name, value = {}, { multiline = false } = {}) {
   const node = el('label', {}, el('span', { text: pick(label) }), el('div', { class: 'bi' }, bn, en));
   return { node, read: () => ({ bn: bn.value.trim(), en: en.value.trim() }) };
 }
-export function textField(label, name, value = '', { type = 'text', required = false } = {}) {
-  const input = el('input', { name, type, value, required });
+export function textField(label, name, value = '', { type = 'text', required = false, multiline = false } = {}) {
+  const input = el(multiline ? 'textarea' : 'input', multiline ? { name, required } : { name, type, value, required });
+  if (multiline) { input.value = value; input.rows = 4; }
   return { node: el('label', {}, el('span', { text: pick(label) }), input), read: () => input.value.trim() };
 }
 export function boolField(label, name, value = false) {
