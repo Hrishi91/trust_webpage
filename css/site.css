@@ -341,7 +341,7 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 .ccard .ill[data-kind="mask"]{background:radial-gradient(circle at 30% 30%,var(--sindoor),var(--ivory2) 75%)}
 .ccard .ill[data-kind="coil"]{background:radial-gradient(circle at 30% 30%,var(--pitambar),var(--ivory2) 75%)}
 .ccard .ill[data-kind="river"]{background:radial-gradient(circle at 30% 30%,var(--durva),var(--ivory2) 75%)}
-.people .ring img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .ev.live{border-color:var(--sindoor);box-shadow:inset 0 0 0 2px var(--sindoor)}
 /* masonry concept was authored for figure+canvas placeholders; the home page renders a+img+span.cap */
 .masonry a{display:block;position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}

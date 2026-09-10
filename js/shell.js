@@ -4,6 +4,8 @@ import { el, digits, fmtDate } from './ui.js';
 import { resolveTheme, applyTheme, isPreview } from './theme.js';
 import { paintHeader, onResize } from './art.js';
 
+let unsubHeader = null;
+
 const NAV = [
   ['home', 'index.html', 'nav.home', null],
   ['about', 'about.html', 'nav.about', 'about'],
@@ -26,7 +28,7 @@ export function pageHeader({ crumb, title, lead }) {
   const c = el('canvas', { class: 'ph-bg', 'aria-hidden': 'true' });
   const ph = el('div', { class: 'ph' }, c, el('div', { class: 'wrap' },
     crumb ? el('span', { class: 'crumb', text: crumb }) : null, el('h1', { text: title }), lead ? el('p', { text: lead }) : null));
-  requestAnimationFrame(() => paintHeader(c)); onResize(() => paintHeader(c));
+  requestAnimationFrame(() => paintHeader(c)); unsubHeader?.(); unsubHeader = onResize(() => paintHeader(c));   // pages re-render on langchange — never stack listeners
   return ph;
 }
 
