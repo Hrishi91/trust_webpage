@@ -24,4 +24,5 @@ export function applyTheme(name, { persist = true } = {}) {
   const safe = THEMES.includes(name) ? name : DEFAULT_THEME;
   document.documentElement.dataset.theme = safe;
   if (persist) { try { localStorage.setItem('design', safe); } catch { /* private mode */ } }
+  document.dispatchEvent(new CustomEvent('themechange'));
 }
