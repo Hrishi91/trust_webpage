@@ -112,7 +112,6 @@ Small, non-blocking items noted during Tasks 1–12 review. None gate Task 13 or
 - `applyTheme()` has no unit test; the theme regex is duplicated in all 8 HTML page heads plus `theme.js` (inherent to the inline-only FOUC-guard script); `</head>` shares a line with the last `<link>` tag in the 8 HTML files
 - rules tests are missing a case for: doc already has `design:'mukha'`, a merge-write of an unrelated field should still succeed (merge semantics)
 - `js/art.js`'s Ganesh SVG element actually closes a few lines later than the brief's cited line range (doc nit only)
-- `pageHeader()` discards `onResize`'s unsubscribe on the very first mount (acceptable — a page-lifetime listener on a multi-page site)
 - home page's `albums`/`history`/`people` are re-fetched on every render rather than cached; the single `Promise.all` blanks the whole home page on any one read failure (both spec'd patterns, not bugs)
 - `donutArcs`'s per-slice 2dp rounding can overshoot the circle's circumference by hundredths of a degree; the initial-letter avatar fallback uses `slice(0,1)` (safe for Bengali since it stays within the Basic Multilingual Plane)
 - the documents accordion on transparency has a duplicate ↓ glyph (`summary::after` plus the link's own text); the render layer has no URL guard on document links (the admin write path already filters what can be uploaded)
