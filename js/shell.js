@@ -1,6 +1,8 @@
-import { getSettings } from './content.js';
+import { getSettings, onAnnouncements } from './content.js';
 import { getLang, setLang, onLangChange, pick, t } from './i18n.js';
-import { el, digits } from './ui.js';
+import { el, digits, fmtDate } from './ui.js';
+import { resolveTheme, applyTheme, isPreview } from './theme.js';
+import { paintHeader, onResize } from './art.js';
 
 const NAV = [
   ['home', 'index.html', 'nav.home', null],
@@ -13,32 +15,73 @@ const NAV = [
   ['members', 'members.html', 'nav.members', 'members'],
 ];
 
+const OM_MARK = 'ॐ';
+function brandMark(s) {
+  return s.logoUrl ? el('img', { src: s.logoUrl, alt: '', class: 'mark' }) : el('span', { class: 'mark om', text: OM_MARK, 'aria-hidden': 'true' });
+}
+
+export function section(...children) { return el('section', {}, el('div', { class: 'wrap' }, ...children)); }
+export function sectionHead(title, aside) { return el('div', { class: 'sh' }, el('h2', { text: title }), aside ?? null); }
+export function pageHeader({ crumb, title, lead }) {
+  const c = el('canvas', { class: 'ph-bg', 'aria-hidden': 'true' });
+  const ph = el('div', { class: 'ph' }, c, el('div', { class: 'wrap' },
+    crumb ? el('span', { class: 'crumb', text: crumb }) : null, el('h1', { text: title }), lead ? el('p', { text: lead }) : null));
+  requestAnimationFrame(() => paintHeader(c)); onResize(() => paintHeader(c));
+  return ph;
+}
+
 export async function mountShell(active, pageTitle) {
   const s = await getSettings();
+  applyTheme(resolveTheme(s.design, location.search), { persist: !isPreview(location.search) });
   document.documentElement.lang = getLang();
+  let ann = [], live = false;
+  const ticker = () => ann.length ? el('div', { class: 'ticker live-strip', 'aria-label': t('live.announcements') },
+    // Duplicated once (pass 0 and 1) for the seamless CSS marquee (width:max-content + -50%
+    // translate loop needs two identical copies of the content). The live `.pulse` badge is
+    // rendered only in pass 0 — otherwise e2e assertions like `.live-strip .pulse` (a single-
+    // element locator) would strict-mode-violate on any page with a live announcement, since
+    // duplicating it verbatim would put two badges in the DOM for one live item.
+    el('div', { class: 'in' }, ...[0, 1].flatMap(pass => ann.slice(0, 5).map(a => {
+      const created = a.createdAt?.toDate ? a.createdAt.toDate() : a.createdAt;
+      return el('span', { class: 'ann' }, pass === 0 && live && a.isLive ? el('span', { class: 'pulse', text: t('live.badge') }) : null,
+        `${a.pinned ? '📌 ' : ''}${pick(a.text)}`, created ? el('small', { text: fmtDate(created, getLang()) }) : null);
+    })))) : null;
   const render = () => {
     document.documentElement.lang = getLang();
     document.title = pageTitle ? `${pageTitle} · ${pick(s.name)}` : pick(s.name);
-    document.getElementById('site-header').replaceChildren(
-      el('header', { class: 'site-top' },
-        el('a', { href: 'index.html', class: 'brand' },
-          s.logoUrl ? el('img', { src: s.logoUrl, alt: '', class: 'logo' }) : null,
-          el('span', { text: pick(s.name) })),
-        el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') })),
-      el('nav', { class: 'site-nav' },
-        ...NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false)
-              .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'active' : '', text: t(tkey) }))));
-    document.getElementById('site-footer').replaceChildren(
-      el('footer', { class: 'site-footer' },
-        el('p', { text: pick(s.address) }),
-        s.contacts.phone ? el('p', {}, el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone })) : null,
-        digits(s.contacts.whatsapp) ? el('p', {}, el('a', { href: `https://wa.me/${digits(s.contacts.whatsapp)}`, text: 'WhatsApp' })) : null,
-        s.mapUrl ? el('p', {}, el('a', { href: s.mapUrl, target: '_blank', rel: 'noopener', text: pick({ bn: 'মানচিত্রে দেখুন', en: 'View on map' }) })) : null,
-        s.regNo ? el('p', { class: 'muted', text: `Reg. No. ${s.regNo}` }) : null,
-        el('p', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` })));
+    const links = el('div', { class: 'links' },
+      ...NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false)
+            .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));
+    document.getElementById('site-header').replaceChildren(...[
+      ticker(),
+      el('nav', { class: 'nav' }, el('div', { class: 'wrap' },
+        el('a', { href: 'index.html', class: 'brand', 'aria-label': pick(s.name) }, brandMark(s),
+          el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
+        links,
+        el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') }),
+        el('button', { class: 'burger', type: 'button', 'aria-label': 'Menu', 'aria-expanded': 'false',
+          onclick: e => { const open = links.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); } },
+          el('span', { class: 'bars', 'aria-hidden': 'true' })))),
+    ].filter(Boolean));
+    const wa = digits(s.contacts.whatsapp);
+    document.getElementById('site-footer').replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
+      el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('span', { class: 'muted', text: `Reg. no. ${s.regNo}` }) : null),
+      el('div', {}, el('b', { text: pick({ bn: 'যোগাযোগ', en: 'Contact' }) }),
+        s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
+        wa ? el('a', { href: `https://wa.me/${wa}`, text: 'WhatsApp' }) : null,
+        s.mapUrl ? el('a', { href: s.mapUrl, target: '_blank', rel: 'noopener', text: pick({ bn: 'মানচিত্রে দেখুন', en: 'View on map' }) }) : null,
+        s.contacts.email ? el('a', { href: `mailto:${s.contacts.email}`, text: s.contacts.email }) : null),
+      el('div', {}, el('b', { text: pick({ bn: 'পাতা', en: 'Pages' }) }),
+        ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) }))),
+      el('div', {}, el('b', { text: pick({ bn: 'ট্রাস্ট', en: 'Trust' }) }),
+        el('a', { href: 'transparency.html', text: t('tr.docs') }), el('a', { href: 'committee.html', text: t('nav.committee') }),
+        el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }))),
+    ));
   };
   render();
   onLangChange(() => { render(); document.dispatchEvent(new CustomEvent('langchange')); });
+  const unsub = onAnnouncements((list, meta) => { ann = list; live = meta.live; render(); });
+  window.addEventListener('pagehide', unsub);
   if (s.maintenance && !location.pathname.includes('/admin/')) {
     document.getElementById('main').replaceChildren(el('p', { class: 'notice', text: t('footer.maintenance') }));
     return null;

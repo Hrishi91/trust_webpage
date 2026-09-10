@@ -22,7 +22,7 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:5500', viewport: { width: 390, height: 844 } },
   webServer: { command: 'npm run serve', url: 'http://127.0.0.1:5500/index.html', reuseExistingServer: true },
   projects: [
-    { name: 'public', testMatch: /(public|donate|transparency|live)\.spec\.js/ },
+    { name: 'public', testMatch: /(public|donate|transparency|live|theme)\.spec\.js/ },
     { name: 'members', testMatch: /members\.spec\.js/, dependencies: ['public'] },
     { name: 'admin', testMatch: /admin\.spec\.js/, dependencies: ['members'] },
   ],

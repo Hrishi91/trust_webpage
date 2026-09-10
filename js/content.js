@@ -15,8 +15,8 @@ export const DEFAULT_SETTINGS = {
   name: { bn: 'গণেশ পুজো ট্রাস্ট', en: 'Ganesh Puja Trust' }, tagline: { bn: '', en: '' },
   address: { bn: '', en: '' }, theme: { bn: '', en: '' }, logoUrl: '', mapUrl: '',
   contacts: { phone: '', whatsapp: '', email: '' }, regNo: '', has80G: false, upiId: '', upiQrUrl: '',
-  pujaDate: '', maintenance: false, defaultLang: 'bn',
-  sectionVisibility: { about: true, committee: true, gallery: true, events: true, donate: false, transparency: false, members: false },
+  pujaDate: '', maintenance: false, defaultLang: 'bn', design: 'siddhi', donatePurposes: '',
+  sectionVisibility: { about: true, committee: true, gallery: true, events: true, donate: false, transparency: false, members: false, culture: true },
 };
 
 let settingsPromise;

@@ -328,3 +328,5 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 /* bridge rules only ADD properties the concept block lacks — never re-declare a value the concept sets (amended after Task 3 review) */
 .otp input,.form input{width:100%;min-height:44px;color:var(--ink)}
 .otp input[inputmode=numeric]{letter-spacing:.4em;text-align:center;font-size:22px;font-weight:700}
+.brand .om{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--bg2);color:var(--pitambar);font:700 24px serif}
+.burger .bars{display:block;width:24px;height:2px;background:currentColor;box-shadow:0 -7px 0 currentColor,0 7px 0 currentColor}
