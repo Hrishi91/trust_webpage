@@ -1,4 +1,4 @@
-import { mountShell } from '../shell.js';
+import { mountShell, pageHeader, section } from '../shell.js';
 import { listPublished } from '../content.js';
 import { db, collection, getDocs, query, where, orderBy } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
@@ -21,14 +21,14 @@ if (s) {
   }
   if (items !== null) {
     const render = () => {
-      main.replaceChildren(...[
-        el('h1', { text: t('nav.about') }),
-        items.length ? null : el('p', { class: 'muted', text: t('common.empty') }),
-        ...items.map(h => el('article', { class: 'card' },
-          el('h2', { text: `${getLang() === 'bn' ? bnDigits(h.year) : h.year} · ${pick(h.title)}` }),
-          el('div', { class: 'rich' }, renderRich(pick(h.body))),
-          ...(h.images ?? []).map(src => el('img', { class: 'cover', src, alt: '', loading: 'lazy' })))),
-      ].filter(Boolean));
+      const lang = getLang(), num = n => lang === 'bn' ? bnDigits(n) : String(n);
+      const sorted = [...items].sort((a, b) => b.year - a.year);
+      main.replaceChildren(pageHeader({ crumb: t('nav.about'), title: t('nav.about'), lead: pick(s.tagline) }),
+        section(items.length ? el('div', { class: 'tl' }, ...sorted.flatMap(h => [
+          el('div', { class: 'yr' }, num(h.year), el('small', { text: pick(h.title) })),
+          el('article', { class: 'card' }, el('h3', { text: pick(h.title) }), el('div', { class: 'rich' }, renderRich(pick(h.body))),
+            (h.images ?? []).length ? el('div', { class: 'pics' }, ...h.images.map(src => el('figure', {}, el('img', { src, alt: '', loading: 'lazy' })))) : null)]))
+        : el('p', { class: 'muted', text: t('common.empty') })));
     };
     render();
     document.addEventListener('langchange', render);

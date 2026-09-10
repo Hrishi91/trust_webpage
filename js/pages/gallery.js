@@ -1,8 +1,8 @@
-import { mountShell } from '../shell.js';
+import { mountShell, pageHeader, section, sectionHead } from '../shell.js';
 import { listPublished, listPhotos, getPublished } from '../content.js';
 import { db, doc, getDoc } from '../firebase.js';
-import { pick, t } from '../i18n.js';
-import { el } from '../ui.js';
+import { pick, t, getLang } from '../i18n.js';
+import { el, bnDigits } from '../ui.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('gallery', t('nav.gallery'));
@@ -21,10 +21,19 @@ if (s) {
     if (errored) {
       main.replaceChildren(el('p', { class: 'muted', text: t('common.error') }));
     } else {
-      const render = () => main.replaceChildren(el('h1', { text: t('gallery.albums') }),
-        albums.length ? el('div', { class: 'grid' }, ...albums.map(a => el('a', { class: 'card', href: `gallery.html?album=${a.id}` },
-          a.coverUrl && el('img', { class: 'cover', src: a.coverUrl, alt: pick(a.title), loading: 'lazy' }),
-          el('p', { text: `${a.year} · ${pick(a.title)}` })))) : el('p', { class: 'muted', text: t('common.empty') }));
+      const render = () => {
+        const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
+        const featured = albums.filter(a => a.featured && a.coverUrl).slice(0, 4);
+        main.replaceChildren(pageHeader({ crumb: t('nav.gallery'), title: t('gallery.albums') }),
+          section(...[
+            featured.length ? sectionHead(pick({ bn: 'সেরা মুহূর্ত', en: 'Best moments' })) : null,
+            featured.length ? el('div', { class: 'best' }, ...featured.map(a => el('a', { href: `gallery.html?album=${a.id}` }, el('img', { src: a.coverUrl, alt: pick(a.title), loading: 'lazy' })))) : null,
+            sectionHead(t('gallery.albums')),
+            albums.length ? el('div', { class: 'albums' }, ...albums.map(a => el('a', { class: 'album', href: `gallery.html?album=${a.id}` },
+              a.coverUrl ? el('img', { src: a.coverUrl, alt: '', loading: 'lazy' }) : el('div', { class: 'nocover' }),
+              el('div', { class: 'cap' }, el('b', { text: num(a.year) }), el('span', { text: pick(a.title) }))))) : el('p', { class: 'muted', text: t('common.empty') }),
+          ].filter(Boolean)));
+      };
       render(); document.addEventListener('langchange', render);
     }
   } else {
@@ -54,10 +63,12 @@ if (s) {
           const box = el('div', { class: 'lightbox', onclick: () => box.remove() }, el('img', { src: photos[i].url, alt: pick(photos[i].caption) }));
           document.body.append(box);
         };
-        const render = () => main.replaceChildren(
-          el('a', { href: 'gallery.html', text: '‹ ' + t('gallery.albums') }),
-          el('h1', { text: `${album.year} · ${pick(album.title)}` }),
-          el('div', { class: 'grid' }, ...photos.map((p, i) => el('img', { class: 'cover', src: p.url, alt: pick(p.caption), loading: 'lazy', onclick: () => open(i) }))));
+        const render = () => {
+          const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
+          main.replaceChildren(pageHeader({ crumb: t('gallery.albums'), title: `${num(album.year)} · ${pick(album.title)}` }),
+            section(el('a', { href: 'gallery.html', text: '‹ ' + t('gallery.albums') }),
+              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('img', { class: 'cover', src: p.url, alt: pick(p.caption), loading: 'lazy', onclick: () => open(i) })))));
+        };
         render(); document.addEventListener('langchange', render);
       }
     }

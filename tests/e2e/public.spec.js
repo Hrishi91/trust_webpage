@@ -20,8 +20,9 @@ test('language toggle switches to English and persists', async ({ page }) => {
 test('drafts and hidden rows never render publicly', async ({ page }) => {
   await page.goto('/about.html');  await expect(page.locator('article')).toHaveCount(1);
   await page.goto('/events.html'); await expect(page.locator('.event')).toHaveCount(1);
-  await page.goto('/gallery.html'); await expect(page.locator('.grid a')).toHaveCount(1);
+  await page.goto('/gallery.html'); await expect(page.locator('.albums a')).toHaveCount(1);
   await page.goto('/committee.html'); await expect(page.locator('.person')).toHaveCount(1);
+  await page.goto('/committee.html'); await expect(page.locator('.officers .officer, .mgrid .mrow')).toHaveCount(1);
   await page.goto('/gallery.html?album=a2'); await expect(page.locator('h1')).toHaveCount(0);
 });
 test('no horizontal overflow on mobile', async ({ page }) => {
