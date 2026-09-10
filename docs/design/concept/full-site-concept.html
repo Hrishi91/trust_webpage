@@ -1,0 +1,770 @@
+<title>গণেশ পুজো ট্রাস্ট</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Baloo+Da+2:wght@500;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Atma:wght@500;700&family=Manrope:wght@400;600;800&family=Noto+Sans+Devanagari:wght@700&display=swap">
+<style>
+/* ================= tokens ================= */
+:root{
+  --bg:#0f1230;--bg2:#1c1850;--hero-ink:#fff6e8;--hero-muted:#c9c2e6;
+  --ivory:#fff7ea;--ivory2:#fdefd6;--ink:#1d1631;--muted:#6b6280;
+  --sindoor:#e2401c;--pitambar:#f7b733;--durva:#2f8f5b;--gold:#ffcc66;
+  --cta:#e2401c;--cta-ink:#fff6e8;--line:rgba(29,22,49,.12);--card:#ffffff;
+  --glow:rgba(247,183,51,.55);--glow2:rgba(226,64,28,.35);
+  --display:"Baloo Da 2","Hind Siliguri",sans-serif;--serif:"Tiro Bangla","Noto Serif Bengali",serif;--body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --r:18px;
+}
+[data-theme="mukha"]{--bg:#e9b322;--bg2:#f2c95a;--hero-ink:#161311;--hero-muted:#4a3d1f;--ivory:#f4eddc;--ivory2:#ece1c5;--ink:#161311;--muted:#5a4a33;--sindoor:#b5271f;--pitambar:#e9b322;--durva:#2f7d57;--gold:#161311;--cta:#b5271f;--cta-ink:#f4eddc;--line:rgba(22,19,17,.2);--card:#fffaf0;--glow:rgba(22,19,17,.18);--glow2:rgba(181,39,31,.25);--display:"Atma","Hind Siliguri",cursive;--r:4px}
+[data-theme="dhokra"]{--bg:#1e1710;--bg2:#2a1f14;--hero-ink:#f3e9d6;--hero-muted:#a8926b;--ivory:#211a12;--ivory2:#2a2118;--ink:#f3e9d6;--muted:#a8926b;--sindoor:#c9502a;--pitambar:#c9962b;--durva:#4f7c5b;--gold:#f1d27a;--cta:#c9962b;--cta-ink:#1e1710;--line:rgba(201,150,43,.28);--card:#2b221a;--glow:rgba(201,150,43,.5);--glow2:rgba(201,80,42,.25);--display:"Tiro Bangla",serif;--r:6px}
+[data-theme="atreyee"]{--bg:#eef3f0;--bg2:#dfeae4;--hero-ink:#17323a;--hero-muted:#4d6a70;--ivory:#f7f4ec;--ivory2:#eef0e6;--ink:#17323a;--muted:#5f7378;--sindoor:#c8281e;--pitambar:#1c6e7a;--durva:#7ba23f;--gold:#1c6e7a;--cta:#c8281e;--cta-ink:#ffffff;--line:rgba(23,50,58,.14);--card:#ffffff;--glow:rgba(28,110,122,.25);--glow2:rgba(123,162,63,.25);--display:"Noto Serif Bengali","Tiro Bangla",serif;--r:12px}
+[data-theme="bangarh"]{--bg:#9e3b26;--bg2:#7a2b1a;--hero-ink:#efe4ce;--hero-muted:#e2c9a3;--ivory:#efe4ce;--ivory2:#e8d9be;--ink:#1b1512;--muted:#6d4a3a;--sindoor:#9e3b26;--pitambar:#d6a93b;--durva:#4f6b3a;--gold:#d6a93b;--cta:#d6a93b;--cta-ink:#1b1512;--line:rgba(158,59,38,.35);--card:#f6ecd8;--glow:rgba(214,169,59,.45);--glow2:rgba(158,59,38,.3);--display:"Tiro Bangla",serif;--r:4px}
+
+/* ================= base ================= */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ivory);color:var(--ink);font:16px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+img,svg,canvas{max-width:100%}
+a{color:var(--sindoor);text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--sindoor)}
+.serif{font-family:var(--serif)}
+:focus-visible{outline:3px solid var(--pitambar);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ================= ticker ================= */
+.ticker{background:var(--sindoor);color:#fff6e8;font-size:13.5px;overflow:hidden;position:relative}
+.ticker .in{display:flex;gap:2.5rem;padding:.35rem 0;white-space:nowrap;width:max-content;animation:tick 28s linear infinite}
+.ticker .in:hover{animation-play-state:paused}
+.ticker b{font-weight:800;letter-spacing:.08em}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ================= nav ================= */
+.nav{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);color:var(--hero-ink);border-bottom:1px solid rgba(255,255,255,.08)}
+[data-theme="atreyee"] .nav,[data-theme="mukha"] .nav{border-bottom-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:.9rem;height:66px}
+.brand{display:flex;align-items:center;gap:.7rem;flex:1;min-width:0}
+.mark{width:42px;height:42px;flex:none}
+.brand .t{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.05}
+.brand .s{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+.links{display:flex;gap:1.35rem;font-size:14.5px;font-weight:600;opacity:.92}
+.links a{color:inherit;position:relative;padding:.3rem 0}
+.links a.on::after,.links a:hover::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--pitambar);border-radius:2px}
+.lang{border:1px solid currentColor;border-radius:999px;padding:.2rem .75rem;font-size:12.5px;opacity:.9}
+.burger{display:none}
+@media (max-width:860px){.links{display:none}.burger{display:block;width:24px;height:18px;border-top:2px solid currentColor;border-bottom:2px solid currentColor;position:relative}.burger::after{content:"";position:absolute;left:0;right:0;top:6px;height:2px;background:currentColor}}
+
+/* ================= hero ================= */
+.hero{position:relative;background:var(--bg);color:var(--hero-ink);overflow:hidden;isolation:isolate}
+.hero canvas.bg{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:2rem;align-items:center;min-height:640px;padding-top:2.5rem;padding-bottom:2.5rem}
+.hero .copy{display:flex;flex-direction:column;gap:.9rem;animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.hero .eyebrow{color:var(--pitambar)}
+.hero h1{font-size:clamp(44px,6.4vw,78px);font-weight:800;text-shadow:0 4px 40px var(--glow2)}
+.hero h1 em{font-style:normal;color:var(--pitambar)}
+.hero p{margin:0;max-width:46ch;font-size:clamp(16px,1.6vw,19px);color:var(--hero-muted)}
+.ctas{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.4rem}
+.btn{display:inline-flex;align-items:center;gap:.55rem;font-weight:800;font-size:15.5px;padding:.85rem 1.4rem;border-radius:999px;background:var(--cta);color:var(--cta-ink);box-shadow:0 10px 30px var(--glow2);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 34px var(--glow)}
+.btn.ghost{background:transparent;color:inherit;border:1.5px solid currentColor;box-shadow:none}
+.btn svg{width:18px;height:18px}
+.count{display:flex;gap:.6rem;margin-top:1rem}
+.count div{min-width:82px;text-align:center;padding:.6rem .5rem;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px)}
+[data-theme="atreyee"] .count div,[data-theme="mukha"] .count div{background:rgba(0,0,0,.05);border-color:var(--line)}
+.count b{display:block;font-family:var(--display);font-size:32px;line-height:1;color:var(--pitambar);font-variant-numeric:tabular-nums;text-shadow:0 0 18px var(--glow)}
+.count span{font-size:12px;letter-spacing:.06em;color:var(--hero-muted)}
+.art{position:relative;display:grid;place-items:center;animation:rise 1.1s .15s cubic-bezier(.2,.7,.2,1) both}
+.art svg.ganesh{width:min(100%,440px);filter:drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 40px var(--glow2))}
+.diyas{position:absolute;left:0;right:0;bottom:-6px;display:flex;justify-content:center;gap:clamp(18px,4vw,42px);pointer-events:none}
+.diya{width:34px;height:40px}
+.diya .fl{transform-origin:50% 100%;animation:flick 1.6s ease-in-out infinite}
+.diya:nth-child(2) .fl{animation-delay:.35s}.diya:nth-child(3) .fl{animation-delay:.7s}.diya:nth-child(4) .fl{animation-delay:1.05s}.diya:nth-child(5) .fl{animation-delay:.2s}
+@keyframes flick{0%,100%{transform:scaleY(1) translateX(0)}30%{transform:scaleY(1.12) translateX(-.6px)}60%{transform:scaleY(.94) translateX(.6px)}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.garland{height:26px;position:relative;z-index:1}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr;min-height:0;padding-top:2rem}.art{order:-1}.art svg.ganesh{width:min(78vw,340px)}.diyas{display:none}}
+
+/* ================= credibility ================= */
+.cred{background:var(--ivory2);border-bottom:1px solid var(--line)}
+.cred .wrap{display:flex;flex-wrap:wrap;gap:.6rem 2.4rem;justify-content:center;padding:.8rem 0;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cred b{color:var(--ink);font-weight:700;margin-right:.3rem}
+
+/* ================= sections ================= */
+section{padding:clamp(2.4rem,6vw,4.5rem) 0}
+.sh{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.4rem}
+.sh h2{font-size:clamp(28px,3.6vw,40px);position:relative;padding-bottom:.35rem}
+.sh h2::after{content:"";display:block;width:64px;height:3px;margin-top:.4rem;background:linear-gradient(90deg,var(--sindoor),var(--pitambar));border-radius:3px}
+[data-theme="mukha"] .sh h2::after{background:var(--ink);height:4px}
+[data-theme="atreyee"] .sh h2::after{border-radius:0;height:2px;background:var(--pitambar)}
+.sh a{font-weight:700;font-size:14.5px;white-space:nowrap}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.2rem;display:grid;gap:.2rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.tile:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.08)}
+.tile svg{width:28px;height:28px;stroke:var(--sindoor);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-bottom:.35rem}
+.tile small{font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.tile b{font-family:var(--display);font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:13.5px;color:var(--muted)}
+@media (max-width:900px){.bento{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.bento{grid-template-columns:1fr}}
+
+/* theme story */
+.story{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+.story .scene{border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;box-shadow:0 24px 60px rgba(0,0,0,.18);position:relative}
+.story .scene canvas{width:100%;height:100%;display:block}
+.story .scene figcaption{position:absolute;left:0;right:0;bottom:0;padding:.7rem 1rem;color:#fff6e8;font-size:13px;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.story .txt{display:flex;flex-direction:column;gap:.8rem}
+.story h2{font-size:clamp(28px,3.4vw,38px)}
+.story p{margin:0;font-size:17px;color:var(--muted)}
+.stitch{display:inline-block;border-bottom:3px dashed var(--sindoor);padding-bottom:2px}
+@media (max-width:900px){.story{grid-template-columns:1fr}}
+
+/* culture */
+.culture{background:var(--ivory2)}
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;display:flex;flex-direction:column;gap:.6rem}
+.ccard .ic{height:120px;display:grid;place-items:center;border-radius:calc(var(--r) - 4px);background:var(--ivory2)}
+.ccard .ic svg{height:96px;width:auto}
+.ccard h3{font-size:22px}
+.ccard p{margin:0;color:var(--muted);font-size:15px}
+.ccard small{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sindoor);font-weight:700}
+@media (max-width:900px){.cgrid{grid-template-columns:1fr}}
+
+/* gallery */
+.masonry{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:150px;gap:.8rem}
+.masonry figure{margin:0;position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.masonry figure:nth-child(1){grid-column:span 2;grid-row:span 2}
+.masonry figure:nth-child(4){grid-row:span 2}
+.masonry canvas{width:100%;height:100%;display:block;transition:transform .5s}
+.masonry figure:hover canvas{transform:scale(1.04)}
+.masonry figcaption{position:absolute;left:0;right:0;bottom:0;padding:.55rem .8rem;font-size:13px;color:#fff6e8;background:linear-gradient(transparent,rgba(0,0,0,.65))}
+@media (max-width:760px){.masonry{grid-template-columns:1fr 1fr;grid-auto-rows:130px}}
+
+/* schedule */
+.days{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.days button{font:700 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:.45rem 1rem;cursor:pointer}
+.days button[aria-pressed="true"]{background:var(--sindoor);color:#fff6e8;border-color:var(--sindoor)}
+.timeline{display:grid;gap:.6rem}
+.ev{display:grid;grid-template-columns:90px 1fr;gap:1rem;padding:.9rem 1rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);align-items:baseline}
+.ev time{font-family:var(--display);font-size:20px;color:var(--sindoor);font-variant-numeric:tabular-nums}
+.ev b{display:block;font-size:17px}
+.ev span{color:var(--muted);font-size:14px}
+
+/* transparency */
+.ledger{display:grid;grid-template-columns:1.1fr .9fr;gap:2rem;align-items:center}
+.bars{display:grid;gap:.7rem}
+.bar{display:grid;grid-template-columns:150px 1fr 110px;gap:.8rem;align-items:center;font-size:14.5px;font-variant-numeric:tabular-nums}
+.bar i{height:12px;border-radius:999px;background:linear-gradient(90deg,var(--sindoor),var(--pitambar));display:block;box-shadow:0 0 12px var(--glow2)}
+.bar i.g{background:linear-gradient(90deg,var(--durva),var(--pitambar))}
+.bar em{font-style:normal;text-align:right;font-weight:700}
+.donut{display:grid;place-items:center}
+.donut svg{width:min(100%,300px)}
+.pill{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;font-size:13px;color:var(--muted)}
+@media (max-width:900px){.ledger{grid-template-columns:1fr}.bar{grid-template-columns:110px 1fr 90px}}
+
+/* donate band */
+.donate{background:var(--bg);color:var(--hero-ink);position:relative;overflow:hidden}
+.donate .wrap{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
+.donate h2{font-size:clamp(30px,4vw,46px)}
+.donate h2 em{font-style:normal;color:var(--pitambar)}
+.donate p{color:var(--hero-muted);max-width:52ch;margin:.5rem 0 1rem}
+.upi{display:flex;gap:1rem;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:var(--r);padding:1rem 1.2rem}
+[data-theme="atreyee"] .upi,[data-theme="mukha"] .upi{background:rgba(0,0,0,.05);border-color:var(--line)}
+.upi svg{width:112px;height:112px;flex:none}
+.upi code{font-size:15px;display:block;color:var(--pitambar)}
+.upi small{color:var(--hero-muted);font-size:12.5px}
+@media (max-width:760px){.donate .wrap{grid-template-columns:1fr}}
+
+/* committee + members */
+.people{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.person{text-align:center;display:grid;gap:.2rem;justify-items:center}
+.ring{width:96px;height:96px;border-radius:50%;padding:4px;background:conic-gradient(var(--sindoor),var(--pitambar),var(--durva),var(--sindoor))}
+.ring span{display:block;width:100%;height:100%;border-radius:50%;background:var(--ivory2);display:grid;place-items:center;font-family:var(--display);font-size:28px;color:var(--sindoor)}
+.person b{font-size:16px}
+.person small{color:var(--muted)}
+@media (max-width:760px){.people{grid-template-columns:1fr 1fr}}
+.members{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:clamp(1.2rem,3vw,2.2rem)}
+.members h3{font-size:26px}
+.members p{color:var(--muted);margin:.4rem 0 1rem}
+.phone{display:grid;gap:.6rem}
+.phone input{font:16px var(--body);padding:.75rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory)}
+@media (max-width:760px){.members{grid-template-columns:1fr}}
+
+/* footer */
+footer{background:var(--bg);color:var(--hero-muted);padding:2.4rem 0 2rem;position:relative}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:1.5rem;font-size:14px}
+footer b{color:var(--hero-ink);display:block;margin-bottom:.4rem;font-family:var(--display);font-size:17px}
+footer a{color:inherit;display:block;padding:.15rem 0}
+footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
+@media (max-width:760px){footer .wrap{grid-template-columns:1fr 1fr}}
+
+
+/* ================= pages ================= */
+.page{display:none}.page.on{display:block}
+.ph{background:var(--bg);color:var(--hero-ink);padding:clamp(2rem,5vw,3.2rem) 0 clamp(1.6rem,4vw,2.4rem);position:relative;overflow:hidden}
+.ph canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.ph .wrap{position:relative;z-index:1;display:grid;gap:.5rem;max-width:760px;margin-left:0}
+.otp input{font:16px var(--body);padding:.8rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory2);color:var(--ink);width:100%;box-sizing:border-box}
+.otp input.code{letter-spacing:.5em;text-align:center;font-size:22px;font-weight:700}
+.ph-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ph h1{font-family:var(--display);font-size:clamp(30px,4.6vw,48px);line-height:1.12;margin:.2rem 0 0;text-wrap:balance}
+.ph p{margin:.2rem 0 0;max-width:62ch;opacity:.9;font-size:16px}
+.ph h1{font-size:clamp(34px,5vw,56px);font-weight:800}
+.ph p{margin:0;color:var(--hero-muted);max-width:60ch;font-size:17px}
+.crumb{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--pitambar);font-weight:700}
+/* history timeline */
+.tl{display:grid;grid-template-columns:120px 1fr;gap:1.2rem 2rem}
+.tl .yr{font-family:var(--display);font-size:38px;color:var(--sindoor);line-height:1;position:sticky;top:84px;align-self:start;padding-top:.4rem}
+.tl .yr small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:.3rem}
+.tl .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.3rem;display:grid;gap:.8rem;margin-bottom:1.6rem}
+.tl .card h3{font-size:24px}
+.tl .card p{margin:0;color:var(--muted);font-size:15.5px}
+.tl .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.tl .pics figure{margin:0;aspect-ratio:4/3;border-radius:calc(var(--r) - 6px);overflow:hidden;border:1px solid var(--line)}
+.tl .pics canvas{width:100%;height:100%;display:block}
+@media (max-width:700px){.tl{grid-template-columns:1fr}.tl .yr{position:static;font-size:30px}.tl .pics{grid-template-columns:repeat(3,1fr)}}
+/* committee */
+.officers{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.officer{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem;display:grid;gap:.3rem;justify-items:center;text-align:center}
+.officer .ring{width:112px;height:112px}
+.officer .ring span{font-size:34px}
+.officer b{font-size:18px;margin-top:.4rem}
+.officer small{color:var(--sindoor);font-weight:700;letter-spacing:.04em}
+.officer p{margin:.2rem 0 0;font-size:13.5px;color:var(--muted)}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+.mrow{display:flex;align-items:center;gap:.8rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:.7rem .9rem}
+.mrow .ring{width:48px;height:48px;padding:3px}.mrow .ring span{font-size:18px}
+.mrow b{display:block;font-size:15px}.mrow small{color:var(--muted)}
+@media (max-width:900px){.officers{grid-template-columns:1fr 1fr}.mgrid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.mgrid{grid-template-columns:1fr}}
+/* gallery albums */
+.albums{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.album{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;border:1px solid var(--line);cursor:pointer}
+.album canvas{width:100%;height:100%;display:block;transition:transform .5s}
+.album:hover canvas{transform:scale(1.04)}
+.album .cap{position:absolute;left:0;right:0;bottom:0;padding:.8rem 1rem;color:#fff6e8;background:linear-gradient(transparent,rgba(0,0,0,.7));display:flex;justify-content:space-between;align-items:end}
+.album .cap b{font-family:var(--display);font-size:22px}
+.album .cap span{font-size:12.5px;opacity:.85}
+.best{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:2rem}
+.best figure{margin:0;aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.best canvas{width:100%;height:100%;display:block}
+@media (max-width:760px){.albums{grid-template-columns:1fr 1fr}.best{grid-template-columns:1fr 1fr}}
+/* donate page */
+.dgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:1.4rem;align-items:start}
+.upibig{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;display:grid;grid-template-columns:auto 1fr;gap:1.2rem;align-items:center}
+.upibig svg{width:160px;height:160px}
+.upibig code{font-family:var(--display);font-size:22px;color:var(--sindoor);display:block}
+.purpose{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem;display:grid;gap:.3rem}
+.pcard b{font-family:var(--display);font-size:20px}
+.pcard span{font-size:13.5px;color:var(--muted)}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
+.chips i{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:.2rem .7rem;font-size:13px;font-variant-numeric:tabular-nums}
+.chips i.on{background:var(--sindoor);color:#fff6e8;border-color:var(--sindoor)}
+.form{display:grid;gap:.6rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem}
+.form input{font:16px var(--body);padding:.7rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory)}
+.wall{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem 1.5rem;font-size:14.5px}
+.wall div{display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.wall div span:last-child{font-weight:700}
+@media (max-width:900px){.dgrid{grid-template-columns:1fr}.upibig{grid-template-columns:1fr;justify-items:center;text-align:center}.wall{grid-template-columns:1fr}}
+/* transparency page */
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.4rem}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem}
+.sum small{font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.sum b{display:block;font-family:var(--display);font-size:28px;font-variant-numeric:tabular-nums}
+.sum b.g{color:var(--durva)}
+.acc{display:grid;gap:.5rem;margin-top:1.4rem}
+.acc details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.7rem 1rem}
+.acc summary{cursor:pointer;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.acc summary::after{content:"↓";color:var(--muted)}
+.acc details[open] summary::after{content:"↑"}
+.acc p{margin:.5rem 0 0;color:var(--muted);font-size:14.5px}
+.legal{background:var(--ivory2);border-radius:var(--r);padding:1.2rem 1.4rem;margin-top:1.4rem;display:grid;grid-template-columns:1fr 1fr;gap:.6rem 2rem;font-size:14.5px}
+.legal b{display:block;font-family:var(--display);font-size:18px;margin-bottom:.2rem;grid-column:1/-1}
+.legal div span{display:block;color:var(--muted);font-size:12.5px}
+@media (max-width:700px){.sum{grid-template-columns:1fr}.legal{grid-template-columns:1fr}}
+/* members page */
+.mem{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start}
+.otp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;display:grid;gap:.7rem}
+.otp input.code{font-size:24px;letter-spacing:.35em;text-align:center}
+.dash{display:grid;gap:1rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:.8rem;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:24px;color:var(--sindoor);font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:12.5px}
+.notice{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem}
+.notice b{font-family:var(--display);font-size:18px}
+.notice p{margin:.3rem 0 0;color:var(--muted);font-size:14.5px}
+.duty{display:grid;grid-template-columns:90px 1fr;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.duty time{font-family:var(--display);color:var(--sindoor)}
+@media (max-width:900px){.mem{grid-template-columns:1fr}}
+
+/* switcher (presentation only) */
+.switch{position:fixed;right:14px;bottom:14px;z-index:50;display:flex;gap:.3rem;padding:.35rem;background:rgba(20,16,40,.92);border:1px solid rgba(255,255,255,.14);border-radius:999px;backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.switch button{font:700 12.5px var(--body);color:#fff6e8;background:transparent;border:0;border-radius:999px;padding:.4rem .7rem;cursor:pointer;opacity:.8}
+.switch button[aria-pressed="true"]{background:#fff6e8;color:#1d1631;opacity:1}
+.switch span{align-self:center;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#c9c2e6;padding:0 .4rem}
+</style>
+
+<!-- ============ ticker ============ -->
+<div class="ticker" aria-label="ঘোষণা"><div class="in">
+  <span>🔴 <b>লাইভ</b> মণ্ডপে সন্ধ্যা আরতি চলছে — সবাই আমন্ত্রিত</span><span>📌 ১৩ সেপ্টেম্বর শিশুদের আঁকা প্রতিযোগিতা, কমিউনিটি হল, বিকেল ৪টা</span><span>ভোগের কুপন মণ্ডপের কাউন্টারে সকাল ১০টা থেকে</span>
+  <span>🔴 <b>লাইভ</b> মণ্ডপে সন্ধ্যা আরতি চলছে — সবাই আমন্ত্রিত</span><span>📌 ১৩ সেপ্টেম্বর শিশুদের আঁকা প্রতিযোগিতা, কমিউনিটি হল, বিকেল ৪টা</span><span>ভোগের কুপন মণ্ডপের কাউন্টারে সকাল ১০টা থেকে</span>
+</div></div>
+
+<!-- ============ nav ============ -->
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="#home" data-go="home" aria-label="গণেশ পুজো ট্রাস্ট">
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="mg" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#3d2c74"/><stop offset="1" stop-color="#1a1240"/></radialGradient><filter id="gl"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#mg)"/><circle cx="32" cy="32" r="24" fill="none" stroke="rgba(190,160,255,.45)" stroke-width="1"/><g fill="none" stroke="rgba(190,160,255,.25)" stroke-width="1"><circle cx="32" cy="32" r="17"/></g><text x="32" y="42" text-anchor="middle" font-family="Noto Sans Devanagari,serif" font-weight="700" font-size="28" fill="#ffb060" filter="url(#gl)">ॐ</text></svg>
+    <span><span class="t">গণেশ পুজো ট্রাস্ট</span><br><span class="s">বালুরঘাট · দক্ষিণ দিনাজপুর</span></span>
+  </a>
+  <div class="links"><a class="on" href="#home" data-go="home">হোম</a><a href="#about" data-go="about">ইতিহাস</a><a href="#committee" data-go="committee">কমিটি</a><a href="#gallery" data-go="gallery">গ্যালারি</a><a href="#events" data-go="events">অনুষ্ঠান</a><a href="#donate" data-go="donate">দান</a><a href="#ledger" data-go="ledger">হিসাব</a><a href="#members" data-go="members">সদস্য</a></div>
+  <span class="lang">EN</span><span class="burger" aria-hidden="true"></span>
+</div></nav>
+
+<div class="page on" data-page="home">
+<!-- ============ hero ============ -->
+<header class="hero" id="top">
+  <canvas class="bg" id="heroBg" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="copy">
+      <span class="eyebrow">পঞ্চম বর্ষ · ১৪–১৭ সেপ্টেম্বর ২০২৬</span>
+      <h1>সবার পুজো,<br><em>সবার উৎসব</em></h1>
+      <p>বালুরঘাটের তিন পাড়া, একটাই মণ্ডপ। সিদ্ধিদাতার আশীর্বাদে পাঁচ বছর — প্রতিটি টাকার হিসাব প্রকাশ্যে, প্রতিটি অনুষ্ঠানে সবাই আমন্ত্রিত।</p>
+      <div class="ctas">
+        <a class="btn" href="#donate" data-go="donate">দান করুন <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12c4 0 6-3 8-3s4 3 4 6-3 4-5 2 0-5 3-5 5 2 5 5"/></svg></a>
+        <a class="btn ghost" href="#events" data-go="events">অনুষ্ঠান সূচি</a>
+      </div>
+      <div class="count" aria-label="পুজো শুরু হতে বাকি"><div><b>১১</b><span>দিন</span></div><div><b>০৪</b><span>ঘণ্টা</span></div><div><b>২৩</b><span>মিনিট</span></div></div>
+    </div>
+    <div class="art">
+      <!-- Ganesh line art -->
+      <svg class="ganesh" viewBox="0 0 420 500" fill="none" stroke="var(--gold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-label="সিদ্ধিদাতা গণেশ">
+        <circle cx="210" cy="230" r="196" stroke="var(--gold)" stroke-opacity=".28" stroke-width="1.2"/>
+        <circle cx="210" cy="230" r="170" stroke="var(--gold)" stroke-opacity=".18" stroke-width="1" stroke-dasharray="3 7"/>
+        <!-- crown -->
+        <path d="M150 120 L160 78 L182 104 L210 60 L238 104 L260 78 L270 120"/>
+        <path d="M148 128 Q210 108 272 128"/>
+        <circle cx="210" cy="74" r="5" fill="var(--pitambar)" stroke="none"/>
+        <!-- head -->
+        <path d="M146 150 C146 108 274 108 274 150 C280 200 262 228 210 236 C158 228 140 200 146 150 Z"/>
+        <!-- ears -->
+        <path d="M148 158 C100 120 60 172 84 214 C100 244 138 244 152 214"/>
+        <path d="M272 158 C320 120 360 172 336 214 C320 244 282 244 268 214"/>
+        <path d="M112 176 C96 190 100 214 118 220" stroke-opacity=".6" stroke-width="2"/>
+        <path d="M308 176 C324 190 320 214 302 220" stroke-opacity=".6" stroke-width="2"/>
+        <!-- tilak -->
+        <path d="M210 128 v22"/><circle cx="210" cy="124" r="3.5" fill="var(--sindoor)" stroke="none"/>
+        <!-- eyes -->
+        <path d="M176 176 q12 -10 24 0"/><path d="M220 176 q12 -10 24 0"/>
+        <!-- trunk: curves left, ends in a curl (vamamukhi) -->
+        <path d="M210 236 C214 270 200 292 178 306 C150 324 138 356 158 378 C172 394 196 386 196 368 C196 356 184 352 178 360"/>
+        <!-- tusk -->
+        <path d="M238 240 C252 250 258 266 250 282"/>
+        <path d="M188 244 C182 250 180 258 184 262" stroke-opacity=".6"/>
+        <!-- body -->
+        <path d="M136 300 C96 330 92 396 118 432 C150 474 270 474 302 432 C328 396 324 330 284 300"/>
+        <path d="M150 348 C170 336 250 336 270 348" stroke-opacity=".5" stroke-width="2"/>
+        <!-- right hand: abhaya (raised palm) -->
+        <path d="M300 300 C332 292 352 262 344 236 M344 236 v-22 M334 232 v-22 M354 234 v-22 M324 240 v-18"/>
+        <!-- left hand with modak -->
+        <path d="M122 300 C96 296 78 318 92 340"/>
+        <path d="M84 344 l16 -22 l16 22 z" fill="var(--pitambar)" fill-opacity=".9" stroke="var(--gold)" stroke-width="2"/>
+        <!-- lotus base -->
+        <path d="M120 446 C150 428 170 456 210 440 C250 456 270 428 300 446"/>
+        <path d="M104 462 C150 440 180 470 210 452 C240 470 270 440 316 462"/>
+        <!-- mouse (mushak) -->
+        <path d="M318 470 c-12 -16 -34 -12 -36 6 c-1 12 12 16 22 12 M280 486 c-8 8 -16 4 -20 -6" stroke-width="2.4"/>
+        <circle cx="300" cy="462" r="4" fill="none" stroke-width="2"/><circle cx="311" cy="474" r="1.6" fill="var(--gold)" stroke="none"/>
+      </svg>
+      <div class="diyas" aria-hidden="true">
+        <svg class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>
+        <svg class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>
+        <svg class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>
+        <svg class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>
+        <svg class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>
+      </div>
+    </div>
+  </div>
+  <canvas class="garland" id="garland" aria-hidden="true"></canvas>
+</header>
+
+<div class="cred"><div class="wrap"><span><b>Est.</b> ২০২১</span><span><b>Registered Trust</b> Reg. no. WB/2026/… (প্রক্রিয়াধীন)</span><span><b>দাতা</b> ৩৪০+ পরিবার</span><span><b>হিসাব</b> প্রতি বছর প্রকাশিত · audit PDF</span></div></div>
+
+<!-- ============ at a glance ============ -->
+<section><div class="wrap">
+  <div class="sh"><h2>এক নজরে</h2><a href="#events" data-go="events">পুরো সূচি →</a></div>
+  <div class="bento">
+    <div class="tile"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8h14M7 13h10M9 18h6"/></svg><small>পুজো শুরু</small><b>১১ দিন</b><span>১৪ সেপ্টেম্বর, সকাল ৮টা · বোধন</span></div>
+    <div class="tile"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><small>পরের অনুষ্ঠান</small><b>শিশুদের আঁকা</b><span>১৩ সেপ্টে · কমিউনিটি হল · বিনামূল্যে</span></div>
+    <div class="tile"><svg viewBox="0 0 24 24"><path d="M12 20V9M12 9c-3 0-5-3-5-5 3 0 5 2 5 5zM12 9c3 0 5-3 5-5-3 0-5 2-5 5zM12 14c-2 0-4-2-4-4 2 0 4 2 4 4zM12 14c2 0 4-2 4-4-2 0-4 2-4 4z"/></svg><small>এই বছরের থিম</small><b>ঐতিহ্য ও ঐক্য</b><span>মুখা · ঢোকরা · আত্রেয়ী</span></div>
+    <div class="tile"><svg viewBox="0 0 24 24"><path d="M4 19h16M6 19V9l6-4 6 4v10M10 19v-5h4v5"/></svg><small>২০২৫-এর হিসাব</small><b>₹৩০,০০০ উদ্বৃত্ত</b><span>আয় ২.৪ L · ব্যয় ২.১ L · audit ✓</span></div>
+  </div>
+</div></section>
+
+<!-- ============ theme story ============ -->
+<section id="theme-home"><div class="wrap story">
+  <figure class="scene"><canvas class="art-scene" data-seed="11" data-kind="pandal"></canvas><figcaption>২০২৫ · বোধনের সন্ধ্যায় মণ্ডপ</figcaption></figure>
+  <div class="txt">
+    <span class="eyebrow">এই বছরের থিম</span>
+    <h2><span class="stitch">ঐতিহ্য ও ঐক্য</span></h2>
+    <p>২০২১-এ বারোজন মিলে পাড়ার মোড়ে ছোট মণ্ডপ। আজ তিন পাড়া এক — আর এই বছর মণ্ডপটাই হচ্ছে দক্ষিণ দিনাজপুরের হাতের কাজ দিয়ে: কুশমণ্ডির মুখা, ঢোকরার প্রদীপ, শীতলপাটির দেওয়াল।</p>
+    <p>প্রতিমা গড়ছেন গঙ্গারামপুরের শিল্পী; ভোগ রান্না পাড়ার মায়েরা; আলো — সব প্রদীপ।</p>
+    <div class="ctas"><a class="btn ghost" href="#gallery" data-go="gallery" style="color:var(--ink)">পাঁচ বছরের গল্প</a></div>
+  </div>
+</div></section>
+
+<!-- ============ culture ============ -->
+<section class="culture"><div class="wrap">
+  <div class="sh"><h2>আমাদের মাটি, আমাদের শিল্প</h2><span class="pill">দক্ষিণ দিনাজপুর</span></div>
+  <div class="cgrid">
+    <div class="ccard">
+      <div class="ic"><svg viewBox="0 0 120 130" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"><path d="M60 6 L108 34 L108 96 L60 124 L12 96 L12 34 Z" fill="var(--pitambar)"/><path d="M60 22 L94 42 L94 90 L60 108 L26 90 L26 42 Z" fill="var(--durva)"/><path d="M38 60h16M66 60h16" stroke-width="6" stroke-linecap="round"/><path d="M42 48a12 12 0 0 1 24 0M62 48a12 12 0 0 1 24 0" stroke="var(--ivory)" stroke-width="4" stroke-linecap="round"/><path d="M60 70c-6 14 2 22 12 22c10 0 12-10 6-16" stroke="var(--ivory)" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="30" r="6" fill="var(--sindoor)" stroke="none"/></svg></div>
+      <small>কুশমণ্ডি · GI tag ২০১৮</small><h3>কাঠের মুখা</h3>
+      <p>একটাই কাঠের গুঁড়ি থেকে খোদাই — গোমিরা নাচের মুখোশ, অশুভ তাড়ানোর আচার। এবার মণ্ডপের প্রবেশপথে ১২টি মুখা।</p>
+    </div>
+    <div class="ccard">
+      <div class="ic"><svg viewBox="0 0 120 130" fill="none" stroke="var(--pitambar)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="60" cy="92" rx="34" ry="26" fill="var(--pitambar)" fill-opacity=".18"/><circle cx="60" cy="46" r="24" fill="var(--pitambar)" fill-opacity=".18"/><path d="M36 42c-12-4-22 4-18 14M84 42c12-4 22 4 18 14"/><path d="M60 62c-3 14 6 22 16 22c10 0 14-10 6-16"/><path d="M30 122h60" stroke-dasharray="2 4"/><path d="M34 92h52" stroke-dasharray="1.5 3.5"/><circle cx="60" cy="92" r="5" fill="var(--pitambar)" stroke="none"/></svg></div>
+      <small>জেলায় ২৬০০+ শিল্পী</small><h3>ঢোকরা</h3>
+      <p>হারানো-মোমের পিতল — তারের কুণ্ডলীর গায়ে আলো। প্রদীপ, ঘণ্টা আর সিদ্ধিদাতার মূর্তি: সব এবার স্থানীয় ঢোকরা।</p>
+    </div>
+    <div class="ccard">
+      <div class="ic"><svg viewBox="0 0 160 110" fill="none" stroke="var(--durva)" stroke-width="2.4" stroke-linecap="round"><path d="M0 40C30 30 50 60 80 50S130 30 160 44" stroke="var(--pitambar)"/><path d="M0 62C30 52 50 82 80 72S130 52 160 66"/><path d="M0 84C30 74 50 104 80 94S130 74 160 88" stroke-opacity=".6"/><path d="M28 30v-14M40 26v-16M52 30v-12" stroke="var(--durva)"/><path d="M110 22v-12M122 26v-16M134 22v-10" stroke="var(--durva)"/></svg></div>
+      <small>বালুরঘাট · বাণগড়</small><h3>আত্রেয়ী ও কোটিবর্ষ</h3>
+      <p>নদীর তীরে পাল-সেনের মাটি। বিসর্জন আত্রেয়ীর ঘাটে, ভাওয়াইয়া আর খন-এর সন্ধ্যা মণ্ডপ প্রাঙ্গণে।</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ gallery ============ -->
+<section id="gallery-home"><div class="wrap">
+  <div class="sh"><h2>গ্যালারি</h2><a href="#">২০২১–২০২৫ সব অ্যালবাম →</a></div>
+  <div class="masonry">
+    <figure><canvas class="art-scene" data-seed="21" data-kind="idol"></canvas><figcaption>২০২৫ · প্রতিমা</figcaption></figure>
+    <figure><canvas class="art-scene" data-seed="22" data-kind="aarti"></canvas><figcaption>সন্ধ্যা আরতি</figcaption></figure>
+    <figure><canvas class="art-scene" data-seed="23" data-kind="crowd"></canvas><figcaption>ভোগ বিতরণ</figcaption></figure>
+    <figure><canvas class="art-scene" data-seed="24" data-kind="river"></canvas><figcaption>আত্রেয়ীর ঘাটে বিসর্জন</figcaption></figure>
+    <figure><canvas class="art-scene" data-seed="25" data-kind="pandal"></canvas><figcaption>২০২৪ · নতুন মণ্ডপ</figcaption></figure>
+    <figure><canvas class="art-scene" data-seed="26" data-kind="crowd"></canvas><figcaption>শিশুদের আঁকা</figcaption></figure>
+  </div>
+</div></section>
+
+<!-- ============ events ============ -->
+<section id="events-home" style="background:var(--ivory2)"><div class="wrap">
+  <div class="sh"><h2>অনুষ্ঠান সূচি</h2><span class="pill">১৪–১৭ সেপ্টেম্বর</span></div>
+  <div class="days" role="tablist"><button aria-pressed="true">১৪ · বোধন</button><button aria-pressed="false">১৫ · মহাপুজো</button><button aria-pressed="false">১৬ · সাংস্কৃতিক</button><button aria-pressed="false">১৭ · বিসর্জন</button></div>
+  <div class="timeline">
+    <div class="ev"><time>০৮:০০</time><div><b>বোধন ও প্রাণপ্রতিষ্ঠা</b><span>ট্রাস্ট মণ্ডপ · পুরোহিত: শ্রী নারায়ণ ভট্টাচার্য</span></div></div>
+    <div class="ev"><time>১২:০০</time><div><b>অঞ্জলি ও ভোগ বিতরণ</b><span>মণ্ডপ · ৩০০ জনের ভোগ — কুপন কাউন্টারে</span></div></div>
+    <div class="ev"><time>১৬:০০</time><div><b>মুখা নাচ — কুশমণ্ডির গোমিরা দল</b><span>মণ্ডপ প্রাঙ্গণ · বিনামূল্যে</span></div></div>
+    <div class="ev"><time>১৯:০০</time><div><b>সন্ধ্যা আরতি ও ঢাক</b><span>মণ্ডপ · সবাই আমন্ত্রিত · 🔴 লাইভ</span></div></div>
+  </div>
+</div></section>
+
+<!-- ============ transparency ============ -->
+<section id="ledger-home"><div class="wrap">
+  <div class="sh"><h2>প্রতিটি টাকার হিসাব</h2><a href="#">২০২৫ audit PDF ↓</a></div>
+  <div class="ledger">
+    <div class="bars">
+      <div class="bar"><span>চাঁদা (৩৪০ পরিবার)</span><i style="width:100%"></i><em>₹১,৭২,০০০</em></div>
+      <div class="bar"><span>রাস্তার সংগ্রহ</span><i style="width:32%"></i><em>₹৫৫,০০০</em></div>
+      <div class="bar"><span>বাস-টোটো</span><i style="width:8%"></i><em>₹১৩,০০০</em></div>
+      <div class="bar"><span>প্রতিমা ও মণ্ডপ</span><i class="g" style="width:70%"></i><em>₹১,২০,০০০</em></div>
+      <div class="bar"><span>ভোগ ও সংস্কৃতি</span><i class="g" style="width:52%"></i><em>₹৯০,০০০</em></div>
+      <p style="margin:.4rem 0 0;color:var(--muted);font-size:14px">আয় ₹২,৪০,০০০ · ব্যয় ₹২,১০,০০০ · <b style="color:var(--durva)">উদ্বৃত্ত ₹৩০,০০০</b> — পরের বছরের প্রতিমা তহবিলে।</p>
+    </div>
+    <div class="donut">
+      <svg viewBox="0 0 200 200" aria-label="ব্যয়ের ভাগ"><circle cx="100" cy="100" r="70" fill="none" stroke="var(--line)" stroke-width="22"/>
+        <circle cx="100" cy="100" r="70" fill="none" stroke="var(--sindoor)" stroke-width="22" stroke-dasharray="251 440" transform="rotate(-90 100 100)"/>
+        <circle cx="100" cy="100" r="70" fill="none" stroke="var(--pitambar)" stroke-width="22" stroke-dasharray="132 440" stroke-dashoffset="-251" transform="rotate(-90 100 100)"/>
+        <circle cx="100" cy="100" r="70" fill="none" stroke="var(--durva)" stroke-width="22" stroke-dasharray="57 440" stroke-dashoffset="-383" transform="rotate(-90 100 100)"/>
+        <text x="100" y="96" text-anchor="middle" font-family="Baloo Da 2,Hind Siliguri" font-weight="800" font-size="26" fill="var(--ink)">৫৭%</text><text x="100" y="118" text-anchor="middle" font-size="11" fill="var(--muted)">প্রতিমা ও মণ্ডপ</text></svg>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ donate ============ -->
+<section class="donate" id="donate-home"><div class="wrap">
+  <div>
+    <span class="eyebrow" style="color:var(--pitambar)">দান</span>
+    <h2>এক টাকাও <em>হিসাবের বাইরে</em> নয়</h2>
+    <p>UPI-তে দিন, WhatsApp-এ জানান — নাম উঠবে দাতাদের তালিকায় (চাইলে নাম গোপন)। রেজিস্ট্রেশনের পরে 80G।</p>
+    <div class="ctas"><a class="btn" href="#">UPI দিয়ে দিন</a><a class="btn ghost" href="#">WhatsApp-এ জানান</a></div>
+  </div>
+  <div class="upi">
+    <svg viewBox="0 0 112 112" aria-label="UPI QR"><rect width="112" height="112" rx="10" fill="#fff"/><g fill="#1d1631"><rect x="10" y="10" width="28" height="28"/><rect x="74" y="10" width="28" height="28"/><rect x="10" y="74" width="28" height="28"/><rect x="16" y="16" width="16" height="16" fill="#fff"/><rect x="80" y="16" width="16" height="16" fill="#fff"/><rect x="16" y="80" width="16" height="16" fill="#fff"/><rect x="20" y="20" width="8" height="8"/><rect x="84" y="20" width="8" height="8"/><rect x="20" y="84" width="8" height="8"/><rect x="46" y="10" width="6" height="6"/><rect x="58" y="10" width="6" height="18"/><rect x="46" y="22" width="6" height="12"/><rect x="46" y="46" width="12" height="6"/><rect x="64" y="46" width="6" height="18"/><rect x="76" y="46" width="12" height="6"/><rect x="94" y="52" width="8" height="8"/><rect x="46" y="64" width="6" height="12"/><rect x="58" y="70" width="12" height="6"/><rect x="76" y="64" width="6" height="12"/><rect x="88" y="70" width="14" height="6"/><rect x="46" y="88" width="12" height="6"/><rect x="64" y="82" width="6" height="20"/><rect x="76" y="88" width="12" height="6"/><rect x="94" y="94" width="8" height="8"/><rect x="10" y="46" width="6" height="12"/><rect x="22" y="52" width="12" height="6"/><rect x="28" y="64" width="6" height="6"/></g></svg>
+    <div><code>ganeshpujatrust@upi</code><small>স্ক্যান করুন বা UPI ID copy করুন<br>Reg. no. WB/2026/… · 80G প্রক্রিয়াধীন</small></div>
+  </div>
+</div></section>
+
+<!-- ============ committee + members ============ -->
+<section><div class="wrap">
+  <div class="sh"><h2>কমিটি</h2><a href="#">সব সদস্য →</a></div>
+  <div class="people">
+    <div class="person"><div class="ring"><span>অ</span></div><b>অমিত সাহা</b><small>সভাপতি</small></div>
+    <div class="person"><div class="ring"><span>রি</span></div><b>রিয়া দাস</b><small>সম্পাদক</small></div>
+    <div class="person"><div class="ring"><span>সু</span></div><b>সুমন মণ্ডল</b><small>কোষাধ্যক্ষ</small></div>
+    <div class="person"><div class="ring"><span>পূ</span></div><b>পূজা ঘোষ</b><small>সহ-সভাপতি</small></div>
+  </div>
+</div></section>
+
+<section id="members-home" style="padding-top:0"><div class="wrap">
+  <div class="members">
+    <div><span class="eyebrow">সদস্যদের পাতা</span><h3>নিজের চাঁদা, নোটিশ, দায়িত্ব — এক জায়গায়</h3><p>কমিটির সদস্যরা মোবাইল নম্বর দিয়ে OTP-তে ঢুকবেন। পাসওয়ার্ড নেই, অ্যাপ নেই।</p></div>
+    <div class="phone"><input type="tel" placeholder="+91 মোবাইল নম্বর" aria-label="মোবাইল নম্বর"><a class="btn" href="#">OTP পাঠান</a></div>
+  </div>
+</div></section>
+
+</div>
+<!-- ===== ABOUT ===== -->
+<div class="page" data-page="about">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">ইতিহাস</span><h1>বারোজন থেকে তিন পাড়া</h1><p>২০২১-এ পাড়ার মোড়ে একটা ছোট মণ্ডপ। পাঁচ বছরে একটা রেজিস্টার্ড ট্রাস্ট — প্রতিটা বছরের গল্প, ছবি আর হিসাব এখানে।</p></div></div>
+<section><div class="wrap tl">
+  <div class="yr">২০২৬<small>ষষ্ঠ বর্ষ · আসছে</small></div>
+  <div class="card"><h3>ঐতিহ্য ও ঐক্য — মণ্ডপ হচ্ছে জেলার হাতের কাজে</h3><p>কুশমণ্ডির ১২টি কাঠের মুখা প্রবেশপথে, ঢোকরার প্রদীপ ও ঘণ্টা, শীতলপাটির দেওয়াল। প্রতিমা গড়ছেন গঙ্গারামপুরের শিল্পী। বোধন ১৪ সেপ্টেম্বর, সকাল ৮টা।</p><div class="pics"><figure><canvas class="art-scene" data-seed="41" data-kind="pandal"></canvas></figure><figure><canvas class="art-scene" data-seed="42" data-kind="idol"></canvas></figure><figure><canvas class="art-scene" data-seed="43" data-kind="crowd"></canvas></figure></div></div>
+  <div class="yr">২০২৫<small>পঞ্চম বর্ষ</small></div>
+  <div class="card"><h3>ট্রাস্ট গঠন, তিন দিনের অনুষ্ঠান</h3><p>শিশুদের আঁকা প্রতিযোগিতা, বৃদ্ধাশ্রমে ভোগ পৌঁছে দেওয়া, প্রথম প্রকাশিত audit। আয় ₹২,৪০,০০০ · ব্যয় ₹২,১০,০০০ · উদ্বৃত্ত পরের বছরের প্রতিমা তহবিলে।</p><div class="pics"><figure><canvas class="art-scene" data-seed="51" data-kind="aarti"></canvas></figure><figure><canvas class="art-scene" data-seed="52" data-kind="crowd"></canvas></figure><figure><canvas class="art-scene" data-seed="53" data-kind="river"></canvas></figure></div></div>
+  <div class="yr">২০২৪<small>চতুর্থ বর্ষ</small></div>
+  <div class="card"><h3>নতুন মণ্ডপ — বাঁশের বদলে স্থায়ী কাঠামো</h3><p>বিসর্জনের শোভাযাত্রায় হাজারের বেশি মানুষ, আত্রেয়ীর ঘাটে। প্রথমবার তিন পাড়ার যৌথ কমিটি।</p><div class="pics"><figure><canvas class="art-scene" data-seed="61" data-kind="pandal"></canvas></figure><figure><canvas class="art-scene" data-seed="62" data-kind="river"></canvas></figure><figure><canvas class="art-scene" data-seed="63" data-kind="crowd"></canvas></figure></div></div>
+  <div class="yr">২০২৩<small>তৃতীয় বর্ষ</small></div>
+  <div class="card"><h3>রক্তদান শিবির — ৮৭ জন</h3><p>পুজোর সাথে সমাজসেবা শুরু। ট্রাস্ট গঠনের প্রস্তাব এই বছরই সাধারণ সভায়।</p><div class="pics"><figure><canvas class="art-scene" data-seed="71" data-kind="crowd"></canvas></figure><figure><canvas class="art-scene" data-seed="72" data-kind="idol"></canvas></figure><figure><canvas class="art-scene" data-seed="73" data-kind="aarti"></canvas></figure></div></div>
+  <div class="yr">২০২২<small>দ্বিতীয় বর্ষ</small></div>
+  <div class="card"><h3>পাড়া বাড়ল — প্রথম সাংস্কৃতিক সন্ধ্যা</h3><p>ভাওয়াইয়া ও খন — জেলার নিজস্ব শিল্পীদের নিয়ে প্রথম সন্ধ্যা। চাঁদা ₹৮৮,০০০।</p></div>
+  <div class="yr">২০২১<small>প্রথম বর্ষ</small></div>
+  <div class="card"><h3>প্রথম পুজো — বারোজন, ₹৪২,০০০</h3><p>পাড়ার মোড়ে বাঁশের মণ্ডপ, স্থানীয় শিল্পীর প্রতিমা, ৩০০ জনের ভোগ। এখান থেকেই শুরু।</p></div>
+</div></section>
+</div>
+
+<!-- ===== COMMITTEE ===== -->
+<div class="page" data-page="committee">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">কমিটি</span><h1>যাঁরা দায়িত্বে</h1><p>২০২৬–২৭ কার্যকরী কমিটি। প্রতিটি পদ সাধারণ সভায় নির্বাচিত; হিসাবের দায়িত্ব কোষাধ্যক্ষ ও দুই সদস্যের।</p></div></div>
+<section><div class="wrap">
+  <div class="officers">
+    <div class="officer"><div class="ring"><span>অ</span></div><b>অমিত সাহা</b><small>সভাপতি</small><p>প্রতিষ্ঠাতা সদস্য · ২০২১ থেকে</p></div>
+    <div class="officer"><div class="ring"><span>রি</span></div><b>রিয়া দাস</b><small>সম্পাদক</small><p>অনুষ্ঠান ও যোগাযোগ</p></div>
+    <div class="officer"><div class="ring"><span>সু</span></div><b>সুমন মণ্ডল</b><small>কোষাধ্যক্ষ</small><p>হিসাব ও audit</p></div>
+    <div class="officer"><div class="ring"><span>পূ</span></div><b>পূজা ঘোষ</b><small>সহ-সভাপতি</small><p>সাংস্কৃতিক ও শিশু বিভাগ</p></div>
+  </div>
+  <div class="sh"><h2>সদস্যরা</h2><span class="pill">৮ জন</span></div>
+  <div class="mgrid">
+    <div class="mrow"><div class="ring"><span>রা</span></div><div><b>রাজীব রায়</b><small>সহ-সম্পাদক</small></div></div>
+    <div class="mrow"><div class="ring"><span>মৌ</span></div><div><b>মৌসুমী সরকার</b><small>সাংস্কৃতিক সম্পাদক</small></div></div>
+    <div class="mrow"><div class="ring"><span>দী</span></div><div><b>দীপক হালদার</b><small>মণ্ডপ ও আলো</small></div></div>
+    <div class="mrow"><div class="ring"><span>অ</span></div><div><b>অনন্যা বিশ্বাস</b><small>ভোগ ও রান্না</small></div></div>
+    <div class="mrow"><div class="ring"><span>স</span></div><div><b>সঞ্জয় বর্মন</b><small>চাঁদা সংগ্রহ (হরিরামপুর)</small></div></div>
+    <div class="mrow"><div class="ring"><span>ত</span></div><div><b>তনুশ্রী রায়</b><small>চাঁদা সংগ্রহ (সিংহদহ)</small></div></div>
+    <div class="mrow"><div class="ring"><span>প</span></div><div><b>পলাশ সরকার</b><small>নিরাপত্তা ও শোভাযাত্রা</small></div></div>
+    <div class="mrow"><div class="ring"><span>জ</span></div><div><b>জয়া মাহাতো</b><small>স্বেচ্ছাসেবক সমন্বয়</small></div></div>
+  </div>
+</div></section>
+</div>
+
+<!-- ===== GALLERY ===== -->
+<div class="page" data-page="gallery">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">গ্যালারি</span><h1>পাঁচ বছরের মুহূর্ত</h1><p>বছর ধরে সাজানো অ্যালবাম। ছবিতে ট্যাপ করলে বড় হয়, সোয়াইপ করে পরেরটা।</p></div></div>
+<section><div class="wrap">
+  <div class="sh"><h2>সেরা মুহূর্ত</h2><span class="pill">কমিটির বাছাই</span></div>
+  <div class="best"><figure><canvas class="art-scene" data-seed="81" data-kind="idol"></canvas></figure><figure><canvas class="art-scene" data-seed="82" data-kind="aarti"></canvas></figure><figure><canvas class="art-scene" data-seed="83" data-kind="river"></canvas></figure><figure><canvas class="art-scene" data-seed="84" data-kind="crowd"></canvas></figure></div>
+  <div class="sh"><h2>অ্যালবাম</h2><a href="#" >সব বছর</a></div>
+  <div class="albums">
+    <div class="album"><canvas class="art-scene" data-seed="91" data-kind="pandal"></canvas><div class="cap"><b>২০২৫</b><span>৬ ছবি · পঞ্চম বর্ষ</span></div></div>
+    <div class="album"><canvas class="art-scene" data-seed="92" data-kind="idol"></canvas><div class="cap"><b>২০২৪</b><span>৬ ছবি · নতুন মণ্ডপ</span></div></div>
+    <div class="album"><canvas class="art-scene" data-seed="93" data-kind="aarti"></canvas><div class="cap"><b>২০২৩</b><span>৬ ছবি · রক্তদান শিবির</span></div></div>
+    <div class="album"><canvas class="art-scene" data-seed="94" data-kind="crowd"></canvas><div class="cap"><b>২০২২</b><span>৪ ছবি</span></div></div>
+    <div class="album"><canvas class="art-scene" data-seed="95" data-kind="river"></canvas><div class="cap"><b>২০২১</b><span>৩ ছবি · প্রথম পুজো</span></div></div>
+    <div class="album"><canvas class="art-scene" data-seed="96" data-kind="pandal"></canvas><div class="cap"><b>মণ্ডপ নির্মাণ</b><span>২০২৬ · চলছে</span></div></div>
+  </div>
+</div></section>
+</div>
+
+<!-- ===== EVENTS ===== -->
+<div class="page" data-page="events">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">অনুষ্ঠান সূচি</span><h1>১৪–১৭ সেপ্টেম্বর ২০২৬</h1><p>চার দিন, বারোটি অনুষ্ঠান। সবই বিনামূল্যে, সবাই আমন্ত্রিত। লাইভ চলাকালীন সারি লাল হয়ে থাকে।</p></div></div>
+<section><div class="wrap">
+  <div class="days" role="tablist"><button aria-pressed="true">১৪ · বোধন</button><button aria-pressed="false">১৫ · মহাপুজো</button><button aria-pressed="false">১৬ · সাংস্কৃতিক</button><button aria-pressed="false">১৭ · বিসর্জন</button></div>
+  <div class="timeline">
+    <div class="ev"><time>০৮:০০</time><div><b>বোধন ও প্রাণপ্রতিষ্ঠা</b><span>ট্রাস্ট মণ্ডপ · পুরোহিত শ্রী নারায়ণ ভট্টাচার্য</span></div></div>
+    <div class="ev"><time>১০:০০</time><div><b>ভোগের কুপন বিতরণ শুরু</b><span>মণ্ডপের কাউন্টার · ৩০০ জন</span></div></div>
+    <div class="ev"><time>১২:০০</time><div><b>অঞ্জলি ও ভোগ বিতরণ</b><span>মণ্ডপ</span></div></div>
+    <div class="ev"><time>১৬:০০</time><div><b>মুখা নাচ — কুশমণ্ডির গোমিরা দল</b><span>মণ্ডপ প্রাঙ্গণ</span></div></div>
+    <div class="ev" style="border-color:var(--sindoor);box-shadow:0 0 0 2px var(--sindoor) inset"><time>১৯:০০</time><div><b>সন্ধ্যা আরতি ও ঢাক 🔴 লাইভ</b><span>মণ্ডপ · সবাই আমন্ত্রিত</span></div></div>
+  </div>
+  <div class="acc" style="margin-top:1.6rem"><details><summary>পুরনো অনুষ্ঠান (২০২৫)</summary><p>১৫ সেপ্টে ২০২৫ · মহাপুজো ও ভোগ · ১৬ সেপ্টে · সাংস্কৃতিক সন্ধ্যা · ১৭ সেপ্টে · বিসর্জন, আত্রেয়ীর ঘাট</p></details></div>
+</div></section>
+</div>
+
+<!-- ===== DONATE ===== -->
+<div class="page" data-page="donate">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">দান</span><h1>এক টাকাও হিসাবের বাইরে নয়</h1><p>UPI-তে দিন, WhatsApp-এ জানান। দাতাদের তালিকায় নাম উঠবে (চাইলে গোপন)। রেজিস্ট্রেশনের পরে 80G রসিদ।</p></div></div>
+<section><div class="wrap dgrid">
+  <div style="display:grid;gap:1rem">
+    <div class="upibig">
+      <svg viewBox="0 0 112 112" aria-label="UPI QR"><rect width="112" height="112" rx="10" fill="#fff"/><g fill="#1d1631"><rect x="10" y="10" width="28" height="28"/><rect x="74" y="10" width="28" height="28"/><rect x="10" y="74" width="28" height="28"/><rect x="16" y="16" width="16" height="16" fill="#fff"/><rect x="80" y="16" width="16" height="16" fill="#fff"/><rect x="16" y="80" width="16" height="16" fill="#fff"/><rect x="20" y="20" width="8" height="8"/><rect x="84" y="20" width="8" height="8"/><rect x="20" y="84" width="8" height="8"/><rect x="46" y="10" width="6" height="6"/><rect x="58" y="10" width="6" height="18"/><rect x="46" y="22" width="6" height="12"/><rect x="46" y="46" width="12" height="6"/><rect x="64" y="46" width="6" height="18"/><rect x="76" y="46" width="12" height="6"/><rect x="94" y="52" width="8" height="8"/><rect x="46" y="64" width="6" height="12"/><rect x="58" y="70" width="12" height="6"/><rect x="76" y="64" width="6" height="12"/><rect x="88" y="70" width="14" height="6"/><rect x="46" y="88" width="12" height="6"/><rect x="64" y="82" width="6" height="20"/><rect x="76" y="88" width="12" height="6"/><rect x="94" y="94" width="8" height="8"/><rect x="10" y="46" width="6" height="12"/><rect x="22" y="52" width="12" height="6"/><rect x="28" y="64" width="6" height="6"/></g></svg>
+      <div><span class="eyebrow">UPI</span><code>ganeshpujatrust@upi</code><p style="margin:.3rem 0 .8rem;color:var(--muted);font-size:14px">যেকোনো UPI app-এ স্ক্যান করুন, বা ID copy করে পাঠান।</p><div class="ctas"><a class="btn" href="#">UPI app-এ খুলুন</a><a class="btn ghost" href="#" style="color:var(--ink)">ID copy</a></div></div>
+    </div>
+    <div class="sh" style="margin:.4rem 0 .2rem"><h2>কোন খাতে</h2></div>
+    <div class="purpose">
+      <div class="pcard"><b>প্রতিমা</b><span>গঙ্গারামপুরের শিল্পী · লক্ষ্য ₹৬০,০০০</span><div class="chips"><i>₹৫০১</i><i class="on">₹১,১০১</i><i>₹২,১০১</i></div></div>
+      <div class="pcard"><b>ভোগ</b><span>৩০০ জন × ৪ দিন · লক্ষ্য ₹৪৮,০০০</span><div class="chips"><i class="on">₹৩০১</i><i>₹৫০১</i><i>₹১,০০১</i></div></div>
+      <div class="pcard"><b>সাংস্কৃতিক</b><span>মুখা নাচ, ভাওয়াইয়া, শিশুদের আঁকা</span><div class="chips"><i>₹২০১</i><i class="on">₹৫০১</i></div></div>
+      <div class="pcard"><b>সাধারণ তহবিল</b><span>যেখানে দরকার সেখানে</span><div class="chips"><i>যেকোনো</i></div></div>
+    </div>
+  </div>
+  <div style="display:grid;gap:1rem">
+    <div class="form"><span class="eyebrow">দান করার পরে</span><b style="font-family:var(--display);font-size:20px">WhatsApp-এ জানান</b><input placeholder="আপনার নাম"><input placeholder="টাকার পরিমাণ" type="number"><input placeholder="UPI ref no. (ঐচ্ছিক)"><a class="btn" href="#">WhatsApp-এ পাঠান</a><small style="color:var(--muted)">এই তথ্য কোথাও জমা থাকে না — শুধু কোষাধ্যক্ষের WhatsApp-এ যায়।</small></div>
+    <div class="form"><span class="eyebrow">দাতাদের তালিকা · ২০২৬</span>
+      <div class="wall"><div><span>শ্যামল সরকার</span><span>₹২,১০১</span></div><div><span>নাম প্রকাশে অনিচ্ছুক</span><span>₹৫,০০০</span></div><div><span>রূপা মণ্ডল</span><span>₹১,১০১</span></div><div><span>দেবাশিস রায়</span><span>₹১,০০১</span></div><div><span>মিতা হালদার</span><span>₹৫০১</span></div><div><span>নাম প্রকাশে অনিচ্ছুক</span><span>₹১,০০১</span></div></div>
+      <small style="color:var(--muted)">৩৪০ পরিবার · মোট ₹১,৭২,০০০ · হিসাব পাতায় পুরো তালিকা</small></div>
+  </div>
+</div></section>
+</div>
+
+<!-- ===== LEDGER ===== -->
+<div class="page" data-page="ledger">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">হিসাব</span><h1>প্রতিটি টাকার হিসাব</h1><p>প্রতি বছর আয়-ব্যয়, audit report, ট্রাস্টের নথি — সব এখানে প্রকাশ্যে। প্রশ্ন থাকলে কোষাধ্যক্ষকে WhatsApp করুন।</p></div></div>
+<section><div class="wrap">
+  <div class="days"><button aria-pressed="true">২০২৫</button><button aria-pressed="false">২০২৪</button><button aria-pressed="false">২০২৩</button></div>
+  <div class="sum"><div><small>আয়</small><b>₹২,৪০,০০০</b></div><div><small>ব্যয়</small><b>₹২,১০,০০০</b></div><div><small>উদ্বৃত্ত</small><b class="g">₹৩০,০০০</b></div></div>
+  <div class="ledger">
+    <div class="bars">
+      <div class="bar"><span>চাঁদা (৩৪০ পরিবার)</span><i style="width:100%"></i><em>₹১,৭২,০০০</em></div>
+      <div class="bar"><span>রাস্তার সংগ্রহ</span><i style="width:32%"></i><em>₹৫৫,০০০</em></div>
+      <div class="bar"><span>বাস-টোটো</span><i style="width:8%"></i><em>₹১৩,০০০</em></div>
+      <div class="bar"><span>প্রতিমা</span><i class="g" style="width:35%"></i><em>₹৬০,০০০</em></div>
+      <div class="bar"><span>মণ্ডপ ও আলো</span><i class="g" style="width:35%"></i><em>₹৬০,০০০</em></div>
+      <div class="bar"><span>ভোগ</span><i class="g" style="width:28%"></i><em>₹৪৮,০০০</em></div>
+      <div class="bar"><span>সাংস্কৃতিক</span><i class="g" style="width:24%"></i><em>₹৪২,০০০</em></div>
+    </div>
+    <div class="donut"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="70" fill="none" stroke="var(--line)" stroke-width="22"/><circle cx="100" cy="100" r="70" fill="none" stroke="var(--sindoor)" stroke-width="22" stroke-dasharray="251 440" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="70" fill="none" stroke="var(--pitambar)" stroke-width="22" stroke-dasharray="100 440" stroke-dashoffset="-251" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="70" fill="none" stroke="var(--durva)" stroke-width="22" stroke-dasharray="89 440" stroke-dashoffset="-351" transform="rotate(-90 100 100)"/><text x="100" y="96" text-anchor="middle" font-family="Baloo Da 2,Hind Siliguri" font-weight="800" font-size="26" fill="var(--ink)">৫৭%</text><text x="100" y="118" text-anchor="middle" font-size="11" fill="var(--muted)">প্রতিমা ও মণ্ডপ</text></svg></div>
+  </div>
+  <div class="acc">
+    <details open><summary>Audit report ২০২৫ (PDF)</summary><p>স্বাধীন হিসাবরক্ষক · ১২ পাতা · প্রকাশ ৩১ মার্চ ২০২৬ · ডাউনলোড ↓</p></details>
+    <details><summary>Trust deed (PDF)</summary><p>রেজিস্ট্রেশন প্রক্রিয়াধীন — নথি প্রকাশ হবে রেজিস্ট্রেশনের পরে।</p></details>
+    <details><summary>Audit report ২০২৪ (PDF)</summary><p>৯ পাতা · প্রকাশ ২৮ মার্চ ২০২৫</p></details>
+  </div>
+  <div class="legal"><b>আইনি তথ্য</b><div>রেজিস্ট্রেশন<span>WB/2026/… — প্রক্রিয়াধীন (Indian Trusts Act)</span></div><div>80G / 12A<span>রেজিস্ট্রেশনের পরে আবেদন</span></div><div>ঠিকানা<span>বাঁধ রোড, বালুরঘাট ৭৩৩১০১, দক্ষিণ দিনাজপুর</span></div><div>ট্রাস্টি<span>অমিত সাহা · রিয়া দাস · সুমন মণ্ডল</span></div></div>
+</div></section>
+</div>
+
+<!-- ===== MEMBERS ===== -->
+<div class="page" data-page="members">
+<div class="ph"><canvas class="ph-bg" aria-hidden="true"></canvas><div class="wrap"><span class="crumb">সদস্যদের পাতা</span><h1>নিজের চাঁদা, নোটিশ, দায়িত্ব</h1><p>কমিটির সদস্যদের জন্য। মোবাইল নম্বরে OTP — পাসওয়ার্ড নেই, অ্যাপ নেই। কমিটি যাঁদের নম্বর যোগ করেছে শুধু তাঁরাই ঢুকতে পারবেন।</p></div></div>
+<section><div class="wrap mem">
+  <div class="otp"><span class="eyebrow">লগইন</span><b style="font-family:var(--display);font-size:22px">মোবাইল নম্বর</b><input type="tel" placeholder="+91 98000 00000"><a class="btn" href="#">OTP পাঠান</a><span style="font-size:13px;color:var(--muted)">OTP এলে ৬ অঙ্ক দিন</span><input class="code" placeholder="••••••" maxlength="6"><a class="btn ghost" href="#" style="color:var(--ink)">যাচাই করুন</a></div>
+  <div class="dash">
+    <div class="notice" style="display:flex;align-items:center;gap:.9rem"><div class="ring" style="width:56px;height:56px;padding:3px"><span style="font-size:22px">রা</span></div><div><b>রাজীব রায়</b><p>সহ-সম্পাদক · +91 98000 00001</p></div><a class="btn ghost" href="#" style="margin-left:auto;color:var(--ink);padding:.5rem .9rem;font-size:13px">লগআউট</a></div>
+    <div class="stats"><div class="stat"><small>প্রতিশ্রুতি</small><b>₹৫,০০০</b></div><div class="stat"><small>দেওয়া হয়েছে</small><b>₹৩,৫০০</b></div><div class="stat"><small>বাকি</small><b>₹১,৫০০</b></div></div>
+    <div class="notice"><span class="eyebrow">নোটিশ</span><b>পরবর্তী মিটিং — রবিবার সন্ধ্যা ৬টা</b><p>মণ্ডপে। আলোচ্য: ভোগের কুপন, শোভাযাত্রার route, স্বেচ্ছাসেবক তালিকা।</p></div>
+    <div class="notice"><span class="eyebrow">আমার দায়িত্ব</span><div class="duty"><time>১৪ সেপ্টে</time><div><b>গেট ও ভিড় সামলানো</b><br><small style="color:var(--muted)">সকাল ৮টা থেকে · সঙ্গে: পলাশ, জয়া</small></div></div><div class="duty"><time>১৬ সেপ্টে</time><div><b>সাংস্কৃতিক মঞ্চ</b><br><small style="color:var(--muted)">বিকেল ৪টা · সঙ্গে: মৌসুমী</small></div></div></div>
+  </div>
+</div></section>
+</div>
+
+<footer><div class="wrap">
+  <div><b>গণেশ পুজো ট্রাস্ট</b>বাঁধ রোড, বালুরঘাট ৭৩৩১০১<br>দক্ষিণ দিনাজপুর, পশ্চিমবঙ্গ<br><span style="opacity:.7">Reg. no. WB/2026/… (প্রক্রিয়াধীন)</span></div>
+  <div><b>যোগাযোগ</b><a href="#">WhatsApp</a><a href="#">মানচিত্রে দেখুন</a><a href="#">info@…</a></div>
+  <div><b>পাতা</b><a href="#theme">ইতিহাস</a><a href="#gallery">গ্যালারি</a><a href="#ledger">হিসাব</a><a href="#members">সদস্য</a></div>
+  <div><b>ট্রাস্ট</b><a href="#">Trust deed</a><a href="#">Audit 2025 (PDF)</a><a href="#">কমিটি</a></div>
+</div>
+<svg class="mouse" viewBox="0 0 60 40" fill="none" stroke="var(--pitambar)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M44 30c-12-18-36-12-38 6c-1 10 12 14 24 10M8 34c-6 4-6 0-4-4"/><circle cx="40" cy="24" r="4"/><circle cx="50" cy="31" r="1.5" fill="var(--pitambar)"/></svg>
+</footer>
+
+<div class="switch" role="group" aria-label="রূপ বাছুন"><span>রূপ</span>
+  <button data-t="siddhi" aria-pressed="true">সিদ্ধি</button><button data-t="mukha" aria-pressed="false">মুখা</button><button data-t="dhokra" aria-pressed="false">ঢোকরা</button><button data-t="atreyee" aria-pressed="false">আত্রেয়ী</button><button data-t="bangarh" aria-pressed="false">বাণগড়</button>
+</div>
+
+<script>
+(function(){
+  const root=document.documentElement; const css=n=>getComputedStyle(root).getPropertyValue(n).trim();
+  const dpr=Math.min(devicePixelRatio||1,2); const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rng=(seed)=>{let s=seed*9301+49297;return()=> (s=(s*16807)%2147483647)/2147483647;};
+  function setup(c){const r=c.getBoundingClientRect();c.width=Math.max(1,r.width*dpr);c.height=Math.max(1,r.height*dpr);const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return [g,r.width,r.height];}
+
+  /* ---- hero background: theme-specific art ---- */
+  function heroBg(){
+    const c=document.getElementById('heroBg'); const [g,W,H]=setup(c); const t=root.dataset.theme||'siddhi';
+    const bg=css('--bg'),bg2=css('--bg2'),gold=css('--gold'),glow=css('--glow'),sind=css('--sindoor'),pit=css('--pitambar'),durva=css('--durva');
+    const lg=g.createLinearGradient(0,0,W,H); lg.addColorStop(0,bg2); lg.addColorStop(1,bg); g.fillStyle=lg; g.fillRect(0,0,W,H);
+    const cx=W*(W>900?0.74:0.5), cy=H*(W>900?0.5:0.3);
+    if(t==='siddhi'||t==='dhokra'){
+      // mandala rings + glow + bokeh
+      g.save(); g.translate(cx,cy); g.strokeStyle=t==='dhokra'?'rgba(201,150,43,.22)':'rgba(190,160,255,.16)'; g.lineWidth=1;
+      for(let ring=0;ring<6;ring++){const R=120+ring*58,n=16+ring*6;for(let i=0;i<n;i++){const a=i/n*Math.PI*2;g.save();g.rotate(a);g.beginPath();g.moveTo(R-26,0);g.quadraticCurveTo(R-8,-13,R+10,0);g.quadraticCurveTo(R-8,13,R-26,0);g.stroke();g.restore();}
+        g.beginPath();g.arc(0,0,R+12,0,Math.PI*2);g.stroke();}
+      g.restore();
+      const rg=g.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.42); rg.addColorStop(0,glow); rg.addColorStop(.4,glow.replace(/[\d.]+\)$/,'0.14)')); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+      const r=rng(3); for(let i=0;i<40;i++){const x=r()*W,y=H*0.45+r()*H*0.55,rad=4+r()*18;const d=g.createRadialGradient(x,y,0,x,y,rad);d.addColorStop(0,gold);d.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=.12+r()*.22;g.fillStyle=d;g.beginPath();g.arc(x,y,rad,0,7);g.fill();} g.globalAlpha=1;
+    } else if(t==='mukha'){
+      // carved geometric mask tessellation
+      g.strokeStyle='rgba(22,19,17,.16)'; g.lineWidth=2; const s=64;
+      for(let y=-s;y<H+s;y+=s*1.5){for(let x=-s;x<W+s;x+=s*1.75){const ox=((y/(s*1.5))%2)?s*0.875:0;const X=x+ox;g.beginPath();g.moveTo(X,y-s*.5);g.lineTo(X+s*.86,y);g.lineTo(X+s*.86,y+s);g.lineTo(X,y+s*1.5);g.lineTo(X-s*.86,y+s);g.lineTo(X-s*.86,y);g.closePath();g.stroke();}}
+      const r=rng(5); for(let i=0;i<14;i++){const x=r()*W,y=r()*H;g.fillStyle=i%3?sind:durva;g.globalAlpha=.16;g.beginPath();g.moveTo(x,y-16);g.lineTo(x+14,y);g.lineTo(x,y+16);g.lineTo(x-14,y);g.closePath();g.fill();} g.globalAlpha=1;
+    } else if(t==='atreyee'){
+      // river lines + paddy
+      g.lineWidth=1.6; for(let i=0;i<9;i++){const y=H*0.25+i*H*0.08;g.strokeStyle=i%2?'rgba(28,110,122,.28)':'rgba(123,162,63,.28)';g.beginPath();for(let x=0;x<=W;x+=20){g.lineTo(x,y+Math.sin((x+i*70)/110)*14+Math.sin(x/37)*4);}g.stroke();}
+      const r=rng(8); g.strokeStyle='rgba(123,162,63,.45)'; g.lineWidth=2; for(let i=0;i<60;i++){const x=r()*W,y=H*0.75+r()*H*0.25,h=10+r()*22;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+4,y-h*.6,x+2,y-h);g.stroke();}
+    } else if(t==='bangarh'){
+      // terracotta frieze rows
+      g.strokeStyle='rgba(239,228,206,.22)'; g.lineWidth=1.5; const s=48;
+      for(let y=s;y<H;y+=s*2){for(let x=0;x<W;x+=s){g.beginPath();g.arc(x+s/2,y,s*.32,Math.PI,0);g.stroke();g.beginPath();g.moveTo(x+s*.2,y+s*.9);g.quadraticCurveTo(x+s/2,y+s*.35,x+s*.8,y+s*.9);g.stroke();}
+        g.beginPath();g.moveTo(0,y+s*1.05);g.lineTo(W,y+s*1.05);g.stroke();}
+      const rg=g.createRadialGradient(cx,cy,0,cx,cy,W*0.4); rg.addColorStop(0,'rgba(214,169,59,.28)'); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+    }
+    // grain
+    const r2=rng(9); g.fillStyle='rgba(255,255,255,.035)'; for(let i=0;i<W*H/900;i++){g.fillRect(r2()*W,r2()*H,1,1);}
+  }
+  /* ---- marigold garland strip ---- */
+  function garland(){
+    const c=document.getElementById('garland'); const [g,W,H]=setup(c); g.clearRect(0,0,W,H);
+    const t=root.dataset.theme||'siddhi'; g.fillStyle=css('--ivory'); g.fillRect(0,0,W,H);
+    const r=rng(2); const step=18; for(let x=-6;x<W+6;x+=step){const y=13+Math.sin(x/60)*3; const col=(Math.floor(x/step)%3===0)?css('--sindoor'):(Math.floor(x/step)%3===1?css('--pitambar'):'#f79a2a');
+      if(t==='atreyee'){g.fillStyle=css('--durva');g.beginPath();g.ellipse(x,y,5,2.5,0,0,7);g.fill();continue;}
+      if(t==='dhokra'){g.strokeStyle=css('--gold');g.lineWidth=1.5;g.beginPath();g.arc(x,y,4,0,7);g.stroke();continue;}
+      for(let p=0;p<8;p++){const a=p/8*Math.PI*2;g.fillStyle=col;g.globalAlpha=.9;g.beginPath();g.ellipse(x+Math.cos(a)*4,y+Math.sin(a)*4,3.2,2,a,0,7);g.fill();}
+      g.globalAlpha=1;g.fillStyle=css('--pitambar');g.beginPath();g.arc(x,y,2.2,0,7);g.fill();}
+  }
+  /* ---- illustrated scenes for gallery/story ---- */
+  function scene(c){
+    const [g,W,H]=setup(c); const seed=+c.dataset.seed, kind=c.dataset.kind; const r=rng(seed);
+    const sind=css('--sindoor'),pit=css('--pitambar'),durva=css('--durva'),gold=css('--gold');
+    const night=['#1a1240','#3b1f2b'], dusk=['#2b1a4e','#c8481c'], river=['#16323a','#1c6e7a'];
+    const pal=kind==='river'?river:(kind==='aarti'||kind==='idol')?night:dusk;
+    const bg=g.createLinearGradient(0,0,0,H); bg.addColorStop(0,pal[0]); bg.addColorStop(1,pal[1]); g.fillStyle=bg; g.fillRect(0,0,W,H);
+    // string lights
+    for(let i=0;i<50;i++){const x=r()*W,y=r()*H*0.55;g.fillStyle=i%2?pit:'#fff3c4';g.globalAlpha=.35+r()*.6;g.beginPath();g.arc(x,y,1+r()*2,0,7);g.fill();} g.globalAlpha=1;
+    if(kind==='river'){ g.strokeStyle='rgba(242,236,221,.35)';g.lineWidth=1.5;for(let i=0;i<7;i++){const y=H*0.55+i*H*0.06;g.beginPath();for(let x=0;x<=W;x+=12)g.lineTo(x,y+Math.sin((x+i*40)/40)*3);g.stroke();}
+      const gl=g.createRadialGradient(W*.5,H*.45,0,W*.5,H*.45,W*.35);gl.addColorStop(0,'rgba(247,183,51,.7)');gl.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gl;g.fillRect(0,0,W,H);
+      g.fillStyle='rgba(0,0,0,.6)';g.beginPath();g.ellipse(W*.5,H*.62,W*.18,H*.06,0,0,7);g.fill(); g.beginPath();g.moveTo(W*.5,H*.62);g.lineTo(W*.46,H*.36);g.lineTo(W*.54,H*.36);g.closePath();g.fill();}
+    else { const cx=W*(0.4+r()*0.2), cy=H*0.6;
+      const gl=g.createRadialGradient(cx,cy,0,cx,cy,W*0.45);gl.addColorStop(0,kind==='aarti'?'rgba(255,190,80,.9)':'rgba(226,64,28,.75)');gl.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gl;g.fillRect(0,0,W,H);
+      // pandal silhouette with pillars
+      g.fillStyle='rgba(0,0,0,.62)';g.beginPath();g.moveTo(cx-W*.34,H);g.lineTo(cx-W*.2,H*.42);g.lineTo(cx,H*.26);g.lineTo(cx+W*.2,H*.42);g.lineTo(cx+W*.34,H);g.closePath();g.fill();
+      g.fillStyle='rgba(0,0,0,.35)';for(let k=-1;k<=1;k+=2){g.fillRect(cx+k*W*.14-4,H*.5,8,H*.5);}
+      if(kind==='idol'||kind==='aarti'){ // idol silhouette
+        g.fillStyle='rgba(20,10,30,.85)';g.beginPath();g.arc(cx,H*.5,W*.07,0,7);g.fill();g.beginPath();g.ellipse(cx,H*.72,W*.13,H*.14,0,0,7);g.fill();
+        g.strokeStyle=gold;g.lineWidth=2;g.beginPath();g.arc(cx,H*.5,W*.075,0,7);g.stroke();g.beginPath();g.moveTo(cx,H*.55);g.quadraticCurveTo(cx-W*.06,H*.66,cx-W*.03,H*.72);g.stroke();
+        g.fillStyle=pit;for(let i=0;i<9;i++){g.globalAlpha=.9;g.beginPath();g.arc(cx-W*.16+i*W*.04,H*.36+Math.sin(i)*4,3,0,7);g.fill();}g.globalAlpha=1;}
+      if(kind==='aarti'){for(let i=0;i<7;i++){const x=cx-W*.2+i*W*.066,y=H*.86;const d=g.createRadialGradient(x,y,0,x,y,14);d.addColorStop(0,'rgba(255,220,120,.95)');d.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=d;g.beginPath();g.arc(x,y,14,0,7);g.fill();}}
+      // marigold garland across top
+      for(let i=0;i<16;i++){const t2=i/15,x=t2*W,y=10+Math.sin(t2*Math.PI)*12;g.fillStyle=i%2?pit:sind;g.beginPath();g.arc(x,y,4.5,0,7);g.fill();}
+      // crowd
+      for(let i=0;i<24;i++){const x=r()*W,y=H*0.86+r()*H*0.14;g.fillStyle='rgba(0,0,0,.65)';g.beginPath();g.arc(x,y,5+r()*5,0,7);g.fill();}}
+    // vignette
+    const v=g.createRadialGradient(W/2,H/2,W*.3,W/2,H/2,W*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.45)');g.fillStyle=v;g.fillRect(0,0,W,H);
+  }
+  function paint(){const on=document.querySelector('.page.on');heroBg();garland();(on||document).querySelectorAll('canvas.art-scene').forEach(scene);(on||document).querySelectorAll('canvas.ph-bg').forEach(phBg);}
+  document.fonts?.ready.then(paint); paint(); let to; addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(paint,120);});
+  document.querySelectorAll('.switch button').forEach(b=>b.addEventListener('click',()=>{root.dataset.theme=b.dataset.t;document.querySelectorAll('.switch button').forEach(x=>x.setAttribute('aria-pressed',x===b));paint();}));
+
+  /* ---- router ---- */
+  function phBg(c){const [g,W,H]=setup(c);const t=root.dataset.theme||'siddhi';const lg=g.createLinearGradient(0,0,W,H);lg.addColorStop(0,css('--bg2'));lg.addColorStop(1,css('--bg'));g.fillStyle=lg;g.fillRect(0,0,W,H);
+    g.save();g.translate(W*0.86,H*0.5);g.strokeStyle=t==='mukha'||t==='atreyee'?'rgba(0,0,0,.12)':'rgba(255,255,255,.14)';g.lineWidth=1;for(let ring=0;ring<4;ring++){const R=40+ring*34,n=12+ring*6;for(let i=0;i<n;i++){const a=i/n*Math.PI*2;g.save();g.rotate(a);g.beginPath();g.moveTo(R-16,0);g.quadraticCurveTo(R-5,-8,R+6,0);g.quadraticCurveTo(R-5,8,R-16,0);g.stroke();g.restore();}}g.restore();
+    const rg=g.createRadialGradient(W*0.86,H*0.5,0,W*0.86,H*0.5,W*0.3);rg.addColorStop(0,css('--glow'));rg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=rg;g.fillRect(0,0,W,H);}
+  function show(name){const pg=document.querySelector(`.page[data-page="${name}"]`)||document.querySelector('.page[data-page="home"]');document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p===pg));
+    document.querySelectorAll('.links a').forEach(a=>a.classList.toggle('on',a.dataset.go===pg.dataset.page));window.scrollTo({top:0});requestAnimationFrame(()=>{pg.querySelectorAll('canvas.art-scene').forEach(scene);pg.querySelectorAll('canvas.ph-bg').forEach(phBg);if(pg.dataset.page==='home')paint();});}
+  document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;e.preventDefault();history.replaceState(null,'','#'+a.dataset.go);show(a.dataset.go);});
+  window.addEventListener('hashchange',()=>show((location.hash||'#home').slice(1)));
+  show((location.hash||'#home').slice(1));
+  document.querySelectorAll('.days button').forEach(b=>b.addEventListener('click',()=>document.querySelectorAll('.days button').forEach(x=>x.setAttribute('aria-pressed',x===b))));
+  // countdown to 14 Sep 2026 08:00 IST
+  const bn=s=>String(s).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]); const target=new Date('2026-09-14T08:00:00+05:30');
+  function tick(){const ms=Math.max(0,target-Date.now());const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);const bs=document.querySelectorAll('.count b');if(bs.length===3){bs[0].textContent=bn(d);bs[1].textContent=bn(String(h).padStart(2,'0'));bs[2].textContent=bn(String(m).padStart(2,'0'));}}
+  tick(); setInterval(tick,30000);
+})();
+</script>
