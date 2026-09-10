@@ -17,6 +17,7 @@ if (s) {
   } catch (err) { console.error(err); main.replaceChildren(el('p', { class: 'muted', text: t('common.error') })); events = null; }
   if (events !== null) {
     const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
+    let unsubHero = null;
     const hero = () => {
       const now = new Date(), cd = s.pujaDate ? countdown(s.pujaDate, now) : null;
       const bg = el('canvas', { class: 'bg', id: 'heroBg', 'aria-hidden': 'true' });
@@ -37,7 +38,7 @@ if (s) {
         el('div', { class: 'art' }, ganeshSvg(), el('div', { class: 'diyas' }, ...[0, 1, 2, 3, 4].map(() => diyaSvg())))),
         garland);
       requestAnimationFrame(() => { paintHero(bg); paintGarland(garland); });
-      onResize(() => { paintHero(bg); paintGarland(garland); });
+      unsubHero?.(); unsubHero = onResize(() => { paintHero(bg); paintGarland(garland); });   // render() runs every 60 s — never stack listeners
       return h;
     };
     const cred = () => {
