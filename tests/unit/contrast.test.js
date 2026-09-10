@@ -33,3 +33,24 @@ test('contrast floors per theme', () => {
     assert.ok(ratio(t.ink, t.card) >= 4.5, `${name} ink/card ${ratio(t.ink, t.card).toFixed(2)}`);
   }
 });
+// final-review fix wave item 2: --hero-accent replaces --pitambar for text sitting directly on the
+// hero/header ground (.crumb, hero eyebrow/em, .countdown figures) — mukha's --pitambar equals its
+// --bg, which made that text invisible; --hero-accent is a distinct per-theme token, checked here.
+test('hero-accent/bg contrast floor per theme', () => {
+  for (const [name, t] of Object.entries(blocks)) {
+    assert.ok(t['hero-accent'], `${name} --hero-accent`);
+    assert.ok(ratio(t['hero-accent'], t.bg) >= 4.5, `${name} hero-accent/bg ${ratio(t['hero-accent'], t.bg).toFixed(2)}`);
+  }
+});
+// final-review fix wave item 3: the sindoor accent (ticker background, CTA/link colour, live badges)
+// and the durva accent (large bold figures) were never checked against the grounds they actually sit
+// on; --ticker-ink replaces the hardcoded #fff6e8 text colour on the sindoor-background .ticker.
+test('accent-on-ground contrast floors per theme', () => {
+  for (const [name, t] of Object.entries(blocks)) {
+    assert.ok(t['ticker-ink'], `${name} --ticker-ink`);
+    assert.ok(ratio(t.sindoor, t.ivory) >= 4.5, `${name} sindoor/ivory ${ratio(t.sindoor, t.ivory).toFixed(2)}`);
+    assert.ok(ratio(t.sindoor, t.card) >= 4.5, `${name} sindoor/card ${ratio(t.sindoor, t.card).toFixed(2)}`);
+    assert.ok(ratio(t.durva, t.card) >= 3.0, `${name} durva/card ${ratio(t.durva, t.card).toFixed(2)}`); // 26px bold figures = large text
+    assert.ok(ratio(t['ticker-ink'], t.sindoor) >= 4.5, `${name} ticker-ink/sindoor ${ratio(t['ticker-ink'], t.sindoor).toFixed(2)}`);
+  }
+});

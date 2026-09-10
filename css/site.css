@@ -1,12 +1,13 @@
 :root{
   --bg:#0f1230;--bg2:#1c1850;--hero-ink:#fff6e8;--hero-muted:#c9c2e6;
   --ivory:#fff7ea;--ivory2:#fdefd6;--ink:#1d1631;--muted:#6b6280;
-  --sindoor:#e2401c;--pitambar:#f7b733;--durva:#2f8f5b;--gold:#ffcc66;
-  --cta:#e2401c;--cta-ink:#fff6e8;--line:rgba(29,22,49,.12);--card:#ffffff;
+  --sindoor:#c9361a;--pitambar:#f7b733;--durva:#2f8f5b;--gold:#ffcc66;
+  --cta:#c9361a;--cta-ink:#fff6e8;--line:rgba(29,22,49,.12);--card:#ffffff;
   --glow:rgba(247,183,51,.55);--glow2:rgba(226,64,28,.35);
   --display:"Baloo Da 2","Hind Siliguri",sans-serif;--serif:"Tiro Bangla","Noto Serif Bengali",serif;--body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
   --r:18px;
   --focus:var(--pitambar);
+  --hero-accent:#ffcc66;--ticker-ink:#fff6e8;
   color-scheme:light;
 }
 /* ================= base ================= */
@@ -23,7 +24,7 @@ h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
 /* ================= ticker ================= */
-.ticker{background:var(--sindoor);color:#fff6e8;font-size:13.5px;overflow:hidden;position:relative}
+.ticker{background:var(--sindoor);color:var(--ticker-ink);font-size:13.5px;overflow:hidden;position:relative}
 .ticker .in{display:flex;gap:2.5rem;padding:.35rem 0;white-space:nowrap;width:max-content;animation:tick 28s linear infinite}
 .ticker .in:hover{animation-play-state:paused}
 .ticker b{font-weight:800;letter-spacing:.08em}
@@ -193,12 +194,13 @@ footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
 .ph canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .ph .wrap{position:relative;z-index:1;display:grid;gap:.5rem;max-width:760px;margin-left:0}
 .otp input{font:16px var(--body);padding:.8rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory2);color:var(--ink);width:100%;box-sizing:border-box}
-.otp input.code{letter-spacing:.5em;text-align:center;font-size:22px;font-weight:700}
 .ph-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.ph h1{font-family:var(--display);font-size:clamp(30px,4.6vw,48px);line-height:1.12;margin:.2rem 0 0;text-wrap:balance}
-.ph p{margin:.2rem 0 0;max-width:62ch;opacity:.9;font-size:16px}
-.ph h1{font-size:clamp(34px,5vw,56px);font-weight:800}
-.ph p{margin:0;color:var(--hero-muted);max-width:60ch;font-size:17px}
+/* Task 9 fix: .ph h1 and .ph p were each declared twice (a second bridge rule from a later task
+   re-declared some but not all properties of the first); merged into one rule each, keeping the
+   winning cascade values. .ph p's second rule never touched `opacity`, so the first rule's
+   opacity:.9 silently survived on every inner-page heading — explicit opacity:1 fixes that. */
+.ph h1{font-family:var(--display);font-size:clamp(34px,5vw,56px);line-height:1.12;font-weight:800;margin:.2rem 0 0;text-wrap:balance}
+.ph p{margin:0;color:var(--hero-muted);max-width:60ch;font-size:17px;opacity:1}
 .crumb{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--pitambar);font-weight:700}
 /* history timeline */
 .tl{display:grid;grid-template-columns:120px 1fr;gap:1.2rem 2rem}
@@ -280,7 +282,10 @@ footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
 /* members page */
 .mem{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start}
 .otp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;display:grid;gap:.7rem}
-.otp input.code{font-size:24px;letter-spacing:.35em;text-align:center}
+/* Task 9 fix: merged with the identical-selector rule that used to sit at ~line 196 (deleted) —
+   this is the effective cascade result (later font-size/letter-spacing won; font-weight:700 from
+   the deleted rule was never overridden, so it's kept explicit here). */
+.otp input.code{font-size:24px;letter-spacing:.35em;text-align:center;font-weight:700}
 .dash{display:grid;gap:1rem}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:.8rem;text-align:center}
@@ -362,3 +367,21 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 table.ledger{display:table}
 /* logged-out members page has only the OTP card — centre it instead of leaving an empty column */
 .mem > .otp:only-child{grid-column:1 / -1;max-width:560px;width:100%;justify-self:center}
+/* final-review fix wave item 1: concept's .garland (line 74) declares height but no width, so the
+   canvas painted onto it stayed at its default replaced-element size (300×150, clipped by
+   height:26px to 52×26 rendered) instead of spanning the hero — bridge-only add, concept lacks
+   both properties on .garland. */
+.garland{width:100%;display:block}
+/* final-review fix wave item 2: mukha sets --pitambar equal to --bg (#e9b322), so anything coloured
+   via --pitambar on the hero/header ground (.crumb, the hero eyebrow/em, .countdown figures) becomes
+   invisible in that theme. --hero-accent is a new per-theme token for exactly this text-on-hero-
+   ground use; re-declaring `color` here is intentional and allowed — the concept's --pitambar value
+   is the defect being worked around, not this rule. */
+.crumb,.hero .eyebrow,.hero h1 em,.countdown b{color:var(--hero-accent)}
+/* final-review fix wave item 7: 44px minimum touch targets for the mobile nav menu links and the
+   footer link list. `.links a` (desktop nav) sets neither min-height nor display in the concept, so
+   `.links.open a` (this new, more specific selector, mobile-menu-open state) can add both cleanly.
+   `footer a` DOES set `display:block` in the concept — adding `display:inline-flex` here would
+   re-declare it, so padding-block reaches 44px instead, per the brief's fallback instruction. */
+.links.open a{min-height:44px;display:flex;align-items:center}
+footer a{min-height:44px;padding-block:.7rem}
