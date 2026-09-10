@@ -303,7 +303,6 @@ body{background:var(--ivory)}
 .countdown b{display:block;font:800 26px/1 var(--display);color:var(--pitambar)}
 .countdown span{font-size:12px;opacity:.85}
 .btn:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.person{ }
 .rich img{max-width:100%;border-radius:calc(var(--r) - 6px)}
 .rich p{margin:.4rem 0}
 .lightbox{position:fixed;inset:0;background:rgba(10,8,20,.94);display:flex;align-items:center;justify-content:center;z-index:60}
@@ -321,14 +320,11 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 .summary b{font:800 26px var(--display)}
 .summary .g{color:var(--durva)}.summary .neg{color:var(--sindoor)}
 @media (max-width:700px){.summary{grid-template-columns:1fr}}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:.8rem;text-align:center}
-.stat small{color:var(--muted);display:block}.stat b{font:800 22px var(--display);color:var(--sindoor)}
 .donor{display:flex;justify-content:space-between;gap:.5rem;padding:.5rem 0;border-bottom:1px solid var(--line)}
 .err{color:var(--sindoor);min-height:1.2em}
-.notice{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem}
 .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.otp input,.form input{font:16px var(--body);padding:.8rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory2);color:var(--ink);width:100%;min-height:44px}
+/* bridge rules only ADD properties the concept block lacks — never re-declare a value the concept sets (amended after Task 3 review) */
+.otp input,.form input{width:100%;min-height:44px;color:var(--ink)}
 .otp input[inputmode=numeric]{letter-spacing:.4em;text-align:center;font-size:22px;font-weight:700}
 ```
 
