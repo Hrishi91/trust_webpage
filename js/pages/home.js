@@ -6,6 +6,7 @@ import { inr, sum } from '../money.js';
 import { ganeshSvg, diyaSvg, paintHero, paintGarland, onResize } from '../art.js';
 import { CULTURE } from '../culture.js';
 import { barsView, donutView } from '../ledger-view.js';
+import { renderRich } from '../rich.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('home');
@@ -77,8 +78,54 @@ if (s) {
         el('p', { class: 'muted', text: pick({ bn: 'কমিটির সদস্যরা মোবাইল নম্বর দিয়ে OTP-তে ঢুকুন।', en: 'Committee members sign in with a phone OTP.' }) })),
       el('form', { class: 'form', action: 'members.html', method: 'get' }, el('input', { type: 'tel', name: 'phone', placeholder: '+91', 'aria-label': t('mem.phone') }), el('button', { class: 'btn', type: 'submit', text: t('mem.sendOtp') }))));
 
-    // Task 7 fills these four in; keep the names.
-    let story = () => null, culture = () => null, gallery = () => null, schedule = () => null, ledger = () => null, committee = () => null;
+    const cultureIcon = kind => { const c = el('div', { class: 'ill' }); c.dataset.kind = kind; return c; }; // CSS draws a token-coloured emblem per kind
+    let story = () => {
+      const h = history.at(-1), cover = albums.at(-1);   // listPublished orders ascending → last = newest
+      if (!pick(s.theme) && !h) return null;
+      return section(el('div', { class: 'story' },
+        cover?.coverUrl ? el('figure', { class: 'scene' }, el('img', { src: cover.coverUrl, alt: pick(cover.title), loading: 'lazy' }), el('figcaption', { text: `${num(cover.year)} · ${pick(cover.title)}` })) : null,
+        el('div', { class: 'txt' }, el('span', { class: 'eyebrow', text: pick({ bn: 'এই বছরের থিম', en: "This year's theme" }) }),
+          el('h2', {}, el('span', { class: 'stitch', text: pick(s.theme) || (h ? pick(h.title) : '') })),
+          h ? el('div', { class: 'rich' }, renderRich(pick(h.body))) : null,
+          el('div', { class: 'ctas' }, el('a', { class: 'btn ghost', href: 'about.html', text: t('nav.about') })))));
+    };
+    let culture = () => s.sectionVisibility.culture === false ? null : el('section', { class: 'culture' }, el('div', { class: 'wrap' },
+      sectionHead(pick({ bn: 'আমাদের মাটি, আমাদের শিল্প', en: 'Our soil, our craft' }), el('span', { class: 'pill', text: pick({ bn: 'দক্ষিণ দিনাজপুর', en: 'Dakshin Dinajpur' }) })),
+      el('div', { class: 'cgrid' }, ...CULTURE.map(c => el('article', { class: 'ccard' }, cultureIcon(c.icon), el('small', { text: pick(c.tag) }), el('h3', { text: pick(c.title) }), el('p', { text: pick(c.text) }))))));
+    let gallery = () => {
+      if (s.sectionVisibility.gallery === false || !albums.length) return null;
+      const latest = albums.slice(-5).reverse();
+      return section(sectionHead(t('nav.gallery'), el('a', { href: 'gallery.html', text: t('gallery.albums') + ' →' })),
+        el('div', { class: 'masonry' }, ...latest.map((a, i) => el('a', { class: i === 0 ? 'big' : '', href: `gallery.html?album=${a.id}` },
+          a.coverUrl ? el('img', { src: a.coverUrl, alt: pick(a.title), loading: 'lazy' }) : null, el('span', { class: 'cap', text: `${num(a.year)} · ${pick(a.title)}` })))));
+    };
+    let schedule = () => {
+      if (s.sectionVisibility.events === false) return null;
+      const now = new Date(), up = events.filter(e => new Date(e.end || e.start) >= now).slice(0, 4);
+      if (!up.length) return null;
+      const time = iso => new Date(iso).toLocaleTimeString(getLang() === 'bn' ? 'bn-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
+      return section(sectionHead(t('events.upcoming'), el('a', { href: 'events.html', text: t('nav.events') + ' →' })),
+        el('div', { class: 'timeline' }, ...up.map(e => { const live = new Date(e.start) <= now && now <= new Date(e.end || e.start);
+          return el('div', { class: live ? 'ev live' : 'ev' }, el('time', { text: `${fmtDate(e.start, getLang())} · ${time(e.start)}` }),
+            el('div', {}, el('b', { text: pick(e.title) }), el('span', { text: pick(e.venue) }), live ? el('span', { class: 'pulse', text: t('live.badge') }) : null)); })));
+    };
+    let ledger = () => {
+      if (s.sectionVisibility.transparency === false || !years[0]) return null;
+      const y = years[0], inc = y.income ?? [], exp = y.expense ?? [];
+      const top = [...inc].sort((a, b) => b.amount - a.amount).slice(0, 3), topE = [...exp].sort((a, b) => b.amount - a.amount).slice(0, 4);
+      const pct = sum(exp) ? Math.round((topE[0]?.amount ?? 0) / sum(exp) * 100) : 0;
+      return section(sectionHead(`${num(y.year)} · ${t('tr.title')}`, el('a', { href: 'transparency.html', text: t('tr.docs') + ' →' })),
+        el('div', { class: 'ledger' }, el('div', {}, barsView(top, getLang()), barsView(topE, getLang(), { kind: 'expense' })),
+          donutView(topE, getLang(), { big: `${num(pct)}%`, small: topE[0] ? pick(topE[0].category) : '' })));
+    };
+    let committee = () => {
+      if (s.sectionVisibility.committee === false || !people.length) return null;
+      const officers = people.filter(p => p.officer).slice(0, 4); const row = officers.length ? officers : people.slice(0, 4);
+      return section(sectionHead(t('nav.committee'), el('a', { href: 'committee.html', text: pick({ bn: 'সব সদস্য →', en: 'All members →' }) })),
+        el('div', { class: 'people' }, ...row.map(p => el('a', { class: 'person', href: 'committee.html' },
+          el('div', { class: 'ring' }, p.photoUrl ? el('img', { src: p.photoUrl, alt: '', loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) })),
+          el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) })))));
+    };
     const render = () => main.replaceChildren(...[hero(), cred(), bento(), story(), culture(), gallery(), schedule(), ledger(), donateBand(), committee(), membersTeaser()].filter(Boolean));
     render();
     document.addEventListener('langchange', render);
