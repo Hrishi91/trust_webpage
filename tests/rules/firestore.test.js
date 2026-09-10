@@ -22,6 +22,15 @@ test('settings: anyone reads, only admin writes', async () => {
   await assertFails(E.admin.firestore().doc('settings/site').delete());
 });
 
+test('settings: design must be one of the five theme names when present', async () => {
+  await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ design: 'mukha' }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ tagline: { bn: 'x', en: 'y' } }, { merge: true })); // design absent is fine
+  await assertFails(E.admin.firestore().doc('settings/site').set({ design: 'neon' }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ design: 7 }, { merge: true }));
+  await assertFails(E.anon.firestore().doc('settings/site').set({ design: 'mukha' }, { merge: true }));
+});
+
 // ---- published-content collections share one shape ----
 for (const coll of ['history', 'events', 'albums']) {
   test(`${coll}: public sees published+not-deleted only; admin sees all; no hard delete`, async () => {

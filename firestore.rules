@@ -11,10 +11,15 @@ service cloud.firestore {
     function isLive() { return resource.data.published == true && resource.data.deleted == false; }
     function albumLive(a) { return a.published == true && a.deleted == false; }
     function hasDeletedFlag() { return request.resource.data.deleted is bool; }
+    // Theme name (Phase 5). Anything else must never reach <html data-theme>.
+    function validDesign() {
+      return !('design' in request.resource.data)
+        || request.resource.data.design in ['siddhi', 'mukha', 'dhokra', 'atreyee', 'bangarh'];
+    }
 
     match /settings/site {
       allow read: if true;
-      allow create, update: if isAdmin();
+      allow create, update: if isAdmin() && validDesign();
       allow delete: if false;
     }
 

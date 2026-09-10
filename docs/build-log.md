@@ -409,3 +409,6 @@ docs/superpowers/specs/2026-09-10-phase-5-design-system.md (theme stored as sett
 
 ## 2026-09-10 — Phase 5 Task 1 — js/theme.js + head cache script
 Pure theme resolver (THEMES, DEFAULT_THEME, THEME_META, resolveTheme, isPreview, applyTheme); inline head script (localStorage-backed, no FOUC); eight public HTML pages wired with Google Fonts + themes.css link. 5 new tests (56 total).
+
+## 2026-09-10 — Phase 5 Task 2 — settings.design rule whitelist
+TDD (RED→GREEN): firestore.rules gains `validDesign()` helper (permit missing design or one of five theme names: siddhi, mukha, dhokra, atreyee, bangarh) and `match /settings/site` now gates on `isAdmin() && validDesign()`. tests/rules/firestore.test.js gained one test (21 total, 20→21 pass). No deploy (Task 13).
