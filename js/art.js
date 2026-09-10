@@ -64,7 +64,8 @@ export function diyaSvg() { return svgFrom(DIYA); }
 /** Hero background: theme-specific mandala/mask/river/frieze art behind the Ganesh art. */
 export function paintHero(c) {
   const [g, W, H] = setup(c); const t = theme();
-  const bg = css('--bg'), bg2 = css('--bg2'), gold = css('--gold'), glow = css('--glow'), sind = css('--sindoor'), pit = css('--pitambar'), durva = css('--durva');
+  // (concept declared an unused --pitambar here; dropped)
+  const bg = css('--bg'), bg2 = css('--bg2'), gold = css('--gold'), glow = css('--glow'), sind = css('--sindoor'), durva = css('--durva');
   const lg = g.createLinearGradient(0, 0, W, H); lg.addColorStop(0, bg2); lg.addColorStop(1, bg); g.fillStyle = lg; g.fillRect(0, 0, W, H);
   const cx = W * (W > 900 ? 0.74 : 0.5), cy = H * (W > 900 ? 0.5 : 0.3);
   if (t === 'siddhi' || t === 'dhokra') {
@@ -117,5 +118,5 @@ export function paintHeader(c) {
 export function onResize(fn) {
   let t; const h = () => { clearTimeout(t); t = setTimeout(fn, 120); };
   window.addEventListener('resize', h); document.addEventListener('themechange', fn);
-  return () => { window.removeEventListener('resize', h); document.removeEventListener('themechange', fn); };
+  return () => { clearTimeout(t); window.removeEventListener('resize', h); document.removeEventListener('themechange', fn); };
 }
