@@ -23,7 +23,7 @@ if (s) {
     const render = () => {
       const lang = getLang(), num = n => lang === 'bn' ? bnDigits(n) : String(n);
       const sorted = [...items].sort((a, b) => b.year - a.year);
-      main.replaceChildren(pageHeader({ crumb: t('nav.about'), title: t('nav.about'), lead: pick(s.tagline) }),
+      main.replaceChildren(pageHeader({ crumb: pick(s.name), title: t('nav.about'), lead: pick(s.tagline) }),
         section(items.length ? el('div', { class: 'tl' }, ...sorted.flatMap(h => [
           el('div', { class: 'yr' }, num(h.year), el('small', { text: pick(h.title) })),
           el('article', { class: 'card' }, el('h3', { text: pick(h.title) }), el('div', { class: 'rich' }, renderRich(pick(h.body))),

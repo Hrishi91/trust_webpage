@@ -150,7 +150,7 @@ if (s) {
       };
 
       main.replaceChildren(
-        pageHeader({ crumb: t('mem.title'), title: t('mem.phone') }),
+        pageHeader({ crumb: pick(s.name), title: t('mem.phone') }),
         section(el('div', { class: 'mem' }, el('div', { class: 'otp card' },
           el('div', { class: 'row' }, phoneInput, sendBtn),
           phoneErr,
@@ -161,7 +161,7 @@ if (s) {
       const lang = getLang();
       if (!member) {
         main.replaceChildren(
-          pageHeader({ crumb: t('mem.title'), title: t('mem.title') }),
+          pageHeader({ crumb: pick(s.name), title: t('mem.title') }),
           section(el('div', { class: 'dash' },
             el('p', { text: t('mem.notMember') }),
             el('button', { class: 'btn', type: 'button', text: t('mem.logout'), onclick: () => signOut(auth) }))));
@@ -187,7 +187,7 @@ if (s) {
         : el('p', { class: 'muted', text: t('common.empty') });
 
       main.replaceChildren(
-        pageHeader({ crumb: t('mem.title'), title: t('mem.title') }),
+        pageHeader({ crumb: pick(s.name), title: t('mem.title') }),
         section(el('div', { class: 'dash' },
           el('div', { class: 'card' },
             el('h2', { text: pick(member.name, lang) }),
