@@ -2,7 +2,7 @@
 
 Static vanilla-JS public website + single-admin Firebase backend for the Ganesh Puja Trust.
 
-**Status: Phases 0–4 live on production (`v2.0.0`, 2026-09-04)** — donations, transparency, live announcements, and the members portal are all serving real traffic at `https://hrishi91.github.io/trust_webpage/`; see `docs/PROJECT_CONTEXT.md` §5 and `docs/pending.md` for owner follow-ups (real donation data, phone OTP on a device, App Check key).
+**Status: Phases 0–5 live on production (2026-09-11)** — donations, transparency, live announcements, the members portal, and a five-theme design system (সিদ্ধি/মুখা/ঢোকরা/আত্রেয়ী/বাণগড়, admin-switchable from the 🎨 ডিজাইন card) are all serving real traffic at `https://hrishi91.github.io/trust_webpage/`; see `docs/PROJECT_CONTEXT.md` §5–6 and `docs/pending.md` for owner follow-ups (real donation data, phone OTP on a device, App Check key, picking a theme).
 
 ## Repo map
 
@@ -66,6 +66,7 @@ package.json                  # Dev dependencies and npm scripts
 - `npm run seed` — Seed emulator with test data
 - `npm run serve` — Serve site locally at http://127.0.0.1:5500
 - `npm run e2e` — Run Playwright end-to-end tests
+- `node scripts/shots.mjs` — Screenshot every public page × all 5 themes × 3 widths to `test-results/shots/` (needs `npm run serve` + a seeded emulator running); warns on horizontal overflow
 
 ## Design and plan
 

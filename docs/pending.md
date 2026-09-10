@@ -80,6 +80,46 @@ Small, non-blocking items noted during Tasks 1–13 review. None gate Task 14; r
 - donations/notices/roster soft-delete and members phone-uniqueness checks have a TOCTOU window (read-then-write, no transaction) — acceptable at single-admin scale, would need a transaction or Firestore-side uniqueness constraint at larger scale
 - `js/pages/home.js`'s live strip can paint once before `onAnnouncements()`'s first `onSnapshot` callback resolves (empty strip flashes, then fills) — not a correctness bug, just a first-paint flicker
 
+## Phase 5 — Design system
+
+Plan: `docs/superpowers/plans/2026-09-10-phase-5-design-system.md`. Spec: `docs/superpowers/specs/2026-09-10-phase-5-design-system.md`.
+
+- [x] Tasks 1–13 all done (2026-09-11) — five selectable themes (`js/theme.js`), rules whitelist for
+  `settings.design`, `css/site.css`+`css/themes.css`, hand-drawn Ganesh/diya art (`js/art.js`), shell
+  rewrite (site-wide live ticker, sticky nav, footer), all eight public pages restyled, new admin
+  fields (`officer`, `featured`, `donatePurposes`, `sectionVisibility.culture`), admin 🎨 ডিজাইন card,
+  screenshot matrix script, docs, rules deployed, production live-verified — **Phase 5 is LIVE**.
+
+### ⏳ Owner still to do (Phase 5)
+
+- **Pick a theme**: /admin/ → 🎨 ডিজাইন → প্রিভিউ each of the five → চালু করুন the one you want. Default
+  live right now is সিদ্ধি (Siddhi).
+- **Mark officers**: 👥 কমিটি → tick "পদাধিকারী (সামনে দেখাও)" for the সভাপতি/সম্পাদক/কোষাধ্যক্ষ so they
+  show first on the committee page.
+- **Mark featured albums**: 🖼️ গ্যালারি → tick "সেরা মুহূর্ত strip-এ দেখাও" on a few good albums so the
+  home page's best-moments strip isn't empty.
+- **Fill দানের খাত**: ⚙️ সেটিংস → "দানের খাত" textarea (one purpose per line, `bn | en | amounts`) so
+  donate.html shows real purpose cards instead of none.
+- **Upload real photos + logo**: replace placeholder committee/album images with real uploads, and set
+  a real logo via `settings.logoUrl` (currently the ॐ mark shows when it's empty).
+- A fixed bottom-sheet Donate button (thumb-reachable on every page, not just the hero CTA/nav link)
+  was **not built this phase** — YAGNI until the owner asks for it (see the Task 13 brief's self-review).
+
+### Deferred minors from Phase 5 reviews
+
+Small, non-blocking items noted during Tasks 1–12 review. None gate Task 13 or go-live; revisit opportunistically.
+
+- `applyTheme()` has no unit test; the theme regex is duplicated in all 8 HTML page heads plus `theme.js` (inherent to the inline-only FOUC-guard script); `</head>` shares a line with the last `<link>` tag in the 8 HTML files
+- rules tests are missing a case for: doc already has `design:'mukha'`, a merge-write of an unrelated field should still succeed (merge semantics)
+- `js/art.js`'s Ganesh SVG element actually closes a few lines later than the brief's cited line range (doc nit only)
+- `pageHeader()` discards `onResize`'s unsubscribe on the very first mount (acceptable — a page-lifetime listener on a multi-page site)
+- home page's `albums`/`history`/`people` are re-fetched on every render rather than cached; the single `Promise.all` blanks the whole home page on any one read failure (both spec'd patterns, not bugs)
+- `donutArcs`'s per-slice 2dp rounding can overshoot the circle's circumference by hundredths of a degree; the initial-letter avatar fallback uses `slice(0,1)` (safe for Bengali since it stays within the Basic Multilingual Plane)
+- the documents accordion on transparency has a duplicate ↓ glyph (`summary::after` plus the link's own text); the render layer has no URL guard on document links (the admin write path already filters what can be uploaded)
+- Task 8's fix report described a listener-leak fix (in `pageHeader()`) without stating how many stray listeners it actually found — same pattern as Task 6's leak fix, which was verified with an exact count
+- `donatePurposes` field placement in the settings form is a little arbitrary (cosmetic ordering only)
+- the 🎨 ডিজাইন card's Apply button has no in-flight guard against a double-click (same pre-existing gap as the settings form's save button); `theme.spec.js`'s apply test doesn't restore `design:'siddhi'` on failure
+
 ## Later phases (spec §8)
 
 Payment gateway (real online UPI/card checkout, not the current "pay via UPI app + WhatsApp confirm" flow) once 80G registration lands and the trust can accept it directly.

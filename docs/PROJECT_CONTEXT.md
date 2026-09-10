@@ -1,4 +1,4 @@
-*Last updated: 2026-09-03 (Task 21 — docs refresh; Phase 0+1 code complete)*
+*Last updated: 2026-09-11 (Phase 5 Task 13 — screenshot matrix, docs, rules deployed, live-verified)*
 
 ## 1. What this is
 
@@ -125,3 +125,70 @@ Practical effect: `tests/e2e/members.spec.js` includes the real "sign in → rel
 ### e2e coverage added
 
 `tests/e2e/{donate,transparency,live,members}.spec.js`, 11 new specs (2+3+2+4) on top of the existing 8, for 19 total. `playwright.config.js` projects now run `public` (public/donate/transparency/live specs) → `members` → `admin`, since `admin.spec.js`'s soft-delete test still mutates seed data and must run last. Both `npm run seed && npm run e2e` runs required by this task were green (19/19), and `npm test` (39 unit + 20 rules) is unchanged and green — no rules/index changes this task.
+
+## 6. State as of 2026-09-11 — Phase 5
+
+**Live: Phase 5 (design system) on 2026-09-11** — rules deployed to `ganesh-puja-trust` (settings.design
+whitelist + unchanged indexes/storage), and every page verified against production
+(`https://hrishi91.github.io/trust_webpage/`). Plan: `docs/superpowers/plans/2026-09-10-phase-5-design-system.md`
+(13 tasks, subagent-driven with per-task review). Spec: `docs/superpowers/specs/2026-09-10-phase-5-design-system.md`.
+
+### What Phase 5 adds
+
+- **Five selectable visual themes** (`js/theme.js`'s `THEMES`/`THEME_META`): সিদ্ধি/Siddhi (Ganesh's own
+  colours — sindoor, pitambar, durva, gold), মুখা/Mukha (Kushmandi wooden mask — yellow/red/black),
+  ঢোকরা/Dhokra (brass light — dark bronze, gold lines, `color-scheme:dark`), আত্রেয়ী/Atreyee (river and
+  paddy — calm, ledger-first), বাণগড়/Bangarh (terracotta heritage — brick red, sandstone). One
+  `css/themes.css` holds the four non-default token blocks; `css/site.css` carries the default (siddhi)
+  tokens plus every shared component rule.
+- **Hand-drawn Ganesh line art + diya SVGs** (`js/art.js`, built via `DOMParser` — no `innerHTML` — per
+  the sanitisation rule) painted into a themed hero/page-header canvas background on every page.
+  Live announcements moved from a home-page-only list into a site-wide `.ticker` in `js/shell.js`,
+  visible from every page (including donate) — a Belur-Math-style notice board.
+  All eight public pages (`index/about/committee/gallery/events/donate/transparency/members`) were
+  restyled onto the new shell/`pageHeader`/`section` primitives: officer ring cards + member grid
+  (committee), best-moments strip + album masonry (gallery), day tabs + live/past accordion (events),
+  purpose cards + UPI/WhatsApp/donor-wall (donate), bars+donut ledger + documents accordion + legal
+  block (transparency), OTP dashboard (members) — nav collapses to logo + burger under 860px.
+- **Admin**: a 🎨 ডিজাইন card (`admin/js/sections/design.js`, dashboard tile #3, right after settings)
+  lists all five themes with a live colour swatch, a Preview link (`?theme=`, own tab only, never
+  persists) and an Apply button (re-authenticates, writes `settings/site.design`, logs an audit row).
+  New fields: committee `officer` (bool, "পদাধিকারী" — shows first as a ring card), albums `featured`
+  (bool, "সেরা মুহূর্ত strip-এ দেখাও" — feeds the home best-moments strip), settings `donatePurposes`
+  (multiline text, one purpose per line, feeds donate.html's purpose cards), settings
+  `sectionVisibility.culture` (hides/shows the static Kushmandi/Dhokra/Atreyee culture cards).
+- **`scripts/shots.mjs`**: renders all 8 pages × 5 themes × 3 widths (390/768/1366) to
+  `test-results/shots/<theme>/<page>-<width>.png` and warns on any horizontal overflow — the gate is
+  zero warnings.
+
+### Decisions and their causes (from the spec, §2)
+
+| Decision | Cause |
+|---|---|
+| Theme stored as `settings/site.design` (string), **not** `settings.theme` | `theme` already means "this year's puja theme" (bilingual text shown on the hero); reusing it would silently break the hero copy |
+| Firestore rule: a `design` field on a settings write must be one of the five theme names | Security-first (owner: "remember the security") — a stray value cannot reach `<html data-theme>` and pull in un-audited CSS |
+| `js/theme.js` applies the theme from settings; `?theme=<name>` overrides for that page load only (admin Preview), never persisted | Admin needs to see a theme before switching the whole site; a shared preview link cannot re-skin the site for anyone else |
+| Last-applied theme cached in `localStorage('design')`, applied by a 1-line inline head script before CSS paints | Settings load is async (Firestore) — without the cache the page flashes the default theme, then swaps |
+| One `css/themes.css` file for the four non-default token blocks; default tokens live in `css/site.css` | No build step — five separate ~15-line files cost more HTTP round-trips than the bytes they'd save |
+| One Google Fonts link (Baloo Da 2, Hind Siliguri, Tiro Bangla, Atma) shared by all five themes | Per-theme font injection adds JS + FOUT for ~30 KB saved; four families with `display=swap` |
+| Live announcements moved from the home page into a ticker in the shell (all pages) | A live aarti announcement should be visible from the donate page too, not just home; `.live-strip .ann .pulse` classes kept so `tests/e2e/live.spec.js` still holds |
+| New flags `committee.officer`, `albums.featured`, `settings.donatePurposes`, `sectionVisibility.culture` | "Officers first", "best-moments strip", "purpose cards" page patterns each need one checkbox/textarea in an existing admin form — no new collections, no new indexes |
+| Culture cards are static bilingual copy in `js/culture.js`, hideable via `sectionVisibility.culture` | District facts (GI 2018, 2600+ artisans) don't change yearly; a collection for them is YAGNI |
+| No canvas "scene" photo placeholders in production | The concept's illustrated scenes stood in for photos during review only; a real album without a cover shows the theme's glow header, not a fake scene |
+
+### Test counts and gate
+
+`npm run test:unit` 67/67, `npm run test:rules` 21/21 (dev emulator stopped first so `emulators:exec`
+could bind 8080/9099), `npm run e2e` 26/26 (public incl. theme.spec.js → members → admin). `scripts/deploy-rules.sh`
+ran the full suite again internally (green) then deployed `firestore:rules,firestore:indexes,storage` to
+`ganesh-puja-trust` — see `docs/build-log.md` for the deploy tail and the live-verification results.
+
+### Fix found and shipped in Task 13
+
+`scripts/shots.mjs`'s local screenshot review (not the live check) surfaced a real layout bug present
+on every page and theme, inherited from Task 5's shell.js rewrite: the concept's brand lockup and
+footer address block each use a `<br>` to put the tagline/registration-number line on its own row;
+that `<br>` was dropped when the markup was ported, so "গণেশ পুজো ট্রাস্ট" ran directly into the tagline
+in the nav brand, and the address ran directly into "Reg. no." in the footer, both on one crowded line.
+Fixed in `js/shell.js` by restoring the `<br>` in both spots — text content unchanged, so no test
+needed updating; `npm run e2e` (26/26) reconfirmed green after the fix.
