@@ -360,3 +360,5 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
    laying rows out two-per-line instead of one column. table.ledger already outranks .ledger on
    specificity, so restoring its own display is enough; no id/class rename needed. */
 table.ledger{display:table}
+/* logged-out members page has only the OTP card — centre it instead of leaving an empty column */
+.mem > .otp:only-child{grid-column:1 / -1;max-width:560px;width:100%;justify-self:center}
