@@ -394,3 +394,6 @@ Owner asked for 5 selectable modern designs, admin-chosen. Scanned lalbaugcharaj
 
 ## 2026-09-10 — design thinking doc + theme sample
 docs/design/design-thinking-2026-09-10.md: culture→design-material table (alpona, marigold, kumkum, diya, kantha/gamcha, Ganesh iconography, Malda mango/silk/Gambhira), 2026 UI patterns kept/dropped, shared skeleton wireframe, five themes as decisions with one signature each, self-critique, a11y/perf floor. Visual sample (5 hero mockups, real Google Fonts, real bn copy) published as an Artifact for the owner to review.
+
+## 2026-09-10 — five design proposals (canvas)
+Owner correction: the Trust is in Dakshin Dinajpur (Balurghat), not Malda — earlier docs said Malda from the Chanda app side names; fixed in the proposals. Research: Ganesh iconography colours (sindoor, pitambar, durva, modak) and district crafts (Kushmandi wooden mask GI 2018, Dhokra, Khon, Bhawaiya, Bangarh terracotta, Atreyee). Five proposals as Claude Design artboards in docs/design/proposals/ (Sindoor, Mukha, Dhokra, Atreyee, Bangarh) with motivation/trade-off notes; published as a canvas for the owner to pick from.

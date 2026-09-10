@@ -5,7 +5,7 @@ derived, so the choices can be argued with rather than just liked.
 
 ## 1. The subject, pinned
 
-- **Subject:** a neighbourhood Ganesh Puja run by a charitable Trust in Malda,
+- **Subject:** a neighbourhood Ganesh Puja run by a charitable Trust in Dakshin Dinajpur (Balurghat),
   West Bengal — five years old, three sides of town, hundreds of small donors.
 - **Audience:** donors and neighbours on phones (bn first), committee members,
   and the occasional auditor/official on a desktop reading the Transparency page.
