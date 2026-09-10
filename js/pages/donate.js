@@ -24,11 +24,7 @@ if (s) {
       errored = true;
     }
     const purposes = parsePurposes(s.donatePurposes);
-    // Hoisted so purpose chips (built inside render()) can fill the amount field. render() re-runs
-    // on langchange and the inputs' placeholders are language-dependent, so the inputs themselves
-    // are (re)created inside render() every time — these three names are just the slots the fresh
-    // inputs are assigned into, declared once at block scope so confirmCard()'s closures (defined
-    // once, outside render()) always read the current render's inputs.
+    // The three inputs are created per render() (placeholders follow the language) but held in these block-level bindings so the purpose chips — built in the same render — can fill the amount.
     let nameField, amountField, refField;
 
     const upiCard = () => {

@@ -1,7 +1,7 @@
 import { mountShell, section, pageHeader } from '../shell.js';
 import { listPublished } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
-import { el, fmtDate, bnDigits, isLiveEvent } from '../ui.js';
+import { el, fmtDate, isLiveEvent } from '../ui.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('events', t('nav.events'));
@@ -18,7 +18,7 @@ if (s) {
   } else {
     let selectedDay = null;
     const render = () => {
-      const now = new Date(), lang = getLang(), num = n => lang === 'bn' ? bnDigits(n) : String(n);
+      const now = new Date(), lang = getLang();
       // Sorted chronologically (listPublished orders by the admin's free-form 'order' field, not
       // by date) so the day tabs read left-to-right by date and the default tab is the nearest
       // upcoming day, not whichever event the admin happened to create/order first.

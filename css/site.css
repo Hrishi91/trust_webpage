@@ -304,7 +304,7 @@ body{background:var(--ivory)}
 .live-strip{/* alias for the ticker so live.spec selectors hold */}
 .ticker .ann{display:inline-block;padding:0 1.6rem;white-space:nowrap}
 .ticker .ann small{opacity:.7;margin-left:.4rem}
-.ticker .pulse{display:inline-block;background:var(--sindoor);color:#fff6e8;border-radius:999px;padding:.05rem .55rem;font-weight:700;animation:pulse 1.2s infinite;margin-right:.4rem}
+.pulse{display:inline-block;background:var(--sindoor);color:#fff6e8;border-radius:999px;padding:.05rem .55rem;font-weight:700;animation:pulse 1.2s infinite;margin-right:.4rem}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .countdown{display:flex;gap:.6rem;margin-top:1.2rem}
 .countdown div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:.5rem .8rem;min-width:64px;text-align:center}
