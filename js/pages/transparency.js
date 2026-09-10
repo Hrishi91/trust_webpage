@@ -89,7 +89,7 @@ if (s) {
           el('div', { class: 'card' }, el('h2', { text: t('tr.income') }), ledgerTable(inc, lang)),
           el('div', { class: 'card' }, el('h2', { text: t('tr.expense') }), ledgerTable(exp, lang)),
           docs.length ? el('div', { class: 'acc' }, ...docs.map((d, i) => el('details', i === 0 ? { open: '' } : {}, el('summary', { text: pick(d.title, lang) }),
-            el('p', {}, el('a', { href: d.url, target: '_blank', rel: 'noopener', text: pick({ bn: 'ডাউনলোড ↓', en: 'Download ↓' }) }))))) : null,
+            el('p', {}, el('a', { href: d.url, target: '_blank', rel: 'noopener', text: pick({ bn: 'ডাউনলোড', en: 'Download' }) }))))) : null,
           el('div', { class: 'legal' }, el('b', { text: pick({ bn: 'আইনি তথ্য', en: 'Legal' }) }),
             el('div', {}, t('tr.regNo'), el('span', { text: s.regNo || pick({ bn: 'প্রক্রিয়াধীন', en: 'in progress' }) })),
             el('div', {}, '80G', el('span', { text: s.has80G ? t('donate.tax80g') : pick({ bn: 'রেজিস্ট্রেশনের পরে', en: 'after registration' }) })),
