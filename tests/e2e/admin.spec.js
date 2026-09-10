@@ -36,7 +36,7 @@ test('create + publish an event, it appears publicly', async ({ page }) => {
   await page.click('#adm-main button[type=submit]');   // publish
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/events.html');
-  await expect(page.locator('.event h3', { hasText: 'ই২ই অনুষ্ঠান' })).toBeVisible();
+  await expect(page.locator('.ev b', { hasText: 'ই২ই অনুষ্ঠান' })).toBeVisible();
 });
 test('soft delete asks confirm + reauth and hides the row', async ({ page }) => {
   await login(page);

@@ -9,6 +9,8 @@ test('donor wall shows exactly the visible seeded rows, anonymous label used, hi
   await expect(page.locator('.donor')).toHaveCount(3);
   await expect(page.locator('.donor', { hasText: 'নাম প্রকাশে অনিচ্ছুক' })).toHaveCount(1);
   await expect(page.locator('main')).not.toContainText('গোপন দাতা'); // d3's donor name — showOnWall:false
+  await expect(page.locator('.purpose .pcard')).toHaveCount(2);
+  await expect(page.locator('.pcard .chips i').first()).toHaveText('₹৫০১');
 });
 
 test('WhatsApp confirm message is pre-filled with the encoded amount', async ({ page }) => {

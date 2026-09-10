@@ -15,11 +15,11 @@ test('language toggle switches to English and persists', async ({ page }) => {
   await page.click('.lang');
   await expect(page.locator('.brand')).toContainText('Ganesh Puja Trust');
   await page.goto('/events.html');
-  await expect(page.locator('h1')).toHaveText('Upcoming events');
+  await expect(page.locator('.ph h1')).toHaveText('Upcoming events');
 });
 test('drafts and hidden rows never render publicly', async ({ page }) => {
   await page.goto('/about.html');  await expect(page.locator('article')).toHaveCount(1);
-  await page.goto('/events.html'); await expect(page.locator('.event')).toHaveCount(1);
+  await page.goto('/events.html'); await expect(page.locator('.ev')).toHaveCount(1);
   await page.goto('/gallery.html'); await expect(page.locator('.albums a')).toHaveCount(1);
   await page.goto('/committee.html'); await expect(page.locator('.person')).toHaveCount(1);
   await page.goto('/committee.html'); await expect(page.locator('.officers .officer, .mgrid .mrow')).toHaveCount(1);

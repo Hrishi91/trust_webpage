@@ -34,10 +34,11 @@ const admin = await auth.createUser({ email: 'admin@example.com', password: 'pas
 await db.doc(`admins/${admin.uid}`).set({ createdAt: new Date() });
 await db.doc('settings/site').set({
   name: bi('গণেশ পুজো ট্রাস্ট', 'Ganesh Puja Trust'), tagline: bi('সবার পুজো', 'Everyone\'s puja'),
-  address: bi('মালদা', 'Malda'), theme: bi('', ''), logoUrl: '', mapUrl: '',
+  address: bi('বালুরঘাট, দক্ষিণ দিনাজপুর', 'Balurghat, Dakshin Dinajpur'), theme: bi('', ''), logoUrl: '', mapUrl: '',
   contacts: { phone: '', whatsapp: '919800000000', email: '' }, regNo: 'WB/2026/DEMO', has80G: false, upiId: 'trust@upi', upiQrUrl: '',
-  pujaDate: new Date(Date.now() + 10 * 86400000).toISOString(), maintenance: false, defaultLang: 'bn',
-  sectionVisibility: { about: true, committee: true, gallery: true, events: true, donate: true, transparency: true, members: true },
+  pujaDate: new Date(Date.now() + 10 * 86400000).toISOString(), maintenance: false, defaultLang: 'bn', design: 'siddhi',
+  donatePurposes: 'প্রতিমা | Idol | 501,1101\nভোগ | Bhog | 301,501',
+  sectionVisibility: { about: true, committee: true, gallery: true, events: true, donate: true, transparency: true, members: true, culture: true },
 });
 const base = { deleted: false, createdAt: new Date() };
 await db.doc('history/h1').set({ ...base, year: 2025, title: bi('২০২৫', '2025'), body: bi('<p>গত বছর</p>', '<p>Last year</p>'), images: [], order: 2025, published: true });

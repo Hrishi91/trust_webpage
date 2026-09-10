@@ -1,8 +1,9 @@
-import { mountShell } from '../shell.js';
+import { mountShell, section, sectionHead, pageHeader } from '../shell.js';
 import { listDonorWall } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, fmtDate, toast, digits } from '../ui.js';
 import { inr } from '../money.js';
+import { parsePurposes } from '../ledger.js';
 
 const COPY_LABEL = { bn: 'কপি করুন', en: 'Copy' };
 const NAME_LABEL = { bn: 'নাম', en: 'Name' };
@@ -22,6 +23,13 @@ if (s) {
       console.error(err);
       errored = true;
     }
+    const purposes = parsePurposes(s.donatePurposes);
+    // Hoisted so purpose chips (built inside render()) can fill the amount field. render() re-runs
+    // on langchange and the inputs' placeholders are language-dependent, so the inputs themselves
+    // are (re)created inside render() every time — these three names are just the slots the fresh
+    // inputs are assigned into, declared once at block scope so confirmCard()'s closures (defined
+    // once, outside render()) always read the current render's inputs.
+    let nameField, amountField, refField;
 
     const upiCard = () => {
       if (!s.upiId) {
@@ -31,29 +39,27 @@ if (s) {
           wa ? el('a', { class: 'btn', href: `https://wa.me/${wa}`, target: '_blank', rel: 'noopener', text: 'WhatsApp' }) : null);
       }
       const payHref = `upi://pay?pa=${encodeURIComponent(s.upiId)}&pn=${encodeURIComponent(pick(s.name))}&cu=INR`;
-      return el('div', { class: 'card' },
-        el('h2', { text: t('donate.upi') }),
-        el('p', {}, el('code', { class: 'upi-id', text: s.upiId })),
-        el('button', {
-          class: 'btn', type: 'button', text: pick(COPY_LABEL),
-          onclick: async () => {
-            if (!navigator.clipboard || !navigator.clipboard.writeText) return;
-            try {
-              await navigator.clipboard.writeText(s.upiId);
-              toast(t('donate.copied'));
-            } catch (err) { console.error(err); }
-          },
-        }),
-        s.upiQrUrl ? el('div', {}, el('p', { class: 'muted', text: t('donate.scan') }), el('img', { src: s.upiQrUrl, alt: t('donate.scan'), style: 'max-width:260px;width:100%' })) : null,
-        el('p', {}, el('a', { class: 'btn', href: payHref, text: t('donate.upi') })));
+      return el('div', { class: 'upibig' },
+        s.upiQrUrl ? el('img', { src: s.upiQrUrl, alt: t('donate.scan'), style: 'width:160px;height:160px;object-fit:contain' }) : null,
+        el('div', {},
+          el('p', {}, el('code', { class: 'upi-id', text: s.upiId })),
+          el('div', { class: 'row' },
+            el('button', {
+              class: 'btn', type: 'button', text: pick(COPY_LABEL),
+              onclick: async () => {
+                if (!navigator.clipboard || !navigator.clipboard.writeText) return;
+                try {
+                  await navigator.clipboard.writeText(s.upiId);
+                  toast(t('donate.copied'));
+                } catch (err) { console.error(err); }
+              },
+            }),
+            el('a', { class: 'btn', href: payHref, text: t('donate.upi') }))));
     };
 
     const confirmCard = () => {
       const wa = digits(s.contacts.whatsapp);
       if (!wa) return null;
-      const nameField = el('input', { type: 'text', placeholder: pick(NAME_LABEL), 'aria-label': pick(NAME_LABEL) });
-      const amountField = el('input', { type: 'number', min: '0', placeholder: pick(AMOUNT_LABEL), 'aria-label': pick(AMOUNT_LABEL) });
-      const refField = el('input', { type: 'text', placeholder: pick(REF_LABEL), 'aria-label': pick(REF_LABEL) });
       return el('div', { class: 'card' },
         el('h2', { text: t('donate.confirm') }),
         el('form', {
@@ -74,20 +80,18 @@ if (s) {
 
     const render = () => {
       const lang = getLang();
-      main.replaceChildren(...[
-        el('h1', { text: t('donate.title') }),
-        upiCard(),
-        confirmCard(),
-        s.has80G ? el('p', { class: 'muted', text: t('donate.tax80g') }) : null,
-        s.regNo ? el('p', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null,
-        el('h2', { text: t('donate.wall') }),
-        errored ? el('p', { class: 'muted', text: t('common.error') })
-          : wall.length ? el('div', {}, ...wall.map(d => el('div', { class: 'donor' },
-              el('span', { text: d.isAnonymous ? t('donate.anonymous') : d.donorName }),
-              el('span', { text: inr(d.amount, lang) }),
-              el('span', { text: fmtDate(d.date, lang) }))))
-            : el('p', { class: 'muted', text: t('common.empty') }),
-      ].filter(Boolean));
+      nameField = el('input', { type: 'text', placeholder: pick(NAME_LABEL), 'aria-label': pick(NAME_LABEL) });
+      amountField = el('input', { type: 'number', min: '0', placeholder: pick(AMOUNT_LABEL), 'aria-label': pick(AMOUNT_LABEL) });
+      refField = el('input', { type: 'text', placeholder: pick(REF_LABEL), 'aria-label': pick(REF_LABEL) });
+      const purposeCards = purposes.length ? el('div', { class: 'purpose' }, ...purposes.map(p => el('div', { class: 'pcard' }, el('b', { text: pick(p.title) }),
+        el('div', { class: 'chips' }, ...p.amounts.map(a => el('i', { text: inr(a, lang), onclick: () => { amountField.value = String(a); amountField.focus(); } })))))) : null;
+      main.replaceChildren(pageHeader({ crumb: t('nav.donate'), title: t('donate.title'), lead: s.has80G ? t('donate.tax80g') : '' }),
+        section(el('div', { class: 'dgrid' },
+          el('div', {}, upiCard(), purposeCards ? sectionHead(pick({ bn: 'কোন খাতে', en: 'For what' })) : null, purposeCards),
+          el('div', {}, confirmCard(), el('div', { class: 'form wall-card' }, el('span', { class: 'eyebrow', text: t('donate.wall') }),
+            errored ? el('p', { class: 'muted', text: t('common.error') }) : wall.length ? el('div', { class: 'wall' }, ...wall.map(d => el('div', { class: 'donor' },
+              el('span', { text: d.isAnonymous ? t('donate.anonymous') : d.donorName }), el('span', { text: inr(d.amount, lang) }), el('span', { class: 'muted', text: fmtDate(d.date, lang) })))) : el('p', { class: 'muted', text: t('common.empty') }),
+            s.regNo ? el('small', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null)))));
     };
     render();
     document.addEventListener('langchange', render);
