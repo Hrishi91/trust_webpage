@@ -35,7 +35,7 @@ export async function mountShell(active, pageTitle) {
   applyTheme(resolveTheme(s.design, location.search), { persist: !isPreview(location.search) });
   document.documentElement.lang = getLang();
   let ann = [], live = false;
-  const ticker = () => ann.length ? el('div', { class: 'ticker live-strip', 'aria-label': t('live.announcements') },
+  const buildTicker = () => ann.length ? el('div', { class: 'ticker live-strip', 'aria-label': t('live.announcements') },
     // Duplicated once (pass 0 and 1) for the seamless CSS marquee (width:max-content + -50%
     // translate loop needs two identical copies of the content). The live `.pulse` badge is
     // rendered only in pass 0 — otherwise e2e assertions like `.live-strip .pulse` (a single-
@@ -46,23 +46,38 @@ export async function mountShell(active, pageTitle) {
       return el('span', { class: 'ann' }, pass === 0 && live && a.isLive ? el('span', { class: 'pulse', text: t('live.badge') }) : null,
         `${a.pinned ? '📌 ' : ''}${pick(a.text)}`, created ? el('small', { text: fmtDate(created, getLang()) }) : null);
     })))) : null;
-  const render = () => {
+  // Announcements arrive on their own Firestore snapshot cadence and must not disturb an
+  // already-open mobile menu, so the ticker is the only piece that snapshot updates re-render:
+  // it is replaced/inserted/removed as the FIRST child of #site-header, leaving `.nav` (and any
+  // `.links.open`/aria-expanded state on it) untouched.
+  const renderTicker = () => {
+    const header = document.getElementById('site-header');
+    const existing = header.querySelector('.ticker');
+    const node = buildTicker();
+    if (node) { if (existing) existing.replaceWith(node); else header.prepend(node); }
+    else if (existing) existing.remove();
+  };
+  // Nav is rebuilt only by the initial mount and on langchange (labels/lang toggle differ) —
+  // never by an announcements update, so an open burger menu survives ticker refreshes.
+  const renderNav = () => {
     document.documentElement.lang = getLang();
     document.title = pageTitle ? `${pageTitle} · ${pick(s.name)}` : pick(s.name);
     const links = el('div', { class: 'links' },
       ...NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false)
             .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));
-    document.getElementById('site-header').replaceChildren(...[
-      ticker(),
-      el('nav', { class: 'nav' }, el('div', { class: 'wrap' },
-        el('a', { href: 'index.html', class: 'brand', 'aria-label': pick(s.name) }, brandMark(s),
-          el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
-        links,
-        el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') }),
-        el('button', { class: 'burger', type: 'button', 'aria-label': 'Menu', 'aria-expanded': 'false',
-          onclick: e => { const open = links.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); } },
-          el('span', { class: 'bars', 'aria-hidden': 'true' })))),
-    ].filter(Boolean));
+    const nav = el('nav', { class: 'nav' }, el('div', { class: 'wrap' },
+      el('a', { href: 'index.html', class: 'brand', 'aria-label': pick(s.name) }, brandMark(s),
+        el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
+      links,
+      el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') }),
+      el('button', { class: 'burger', type: 'button', 'aria-label': pick({ bn: 'মেনু', en: 'Menu' }), 'aria-expanded': 'false',
+        onclick: e => { const open = links.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); } },
+        el('span', { class: 'bars', 'aria-hidden': 'true' }))));
+    const header = document.getElementById('site-header');
+    const existingNav = header.querySelector('.nav');
+    if (existingNav) existingNav.replaceWith(nav); else header.appendChild(nav);
+  };
+  const renderFooter = () => {
     const wa = digits(s.contacts.whatsapp);
     document.getElementById('site-footer').replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
       el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('span', { class: 'muted', text: `Reg. no. ${s.regNo}` }) : null),
@@ -78,9 +93,9 @@ export async function mountShell(active, pageTitle) {
         el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }))),
     ));
   };
-  render();
-  onLangChange(() => { render(); document.dispatchEvent(new CustomEvent('langchange')); });
-  const unsub = onAnnouncements((list, meta) => { ann = list; live = meta.live; render(); });
+  renderTicker(); renderNav(); renderFooter();
+  onLangChange(() => { renderTicker(); renderNav(); renderFooter(); document.dispatchEvent(new CustomEvent('langchange')); });
+  const unsub = onAnnouncements((list, meta) => { ann = list; live = meta.live; renderTicker(); });
   window.addEventListener('pagehide', unsub);
   if (s.maintenance && !location.pathname.includes('/admin/')) {
     document.getElementById('main').replaceChildren(el('p', { class: 'notice', text: t('footer.maintenance') }));
