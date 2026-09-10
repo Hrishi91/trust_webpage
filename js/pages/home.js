@@ -1,7 +1,7 @@
 import { mountShell, section, sectionHead } from '../shell.js';
 import { listPublished, listCommittee, listTransparencyYears } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
-import { el, countdown, fmtDate, bnDigits, digits } from '../ui.js';
+import { el, countdown, fmtDate, bnDigits, digits, isLiveEvent } from '../ui.js';
 import { inr, sum } from '../money.js';
 import { ganeshSvg, diyaSvg, paintHero, paintGarland, onResize } from '../art.js';
 import { CULTURE } from '../culture.js';
@@ -105,7 +105,7 @@ if (s) {
       if (!up.length) return null;
       const time = iso => new Date(iso).toLocaleTimeString(getLang() === 'bn' ? 'bn-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
       return section(sectionHead(t('events.upcoming'), el('a', { href: 'events.html', text: t('nav.events') + ' →' })),
-        el('div', { class: 'timeline' }, ...up.map(e => { const live = new Date(e.start) <= now && now <= new Date(e.end || e.start);
+        el('div', { class: 'timeline' }, ...up.map(e => { const live = isLiveEvent(e, now);   // js/ui.js: end || start+2h (amended after Task 7 review)
           return el('div', { class: live ? 'ev live' : 'ev' }, el('time', { text: `${fmtDate(e.start, getLang())} · ${time(e.start)}` }),
             el('div', {}, el('b', { text: pick(e.title) }), el('span', { text: pick(e.venue) }), live ? el('span', { class: 'pulse', text: t('live.badge') }) : null)); })));
     };
@@ -116,7 +116,7 @@ if (s) {
       const pct = sum(exp) ? Math.round((topE[0]?.amount ?? 0) / sum(exp) * 100) : 0;
       return section(sectionHead(`${num(y.year)} · ${t('tr.title')}`, el('a', { href: 'transparency.html', text: t('tr.docs') + ' →' })),
         el('div', { class: 'ledger' }, el('div', {}, barsView(top, getLang()), barsView(topE, getLang(), { kind: 'expense' })),
-          donutView(topE, getLang(), { big: `${num(pct)}%`, small: topE[0] ? pick(topE[0].category) : '' })));
+          donutView(exp, getLang(), { big: `${num(pct)}%`, small: topE[0] ? pick(topE[0].category) : '' })));   // full list, so the ring and the centre % agree (amended after Task 7 review)
     };
     let committee = () => {
       if (s.sectionVisibility.committee === false || !people.length) return null;

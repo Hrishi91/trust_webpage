@@ -29,6 +29,14 @@ export function fmtDate(iso, lang = 'bn') {
   return lang === 'bn' ? bnDigits(out) : out;
 }
 
+/** Is event e (start/end ISO) running at `now`? An event without `end` counts as running for defaultMs after start. */
+export function isLiveEvent(e, now = new Date(), defaultMs = 2 * 3600000) {
+  const start = new Date(e?.start ?? '');
+  if (Number.isNaN(start.getTime())) return false;
+  const end = e?.end ? new Date(e.end) : new Date(start.getTime() + defaultMs);
+  return start <= now && now <= end;
+}
+
 // ---- DOM helpers (browser only) ----
 export function el(tag, attrs = {}, ...children) {
   const n = document.createElement(tag);

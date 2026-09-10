@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { escapeHtml, countdown, fmtDate, bnDigits, digits } from '../../js/ui.js';
+import { escapeHtml, countdown, fmtDate, bnDigits, digits, isLiveEvent } from '../../js/ui.js';
 
 test('escapeHtml escapes the five', () =>
   assert.equal(escapeHtml(`<a href="x" title='y'>&</a>`), '&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;'));
@@ -21,3 +21,11 @@ test('bnDigits maps 0-9 to U+09E6..U+09EF', () => assert.equal(bnDigits('0123456
 
 test('digits strips everything but digits', () => assert.equal(digits('+91 98000-00000'), '919800000000'));
 test('digits tolerates null', () => assert.equal(digits(null), ''));
+
+test('isLiveEvent with no end is live within the 2h default window after start', () =>
+  assert.equal(isLiveEvent({ start: '2026-09-14T08:00:00+05:30', end: '' }, new Date('2026-09-14T09:30:00+05:30')), true));
+test('isLiveEvent with no end is not live past the 2h default window', () =>
+  assert.equal(isLiveEvent({ start: '2026-09-14T08:00:00+05:30', end: '' }, new Date('2026-09-14T10:30:00+05:30')), false));
+test('isLiveEvent with an explicit end uses it', () =>
+  assert.equal(isLiveEvent({ start: '2026-09-14T08:00:00+05:30', end: '2026-09-14T12:00:00+05:30' }, new Date('2026-09-14T11:00:00+05:30')), true));
+test('isLiveEvent with an invalid start is never live', () => assert.equal(isLiveEvent({ start: 'nope' }), false));
