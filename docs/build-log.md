@@ -412,3 +412,6 @@ Pure theme resolver (THEMES, DEFAULT_THEME, THEME_META, resolveTheme, isPreview,
 
 ## 2026-09-10 — Phase 5 Task 2 — settings.design rule whitelist
 TDD (RED→GREEN): firestore.rules gains `validDesign()` helper (permit missing design or one of five theme names: siddhi, mukha, dhokra, atreyee, bangarh) and `match /settings/site` now gates on `isAdmin() && validDesign()`. tests/rules/firestore.test.js gained one test (21 total, 20→21 pass). No deploy (Task 13).
+
+## 2026-09-10 — Phase 5 Task 3 — theme tokens + component CSS + contrast test
+TDD (RED→GREEN): tests/unit/contrast.test.js added first (RED — ENOENT css/themes.css), then css/themes.css created (four `[data-theme]` blocks, concept lines 14–17 verbatim, dhokra gains `color-scheme:dark;`) and css/site.css fully rewritten from concept lines 5–13 (siddhi tokens + `--focus`/`color-scheme:light`) + 19–297 (base→members, skipping line 199's `.page{display:none}` and the 298–302 switcher) + a bridge block for class names the JS still emits (`.tabs`, `.summary`, `.stats`, `.donor`, `.lightbox`, `table.ledger`, `.otp input`, `.countdown`). No token adjustments needed — all five themes passed the contrast floors (ink/muted vs ivory ≥4.5, hero-ink/bg ≥4.5, cta-ink/cta ≥3.0, ink/card ≥4.5) on the first run. 58 unit tests total (56→58), all green.
