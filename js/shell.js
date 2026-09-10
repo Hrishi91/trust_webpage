@@ -69,7 +69,9 @@ export async function mountShell(active, pageTitle) {
             .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));
     const nav = el('nav', { class: 'nav' }, el('div', { class: 'wrap' },
       el('a', { href: 'index.html', class: 'brand', 'aria-label': pick(s.name) }, brandMark(s),
-        el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
+        // concept markup put a <br> between .t and .s (two-line lockup: name, then tagline below);
+        // it was dropped when this was ported in Task 5, so name+tagline ran together on one line.
+        el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('br') : null, pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
       links,
       el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') }),
       el('button', { class: 'burger', type: 'button', 'aria-label': pick({ bn: 'মেনু', en: 'Menu' }), 'aria-expanded': 'false',
@@ -82,7 +84,9 @@ export async function mountShell(active, pageTitle) {
   const renderFooter = () => {
     const wa = digits(s.contacts.whatsapp);
     document.getElementById('site-footer').replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
-      el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('span', { class: 'muted', text: `Reg. no. ${s.regNo}` }) : null),
+      // concept footer put a <br> before the "Reg. no." line (own line, muted); missing here ran
+      // the address and reg. no. together on one line with no separator.
+      el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('br') : null, s.regNo ? el('span', { class: 'muted', text: `Reg. no. ${s.regNo}` }) : null),
       el('div', {}, el('b', { text: pick({ bn: 'যোগাযোগ', en: 'Contact' }) }),
         s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
         wa ? el('a', { href: `https://wa.me/${wa}`, text: 'WhatsApp' }) : null,
