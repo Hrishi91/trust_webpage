@@ -4,6 +4,7 @@ test('stored design reaches <html data-theme> and the ?theme= override wins with
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'siddhi'); // seed: design 'siddhi'
   await page.goto('/index.html?theme=mukha');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'mukha');
+  expect(await page.evaluate(() => localStorage.getItem('design'))).toBe('siddhi'); // preview must not persist
   await page.goto('/about.html');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'siddhi'); // preview did not persist
 });
@@ -33,6 +34,15 @@ test('admin applies a theme from the 🎨 card; the public site reflects it; aud
   await page.click('.theme-tile[data-theme-name="atreyee"] button.apply');
   await expect(page.locator('.toast')).toBeVisible();
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'atreyee');
+  // logAudit(ctx, 'update', 'settings/site', {design: cur}, {design: 'atreyee'}) (admin/js/sections/
+  // design.js) — assert the emulator actually persisted an audit row, same REST-read pattern as
+  // admin.spec.js's soft-delete test.
+  const auditRes = await fetch('http://127.0.0.1:8080/v1/projects/demo-trust/databases/(default)/documents/audit', { headers: { Authorization: 'Bearer owner' } });
+  expect(auditRes.status).toBe(200);
+  const auditBody = await auditRes.json();
+  const wrote = (auditBody.documents ?? []).some(d =>
+    d.fields?.path?.stringValue === 'settings/site' && d.fields?.after?.mapValue?.fields?.design?.stringValue === 'atreyee');
+  expect(wrote).toBe(true);
   await page.goto('/index.html');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'atreyee');
   // restore for the other specs (theme.spec runs inside the 'public' project before 'admin')
