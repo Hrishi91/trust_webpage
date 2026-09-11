@@ -131,6 +131,35 @@ Plan: `docs/superpowers/plans/2026-09-11-phase-6-template-complete.md`. Spec: `d
 
 ### Deferred minors from Phase 6 reviews
 
-- Task 3: no automated assertion on `document.title` override; admin `route()` is non-reentrant (pre-existing); other admin-written image URLs (`photoUrl`/`coverUrl`/`upiQrUrl`) are not `httpsUrl()`-guarded (Storage-derived) — final review to triage
-- Task 4: row values not trimmed on load (only the writer trims anyway); duplicate `.str-row .bi` rule
-- Task 6: an invalid hex row is silently dropped on save (no toast); `updateDoc`'s doc-must-exist precondition is undocumented; the hex input's `pattern` attribute is inert outside a `<form>`
+Fixed by the 2026-09-12 final-review fix wave and removed from this list: no automated assertion
+on `document.title` override (M12); other admin-written image URLs `photoUrl`/`coverUrl`/`upiQrUrl`
+not `httpsUrl()`-guarded (I3/M6); duplicate `.str-row .bi` rule (M13); an invalid hex row silently
+dropped on save with no toast (M7).
+
+- Task 3: admin `route()` is non-reentrant (pre-existing) — still open.
+- Task 4: row values not trimmed on load (only the writer trims anyway) — still open.
+- Task 6: `updateDoc`'s doc-must-exist precondition is now documented with an inline comment at the
+  call site (`admin/js/sections/design.js`) rather than fixed in code — `settings/site` is seeded on
+  production and by `tests/seed/seed.js` before any admin ever reaches the card, so the precondition
+  always holds in practice. The hex input's `pattern` attribute is still inert outside a `<form>` —
+  still open (harmless: `admin/js/sections/design.js`'s own save handler now validates the same hex
+  shape in JS before writing).
+- M9 — `firestore.rules`' `content/{doc}` rule (`allow create, update: if isAdmin() && doc in
+  ['strings', 'media']`) gates which *document* an admin may write but never validates the *shape*
+  of its values — a buggy admin write could put a non-`{bn,en}` value into `content/strings` or a
+  non-string/non-https value into `content/media`; client code tolerates this (`setOverrides()`
+  drops malformed entries, `httpsUrl()` blanks bad media URLs) but the rule itself doesn't enforce
+  it server-side the way `validOverrideValues()`/`validSocial()` do for `settings/site`.
+- M10 — a `content/strings` override written under a STRINGS key that a later change renames or
+  removes has no cleanup path: `STRING_GROUPS` (and so the ✏️ লেখা editor) is derived from the
+  *current* `STRINGS` table, so the orphaned override row becomes invisible in the admin UI while
+  still sitting in Firestore — a legacy-key lockout with no admin-visible way to find or delete it.
+- M11 — a media slot or settings URL field saved before `httpsUrl()` gating existed (or a
+  non-`https://` value from some other path, e.g. a pasted `http://` link) is silently blanked at
+  render time by every `httpsUrl()` call site added in this wave, but the stale non-https value
+  itself is never surfaced to the admin or cleaned from Firestore — invisible litter, not a bug.
+- M14 — page headers with a `header.*` media slot photo (`js/shell.js`'s `pageHeader({image})`,
+  `.ph.photo .ph-img{opacity:.55}` in `css/site.css`) only dim the photo by a fixed opacity over
+  `--bg`; unlike the 🎨 ডিজাইন colour rows, there is no live contrast check against `--hero-ink` for
+  the crumb/title/lead text, so a bright admin-uploaded header photo could leave that text hard to
+  read.

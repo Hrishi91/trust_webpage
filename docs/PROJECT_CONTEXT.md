@@ -223,7 +223,7 @@ verified against `https://hrishi91.github.io/trust_webpage/`. Plan:
   collection — ~130 small values are one document read, not 130.
 - **Culture cards move off static code**: `culture/{id}` (title/tag/text/imageUrl/order/published/
   deleted) replaces the static `js/culture.js` array once the collection is non-empty; the three
-  current cards (মুখা কাঠের মুখা, ঢোকরা, আত্রেয়ী ও কার্তিবর্ষ) are the seeded production defaults so
+  current cards (মুখা কাঠের মুখা, ঢোকরা, আত্রেয়ী ও কোটিবর্ষ) are the seeded production defaults so
   the admin edits existing cards instead of starting from nothing. Admin card **🏺 সংস্কৃতি**
   (`admin/js/sections/culture.js`) is list/edit/reorder/publish, same pattern as কমিটি.
 - **Colours, fonts, home-section order, social/estYear/credItems/metaDescription**:
