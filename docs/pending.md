@@ -131,6 +131,7 @@ Plan: `docs/superpowers/plans/2026-09-11-phase-6-template-complete.md`. Spec: `d
 
 ### Deferred minors from Phase 6 reviews
 
+- `admin/js/sections/albums.js` photo-list thumbnail renders `p.url` as `<img src>` without `httpsUrl()` (admin-only, Storage-derived URLs; every public `src`/`href` is gated) — wrap it for consistency (final re-review, 2026-09-12).
 Fixed by the 2026-09-12 final-review fix wave and removed from this list: no automated assertion
 on `document.title` override (M12); other admin-written image URLs `photoUrl`/`coverUrl`/`upiQrUrl`
 not `httpsUrl()`-guarded (I3/M6); duplicate `.str-row .bi` rule (M13); an invalid hex row silently
