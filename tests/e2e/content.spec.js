@@ -79,5 +79,7 @@ test('settings.designOverrides.sindoor becomes a computed custom property on <ht
 test('culture cards render from the seeded culture collection (published only)', async ({ page }) => {
   await page.goto('/index.html');
   await expect(page.locator('.ccard')).toHaveCount(3); // cu1-cu3 published, cu4 draft excluded
-  await expect(page.locator('.ccard h3').first()).toHaveText('কাঠের মুখা'); // cu1, from js/culture.js CULTURE[0]
+  // " (seed)" suffix (tests/seed/seed.js) proves this came from Firestore, not js/pages/home.js's
+  // identical-looking CULTURE[0] fallback that renders when the collection is empty.
+  await expect(page.locator('.ccard h3').first()).toHaveText('কাঠের মুখা (seed)');
 });

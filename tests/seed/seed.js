@@ -64,7 +64,11 @@ await db.doc('committee/c2').set({ ...base, name: bi('গোপন', 'Hidden'), 
 await db.doc('content/strings').set({});
 await db.doc('content/media').set({});
 for (const [i, c] of CULTURE.entries()) {
-  await db.doc(`culture/cu${i + 1}`).set({ ...base, title: c.title, tag: c.tag, text: c.text, imageUrl: '', order: i + 1, published: true });
+  // cu1's title gets a " (seed)" suffix so tests/e2e/content.spec.js's culture-card assertion can
+  // tell a real Firestore row apart from js/pages/home.js's identical-looking CULTURE fallback —
+  // without this, that test would pass even if the Firestore fetch were silently broken.
+  const title = i === 0 ? bi(`${c.title.bn} (seed)`, `${c.title.en} (seed)`) : c.title;
+  await db.doc(`culture/cu${i + 1}`).set({ ...base, title, tag: c.tag, text: c.text, imageUrl: '', order: i + 1, published: true });
 }
 await db.doc('culture/cu4').set({ ...base, title: bi('ড্রাফট', 'Draft'), tag: bi('', ''), text: bi('', ''), imageUrl: '', order: 4, published: false });
 
