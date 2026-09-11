@@ -80,7 +80,7 @@ if (s) {
           el('span', { class: 'eyebrow', text: t('nav.donate') }), el('h2', {}, t('home.donateHeading'), el('em', { text: t('home.donateHeadingEm') })),
           el('p', { text: t('home.donateLead') }),
           el('div', { class: 'ctas' }, el('a', { class: 'btn', href: 'donate.html', text: t('donate.upi') }), wa ? el('a', { class: 'btn ghost', href: `https://wa.me/${wa}`, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null)),
-        el('div', { class: 'upi' }, s.upiQrUrl ? el('img', { src: s.upiQrUrl, alt: t('donate.scan'), width: 112, height: 112 }) : null,
+        el('div', { class: 'upi' }, httpsUrl(s.upiQrUrl) ? el('img', { src: httpsUrl(s.upiQrUrl), alt: t('donate.scan'), width: 112, height: 112 }) : null,
           el('div', {}, el('code', { text: s.upiId }), el('p', { text: t('donate.scan') })))));
     };
     const membersTeaser = () => {
@@ -98,7 +98,7 @@ if (s) {
       const h = history.at(-1), cover = albums.at(-1);   // listPublished orders ascending → last = newest
       if (!pick(s.theme) && !h) return null;
       return section(el('div', { class: 'story' },
-        cover?.coverUrl ? el('figure', { class: 'scene' }, el('img', { src: cover.coverUrl, alt: pick(cover.title), loading: 'lazy' }), el('figcaption', { text: `${num(cover.year)} · ${pick(cover.title)}` })) : null,
+        httpsUrl(cover?.coverUrl) ? el('figure', { class: 'scene' }, el('img', { src: httpsUrl(cover.coverUrl), alt: pick(cover.title), loading: 'lazy' }), el('figcaption', { text: `${num(cover.year)} · ${pick(cover.title)}` })) : null,
         el('div', { class: 'txt' }, el('span', { class: 'eyebrow', text: t('home.thisTheme') }),
           el('h2', {}, el('span', { class: 'stitch', text: pick(s.theme) || (h ? pick(h.title) : '') })),
           h ? el('div', { class: 'rich' }, renderRich(pick(h.body))) : null,
@@ -118,7 +118,7 @@ if (s) {
       const latest = albums.slice(-5).reverse();
       return section(sectionHead(t('nav.gallery'), el('a', { href: 'gallery.html', text: t('gallery.albums') + ' →' })),
         el('div', { class: 'masonry' }, ...latest.map((a, i) => el('a', { class: i === 0 ? 'big' : '', href: `gallery.html?album=${a.id}` },
-          a.coverUrl ? el('img', { src: a.coverUrl, alt: pick(a.title), loading: 'lazy' }) : null, el('span', { class: 'cap', text: `${num(a.year)} · ${pick(a.title)}` })))));
+          httpsUrl(a.coverUrl) ? el('img', { src: httpsUrl(a.coverUrl), alt: pick(a.title), loading: 'lazy' }) : null, el('span', { class: 'cap', text: `${num(a.year)} · ${pick(a.title)}` })))));
     };
     let schedule = () => {
       if (s.sectionVisibility.events === false) return null;
@@ -144,7 +144,7 @@ if (s) {
       const officers = people.filter(p => p.officer).slice(0, 4); const row = officers.length ? officers : people.slice(0, 4);
       return section(sectionHead(t('nav.committee'), el('a', { href: 'committee.html', text: t('home.allMembers') })),
         el('div', { class: 'people' }, ...row.map(p => el('a', { class: 'person', href: 'committee.html' },
-          el('div', { class: 'ring' }, p.photoUrl ? el('img', { src: p.photoUrl, alt: '', loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) })),
+          el('div', { class: 'ring' }, httpsUrl(p.photoUrl) ? el('img', { src: httpsUrl(p.photoUrl), alt: '', loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) })),
           el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) })))));
     };
     // settings.homeSections (Phase 6 "nothing static", js/sections.js) reorders/toggles these

@@ -20,7 +20,7 @@ const NAV = [
 
 const OM_MARK = 'ॐ';
 function brandMark(s) {
-  const url = mediaUrl(s.media, 'brandMark') || s.logoUrl;
+  const url = mediaUrl(s.media, 'brandMark') || httpsUrl(s.logoUrl);
   return url ? el('img', { src: url, alt: '', class: 'mark' }) : el('span', { class: 'mark om', text: OM_MARK, 'aria-hidden': 'true' });
 }
 
