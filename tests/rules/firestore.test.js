@@ -240,6 +240,7 @@ test('content: strings/media readable by anyone; only admin writes; only those t
   await assertSucceeds(E.anon.firestore().doc('content/media').get());
   await assertFails(E.anon.firestore().doc('content/strings').set({ x: { bn: 'a', en: 'b' } }));
   await assertFails(E.other.firestore().doc('content/strings').set({ x: { bn: 'a', en: 'b' } }));
+  await assertFails(E.unverified.firestore().doc('content/strings').set({ 'nav.home': { bn: 'x', en: 'y' } }));
   await assertSucceeds(E.admin.firestore().doc('content/strings').set({ 'nav.home': { bn: 'গ', en: 'g' } }));
   await assertSucceeds(E.admin.firestore().doc('content/media').set({ hero: 'https://example.com/new.jpg' }));
   await assertFails(E.admin.firestore().doc('content/other').set({ x: 1 }));
@@ -251,6 +252,7 @@ test('culture: published+not-deleted for public; admin sees all; write needs del
     await db.doc('culture/p').set(pub);
     await db.doc('culture/d').set(draft);
     await db.doc('culture/g').set(gone);
+    await db.doc('culture/cu-draft').set(draft);
   });
   const a = E.anon.firestore();
   await assertSucceeds(a.doc('culture/p').get());
@@ -260,6 +262,8 @@ test('culture: published+not-deleted for public; admin sees all; write needs del
   await assertFails(a.collection('culture').get());
   await assertSucceeds(E.admin.firestore().collection('culture').get());
   await assertFails(E.other.firestore().doc('culture/new').set(pub));
+  await assertFails(E.unverified.firestore().doc('culture/c9').set({ ...pub }));
+  await assertFails(E.unverified.firestore().doc('culture/cu-draft').get());
   await assertSucceeds(E.admin.firestore().doc('culture/new').set(pub));
   await assertFails(E.admin.firestore().doc('culture/nodel').set({ title: pub.title, published: true, order: 9 }));   // hasDeletedFlag
   await assertFails(E.admin.firestore().doc('culture/new').update({ deleted: 'yes' }));                               // hasDeletedFlag
@@ -282,11 +286,14 @@ test('settings: fonts validated against the whitelist, empty string allowed (the
   await assertSucceeds(E.admin.firestore().doc('settings/site').set({ fonts: { display: '', body: 'Hind Siliguri' } }, { merge: true }));
   await assertFails(E.admin.firestore().doc('settings/site').set({ fonts: { display: 'Comic Sans' } }, { merge: true }));
   await assertFails(E.admin.firestore().doc('settings/site').set({ fonts: { evil: 'Atma' } }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ fonts: 'nope' }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ fonts: 5 }, { merge: true }));
 });
 
 test('settings: homeSections must be a list within the size cap; per-element shape is validated client-side (Task 3)', async () => {
   await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
   await assertSucceeds(E.admin.firestore().doc('settings/site').set({ homeSections: [{ key: 'hero', on: true }] }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ homeSections: Array.from({ length: 11 }, (_, i) => ({ key: 'x' + i, on: true })) }, { merge: true }));
   await assertFails(E.admin.firestore().doc('settings/site').set({ homeSections: 'nope' }, { merge: true }));
   await assertFails(E.admin.firestore().doc('settings/site').set({ homeSections: Array.from({ length: 12 }, (_, i) => ({ key: 'x' + i, on: true })) }, { merge: true }));
 });
