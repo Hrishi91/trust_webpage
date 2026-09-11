@@ -24,7 +24,7 @@ test('admin posting a new announcement appears on the public home page without r
   await admPage.fill('input[name=email]', 'admin@example.com');
   await admPage.fill('input[name=password]', 'password12345');
   await admPage.click('button[type=submit]');
-  await expect(admPage.locator('.grid .tile')).toHaveCount(13);
+  await expect(admPage.locator('.grid .tile')).toHaveCount(14);
   await admPage.goto('/admin/#announcements');
   await admPage.fill('textarea[name="text.bn"]', 'ই২ই লাইভ ঘোষণা');
   await admPage.fill('textarea[name="text.en"]', 'E2E live announcement');

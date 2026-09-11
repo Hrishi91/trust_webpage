@@ -9,7 +9,7 @@ async function login(page) {
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(13);
+  await expect(page.locator('.grid .tile')).toHaveCount(14);
 }
 test('wrong password fails', async ({ page }) => {
   await page.goto('/admin/');
@@ -71,4 +71,29 @@ test('admin panel follows the stored theme and uses the site fonts', async ({ pa
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'atreyee');
   await page.click('.theme-tile[data-theme-name="siddhi"] button.apply');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'siddhi');
+});
+test('✏️ লেখা — override a string, see it publicly, then reset it', async ({ page }) => {
+  await login(page);
+  await page.goto('/admin/#strings');
+  await page.waitForSelector('input[name="nav.home.bn"]');
+  await page.fill('input[name="nav.home.bn"]', 'শুরু');
+  page.on('dialog', d => d.accept('password12345'));
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  await expect(page.locator('.links a').first()).toHaveText('শুরু');
+  await page.goto('/admin/#strings');
+  await page.waitForSelector('input[name="nav.home.bn"]');
+  await page.click('.str-row:has(input[name="nav.home.bn"]) .btn-sm');
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  await expect(page.locator('.links a').first()).toHaveText('হোম');
+});
+test('✏️ লেখা — search filters rows by key', async ({ page }) => {
+  await login(page);
+  await page.goto('/admin/#strings');
+  await page.waitForSelector('input[name="nav.home.bn"]');
+  await page.fill('input[type=search]', 'nav.donate');
+  await expect(page.locator('.str-row:visible')).toHaveCount(1);
 });

@@ -257,6 +257,30 @@ export const STRINGS = {
   'admin.announcements.expiresAt': { bn: 'মেয়াদ শেষ (ঐচ্ছিক)', en: 'Expires at (optional)' },
   'admin.announcements.edit': { bn: 'সম্পাদনা', en: 'Edit' },
   'admin.announcements.expired': { bn: 'মেয়াদ শেষ', en: 'expired' },
+  // admin — ✏️ লেখা string editor (Phase 6 Task 4)
+  'admin.strings': { bn: 'লেখা', en: 'Text' },
+  'admin.stringsHint': {
+    bn: 'সব লেখা এখানে বদলাতে পারবেন। খালি রাখলে ডিফল্ট লেখা দেখাবে। সেভ করার পর অ্যাডমিন প্যানেলের নিজের লেবেল (যেমন এই পাতার শিরোনাম) পরের রুট/রিলোডে বদলাবে, খোলা ট্যাবে সঙ্গে সঙ্গে নয়।',
+    en: 'Change any text here. Leave a field blank to use the default. The admin panel\'s own labels (like this page\'s heading) update on the next route or reload, not instantly in an open tab.',
+  },
+  'admin.strings.search': { bn: 'খুঁজুন (key বা লেখা দিয়ে)', en: 'Search (by key or text)' },
+  'admin.strings.reset': { bn: 'default-এ ফেরাও', en: 'Reset to default' },
+  'admin.strings.save': { bn: 'সেভ করুন', en: 'Save' },
+  'admin.strings.group.nav': { bn: 'নেভিগেশন', en: 'Navigation' },
+  'admin.strings.group.common': { bn: 'সাধারণ', en: 'Common' },
+  'admin.strings.group.countdown': { bn: 'কাউন্টডাউন', en: 'Countdown' },
+  'admin.strings.group.live': { bn: 'লাইভ', en: 'Live' },
+  'admin.strings.group.home': { bn: 'হোম', en: 'Home' },
+  'admin.strings.group.about': { bn: 'ইতিহাস', en: 'History' },
+  'admin.strings.group.committee': { bn: 'কমিটি', en: 'Committee' },
+  'admin.strings.group.gallery': { bn: 'গ্যালারি', en: 'Gallery' },
+  'admin.strings.group.events': { bn: 'অনুষ্ঠান', en: 'Events' },
+  'admin.strings.group.donate': { bn: 'দান', en: 'Donate' },
+  'admin.strings.group.transparency': { bn: 'হিসাব', en: 'Transparency' },
+  'admin.strings.group.members': { bn: 'সদস্য', en: 'Members' },
+  'admin.strings.group.footer': { bn: 'ফুটার', en: 'Footer' },
+  'admin.strings.group.cred': { bn: 'বিশ্বাসযোগ্যতা', en: 'Credibility' },
+  'admin.strings.group.admin': { bn: 'অ্যাডমিন', en: 'Admin' },
 };
 
 // --- overrides layer (Phase 6: admin can override any default above) ---

@@ -27,7 +27,7 @@ test('admin preview (?preview=1) shows the unpublished 2024 year', async ({ page
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(13);
+  await expect(page.locator('.grid .tile')).toHaveCount(14);
 
   await page.goto('/transparency.html?year=2024&preview=1');
   await expect(page.locator('.tabs button.active')).toHaveText('২০২৪');
