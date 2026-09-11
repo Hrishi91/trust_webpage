@@ -1,15 +1,3 @@
-:root{
-  --bg:#0f1230;--bg2:#1c1850;--hero-ink:#fff6e8;--hero-muted:#c9c2e6;
-  --ivory:#fff7ea;--ivory2:#fdefd6;--ink:#1d1631;--muted:#6b6280;
-  --sindoor:#c9361a;--pitambar:#f7b733;--durva:#2f8f5b;--gold:#ffcc66;
-  --cta:#c9361a;--cta-ink:#fff6e8;--line:rgba(29,22,49,.12);--card:#ffffff;
-  --glow:rgba(247,183,51,.55);--glow2:rgba(226,64,28,.35);
-  --display:"Baloo Da 2","Hind Siliguri",sans-serif;--serif:"Tiro Bangla","Noto Serif Bengali",serif;--body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
-  --r:18px;
-  --focus:var(--pitambar);
-  --hero-accent:#ffcc66;--ticker-ink:#fff6e8;
-  color-scheme:light;
-}
 /* ================= base ================= */
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}

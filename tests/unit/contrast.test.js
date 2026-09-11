@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const site = readFileSync(new URL('../../css/site.css', import.meta.url), 'utf8');
+const tokens = readFileSync(new URL('../../css/tokens.css', import.meta.url), 'utf8');
 const themes = readFileSync(new URL('../../css/themes.css', import.meta.url), 'utf8');
 
 function tokensOf(block) {
@@ -11,7 +11,7 @@ function tokensOf(block) {
   for (const m of block.matchAll(/--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\b/g)) out[m[1]] = m[2];
   return out;
 }
-const blocks = { siddhi: tokensOf(site.match(/:root\s*\{[^}]*\}/)[0]) };
+const blocks = { siddhi: tokensOf(tokens.match(/:root\s*\{[^}]*\}/)[0]) };
 for (const m of themes.matchAll(/\[data-theme="([a-z]+)"\]\s*\{([^}]*)\}/g)) blocks[m[1]] = tokensOf(m[2]);
 
 const lum = hex => {
