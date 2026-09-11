@@ -41,6 +41,19 @@ test('content/strings override replaces the default nav label', async ({ page })
   }
 });
 
+test('content/strings override of a page-title key reaches document.title (final-review fix wave, M12)', async ({ page }) => {
+  // about.html calls mountShell('about', 'nav.about') — js/shell.js's renderNav() resolves that
+  // key with t() (not a pre-resolved string) specifically so an override reaches document.title,
+  // not just the on-page nav link. This was previously asserted nowhere (Task 3 deferred minor).
+  try {
+    await setDoc('content/strings', { 'nav.about': bnEn('আমাদের কথা', 'Our story') });
+    await page.goto('/about.html');
+    await expect(page).toHaveTitle(/আমাদের কথা/);
+  } finally {
+    await setDoc('content/strings', {});
+  }
+});
+
 test('content/media hero slot switches the hero into photo mode', async ({ page }) => {
   try {
     await setDoc('content/media', { hero: sv('https://placehold.co/600x600') });
