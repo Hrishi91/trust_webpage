@@ -16,13 +16,16 @@
 // 'members' project (phone OTP; reads/writes nothing another project depends on) between 'public'
 // and 'admin', per the plan: public → members → admin, since admin's soft-delete test mutates
 // seed data and must run last.
+// Phase 6 Task 3 adds content.spec.js (content/strings, content/media, settings overrides,
+// culture cards) to 'public' — every mutating test restores the seeded default in a `finally`, so
+// it is safe alongside the other public specs regardless of run order within the project.
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests/e2e', timeout: 30000, workers: 1, retries: 0,
   use: { baseURL: 'http://127.0.0.1:5500', viewport: { width: 390, height: 844 } },
   webServer: { command: 'npm run serve', url: 'http://127.0.0.1:5500/index.html', reuseExistingServer: true },
   projects: [
-    { name: 'public', testMatch: /(public|donate|transparency|live|theme)\.spec\.js/ },
+    { name: 'public', testMatch: /(public|donate|transparency|live|theme|content)\.spec\.js/ },
     { name: 'members', testMatch: /members\.spec\.js/, dependencies: ['public'] },
     { name: 'admin', testMatch: /admin\.spec\.js/, dependencies: ['members'] },
   ],
