@@ -1,4 +1,4 @@
-*Last updated: 2026-09-11 (Phase 5 Task 13 — screenshot matrix, docs, rules deployed, live-verified)*
+*Last updated: 2026-09-12 (Phase 6 Task 7 — production seed, docs, rules deployed, live-verified)*
 
 ## 1. What this is
 
@@ -198,3 +198,68 @@ that `<br>` was dropped when the markup was ported, so "গণেশ পুজ�
 in the nav brand, and the address ran directly into "Reg. no." in the footer, both on one crowded line.
 Fixed in `js/shell.js` by restoring the `<br>` in both spots — text content unchanged, so no test
 needed updating; `npm run e2e` (26/26) reconfirmed green after the fix.
+
+## 7. State as of 2026-09-12 — Phase 6 ("nothing static")
+
+**Live: Phase 6 on 2026-09-12** — rules + indexes + storage deployed to `ganesh-puja-trust`, three
+culture defaults and empty `content/strings`/`content/media` docs seeded on production, every page
+verified against `https://hrishi91.github.io/trust_webpage/`. Plan:
+`docs/superpowers/plans/2026-09-11-phase-6-template-complete.md` (7 tasks). Spec:
+`docs/superpowers/specs/2026-09-11-phase-6-template-complete.md`.
+
+### What Phase 6 adds
+
+- **Every UI string editable**: `js/i18n.js`'s `STRINGS` (now 211 keys, up from the 91 baseline plus
+  ~30 literals that were previously inline) is the default table; `content/strings` holds `{bn,en}`
+  overrides read once per page load and layered by `t(key) = override ?? default`. Admin card
+  **✏️ লেখা** (`admin/js/sections/strings.js`) groups all keys by section, search-filters them, and
+  writes only the changed rows on Save.
+- **UI images as slots, not free-form uploads**: `js/media-slots.js`'s fixed 14-slot registry (hero,
+  garland, brand mark, favicon, OG image, donate-band, members-teaser, seven page headers) backs
+  `content/media` (`{ [slot]: url }`); an empty or non-`https://` slot falls back to the existing
+  drawn art — "nothing static" must never mean "empty until uploaded". Admin card **🖼️ UI ছবি**
+  (`admin/js/sections/media.js`) is one row per slot with a thumbnail/upload/remove.
+  `content/{strings,media}` is a fixed two-doc registry (`doc in ['strings','media']`), not an open
+  collection — ~130 small values are one document read, not 130.
+- **Culture cards move off static code**: `culture/{id}` (title/tag/text/imageUrl/order/published/
+  deleted) replaces the static `js/culture.js` array once the collection is non-empty; the three
+  current cards (মুখা কাঠের মুখা, ঢোকরা, আত্রেয়ী ও কার্তিবর্ষ) are the seeded production defaults so
+  the admin edits existing cards instead of starting from nothing. Admin card **🏺 সংস্কৃতি**
+  (`admin/js/sections/culture.js`) is list/edit/reorder/publish, same pattern as কমিটি.
+- **Colours, fonts, home-section order, social/estYear/credItems/metaDescription**:
+  `settings.designOverrides` (15 whitelisted `#rrggbb` keys, rules-validated) layers over each
+  theme's own tokens; `settings.fonts` picks display/body from the four already-loaded families;
+  `settings.homeSections` reorders/toggles the 11 home sections; `settings.social`
+  (facebook/youtube/instagram/whatsappGroup, `https://`-or-empty, rules-validated),
+  `settings.estYear`, `settings.credItems` (`bn | en` per line, array form also accepted), and
+  `settings.metaDescription` round out the "everything on the page is admin content" goal. 🎨
+  ডিজাইন and ⚙️ সেটিংস (existing cards) were extended rather than split into new ones.
+- Admin dashboard grew from 13 tiles (Phase 5) to **16** (✏️ লেখা, 🖼️ UI ছবি, 🏺 সংস্কৃতি added,
+  import order: ঘোষণা, সেটিংস, ডিজাইন, লেখা, UI ছবি, সংস্কৃতি, ইতিহাস, কমিটি, গ্যালারি, অনুষ্ঠান,
+  ব্যাকআপ, দান, হিসাব, সদস্য, নোটিশ, দায়িত্ব তালিকা).
+
+### Decisions and their causes (from the spec, §2)
+
+| Decision | Cause |
+|---|---|
+| Overrides layered over code defaults (`t(key) = override ?? default`), never a blank-slate CMS | The owner must be able to change anything, but must never *have* to fill 130 fields to get a working site; defaults are the approved copy. |
+| One `content/strings` doc, not a collection | ~130 small values read on every page load: one document read, one cache entry; a collection would be 130 reads. Doc stays far below the 1 MiB limit. |
+| Media slots are a fixed registry in code | The layout decides where an image can go; the admin decides which image. Free-form slots would need layout editing, out of scope. |
+| Drawn art stays as the fallback for every image slot | "Nothing static" must not mean "empty until uploaded". |
+| Colour overrides validated in rules (`#rrggbb`, whitelisted keys) and contrast-checked in the admin UI before save (warning, not a block) | Security-first: nothing but a colour literal can reach `style` on `<html>`; the admin sees the WCAG ratio and decides. |
+| Fonts limited to the four families already loaded | Loading arbitrary Google Fonts from admin input is a new external-origin vector and a performance trap. |
+| Head `<meta>`/OG tags stay static in HTML; JS sets `document.title`/description at runtime | GitHub Pages has no server render; social scrapers do not run JS — documented limitation. |
+| Culture cards seeded on production from the current three defaults (owner OAuth REST, dummy-safe) | So the admin edits existing cards instead of starting from nothing. |
+
+### Test counts and gate
+
+`npm run test:unit` 93/93, `npm run test:rules` 27/27 (dev emulator stopped first), `npm run e2e`
+38/38 (all three projects), `node scripts/shots.mjs` exit 0 (zero overflow/fail). Admin screenshots
+of ✏️ লেখা/🖼️ UI ছবি/🏺 সংস্কৃতি/🎨 ডিজাইন/⚙️ সেটিংস at 390/1366 inspected — the sticky `.savebar`
+Save button renders mid-page in *full-page* screenshots of the লেখা/UI ছবি/ডিজাইন cards only; this is
+the same known Chromium/Playwright full-page + `position:sticky` capture artifact already logged in
+Tasks 4–6, reconfirmed here via `getBoundingClientRect()` at scroll-top (the button sits correctly at
+the viewport bottom, not mid-list, during real scrolling) — not a real layout bug, no CSS change made.
+`scripts/deploy-rules.sh` ran the full suite again internally (green) then deployed
+`firestore:rules,firestore:indexes,storage` to `ganesh-puja-trust` — see `docs/build-log.md` for the
+deploy tail and the live-verification results.

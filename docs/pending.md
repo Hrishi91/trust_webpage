@@ -108,3 +108,29 @@ Plan: `docs/superpowers/plans/2026-09-10-phase-5-design-system.md`. Spec: `docs/
 ### Deferred minors from Phase 5 reviews
 
 - dhokra theme: `.pulse`, `.tabs button.active`, `.chips i.on`, `.days button[aria-pressed="true"]` still hardcode `#fff6e8` on `--sindoor` (3.2:1 after the final-review token change); switch them to `var(--ticker-ink)` and add the pair to `tests/unit/contrast.test.js` (found by the final-review re-review, 2026-09-11).
+
+## Phase 6 — "Nothing static": every visible thing is admin-editable
+
+Plan: `docs/superpowers/plans/2026-09-11-phase-6-template-complete.md`. Spec: `docs/superpowers/specs/2026-09-11-phase-6-template-complete.md`.
+
+- [x] Task 1 i18n overrides + keyed UI literals (2026-09-11)
+- [x] Task 2 rules, content reads, seed (2026-09-11)
+- [x] Task 3 overrides rendered on the public site (2026-09-11)
+- [x] Task 4 admin ✏️ লেখা (2026-09-11)
+- [x] Task 5 admin UI images + culture (2026-09-11)
+- [x] Task 6 admin design + settings extensions (2026-09-11)
+- [x] Task 7 production seed, docs, rules deploy, live verification (2026-09-12) — **Phase 6 is LIVE**
+
+### ⏳ Owner still to do (Phase 6)
+
+- **Edit your own strings**: /admin/ → ✏️ লেখা → search or browse by group, change any bn/en pair, সেভ করুন. Leave both sides empty to fall back to the default text.
+- **Upload real UI images**: /admin/ → 🖼️ UI ছবি → hero (idol/banner) photo is the one visitors notice first; the rest (brand mark, favicon, page headers) are optional — drawn art stays until you upload something. The **OG (share) image slot is reserved** — no page reads it yet (nothing on the public site shows it), keep that in mind if you upload one expecting it to appear when the site is shared on WhatsApp/Facebook.
+- **Edit the three সংস্কৃতি cards**: /admin/ → 🏺 সংস্কৃতি → the seeded মুখা/ঢোকরা/আত্রেয়ী cards are the same copy that was static before; add photos, edit text, or add a fourth.
+- **Pick colours/fonts if you want a different look than the theme**: /admin/ → 🎨 ডিজাইন → রং/ফন্ট rows below the five theme tiles — leave a row empty to keep the theme's own colour.
+- **Fill social links, established year, meta description**: /admin/ → ⚙️ সেটিংস → নিচের দিকে সোশ্যাল লিঙ্ক / প্রতিষ্ঠার বছর / meta description — all optional, blank means "don't show".
+
+### Deferred minors from Phase 6 reviews
+
+- Task 3: no automated assertion on `document.title` override; admin `route()` is non-reentrant (pre-existing); other admin-written image URLs (`photoUrl`/`coverUrl`/`upiQrUrl`) are not `httpsUrl()`-guarded (Storage-derived) — final review to triage
+- Task 4: row values not trimmed on load (only the writer trims anyway); duplicate `.str-row .bi` rule
+- Task 6: an invalid hex row is silently dropped on save (no toast); `updateDoc`'s doc-must-exist precondition is undocumented; the hex input's `pattern` attribute is inert outside a `<form>`

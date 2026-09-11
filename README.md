@@ -2,7 +2,9 @@
 
 Static vanilla-JS public website + single-admin Firebase backend for the Ganesh Puja Trust.
 
-**Status: Phases 0–5 live on production (2026-09-11)** — donations, transparency, live announcements, the members portal, and a five-theme design system (সিদ্ধি/মুখা/ঢোকরা/আত্রেয়ী/বাণগড়, admin-switchable from the 🎨 ডিজাইন card) are all serving real traffic at `https://hrishi91.github.io/trust_webpage/`; see `docs/PROJECT_CONTEXT.md` §5–6 and `docs/pending.md` for owner follow-ups (real donation data, phone OTP on a device, App Check key, picking a theme).
+**Status: Phases 0–6 live on production (2026-09-12)** — donations, transparency, live announcements, the members portal, a five-theme design system, and Phase 6's "nothing static" template (every UI string, image slot, colour/font, home-section order, and culture card is admin-editable) are all serving real traffic at `https://hrishi91.github.io/trust_webpage/`; see `docs/PROJECT_CONTEXT.md` §5–7 and `docs/pending.md` for owner follow-ups (real donation data, phone OTP on a device, App Check key, picking a theme, editing the Phase 6 defaults).
+
+Code keeps layout and defaults; the admin can override almost everything else without touching code. `content/strings` holds `{bn,en}` text overrides read once and layered as `t(key) = override ?? default` over `js/i18n.js`'s `STRINGS` table; `content/media` maps a fixed slot registry (`js/media-slots.js`) to uploaded image URLs, falling back to the site's drawn art when a slot is empty; `culture/{id}` replaces the static culture-card array once it holds any published rows; and `settings.designOverrides/fonts/homeSections/social/estYear/credItems/metaDescription` layer colours, fonts, home-page section order, and a few more fields over each theme's own tokens. An untouched site looks exactly as it does today — every override is optional, and every admin card that writes one has a "back to default" control.
 
 ## Repo map
 
