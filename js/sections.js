@@ -32,13 +32,25 @@ export function orderSections(list) {
 }
 
 /**
- * settings.credItems: free text, one custom credibility-strip entry per line, "bn | en".
- * A line with no "|" is treated as bn-only (en falls back empty, same as pick()'s other-language
- * fallback elsewhere in the codebase). Blank lines are ignored.
+ * settings.credItems: either free text (one custom credibility-strip entry per line, "bn | en" —
+ * a line with no "|" is treated as bn-only, en falls back empty, same as pick()'s other-language
+ * fallback elsewhere in the codebase) or, per the current spec, an array of {bn, en} objects. Both
+ * shapes are accepted because Task 2's storage format changed after this parser was first written
+ * and existing/hand-edited Firestore data may still be either. Blank lines are ignored; array
+ * entries with neither a non-empty bn nor en (or that aren't even a plain object) are dropped —
+ * malformed Firestore data must never crash rendering.
  */
-export function parseCredItems(text) {
-  if (typeof text !== 'string' || !text.trim()) return [];
-  return text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+export function parseCredItems(input) {
+  if (Array.isArray(input)) {
+    return input.map(entry => {
+      if (!entry || typeof entry !== 'object') return null;
+      const bn = typeof entry.bn === 'string' ? entry.bn.trim() : '';
+      const en = typeof entry.en === 'string' ? entry.en.trim() : '';
+      return (bn || en) ? { bn, en } : null;
+    }).filter(Boolean);
+  }
+  if (typeof input !== 'string' || !input.trim()) return [];
+  return input.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
     const [bn, en = ''] = line.split('|').map(s => s.trim());
     return { bn, en };
   });

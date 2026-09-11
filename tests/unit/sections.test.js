@@ -47,3 +47,29 @@ test('parseCredItems: "bn | en" per line, trims, ignores blank lines, tolerates 
   );
   assert.deepEqual(parseCredItems('শুধু বাংলা'), [{ bn: 'শুধু বাংলা', en: '' }]);
 });
+
+// Fix round 1, finding 3: the current spec stores credItems as a "bn | en" per-line string, but
+// parseCredItems must also accept the array-of-{bn,en} shape (existing/hand-edited Firestore
+// data, or a future admin UI that writes structured rows) without crashing on malformed entries.
+test('parseCredItems: accepts an array of {bn,en} objects, trimming and dropping entries with neither side set', () => {
+  assert.deepEqual(
+    parseCredItems([{ bn: '২০২১ থেকে', en: 'Since 2021' }, { bn: '  ১০০+ স্বেচ্ছাসেবক  ', en: '' }]),
+    [{ bn: '২০২১ থেকে', en: 'Since 2021' }, { bn: '১০০+ স্বেচ্ছাসেবক', en: '' }],
+  );
+  assert.deepEqual(parseCredItems([]), []);
+});
+
+test('parseCredItems: array branch tolerates mixed junk entries without crashing', () => {
+  assert.deepEqual(
+    parseCredItems([
+      { bn: '', en: '' },           // neither side set — dropped
+      null,                          // not an object — dropped
+      'a plain string',              // not an object — dropped
+      42,                            // not an object — dropped
+      { bn: 7, en: 'valid en only' }, // non-string bn ignored, en kept
+      { en: 'Only English' },        // missing bn — fine
+      { bn: 'শুধু বাংলা' },           // missing en — fine
+    ]),
+    [{ bn: '', en: 'valid en only' }, { bn: '', en: 'Only English' }, { bn: 'শুধু বাংলা', en: '' }],
+  );
+});

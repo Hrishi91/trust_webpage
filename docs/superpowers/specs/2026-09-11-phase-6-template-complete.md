@@ -15,7 +15,7 @@ site looks exactly as it does now.
 | Culture cards (মুখা · ঢোকরা · আত্রেয়ী …) | static `js/culture.js` | `culture/{id}` collection `{title, tag, text:{bn,en}, imageUrl, order, published, deleted}`; empty collection → the three defaults from `js/culture.js` | **🏺 সংস্কৃতি** |
 | Colours + fonts | five fixed token sets | `settings.designOverrides` = subset of `{bg,bg2,ivory,ivory2,ink,muted,sindoor,pitambar,durva,gold,cta,ctaInk,card,heroAccent}` as `#rrggbb`, plus `settings.fonts = {display, body}` from the four loaded families; applied as inline custom properties on `<html>` over the chosen theme | **🎨 ডিজাইন** (extended) |
 | Home section order + on/off (hero, cred, glance, story, culture, gallery, schedule, ledger, donate, committee, members) | fixed order in `home.js` | `settings.homeSections = [{key, on}]` | **🎨 ডিজাইন** |
-| Social links, established year, custom credibility items, meta description | none / derived | `settings.social = {facebook, youtube, instagram, whatsappGroup}`, `settings.estYear`, `settings.credItems=[{bn,en}]`, `settings.metaDescription={bn,en}` | **⚙️ সেটিংস** |
+| Social links, established year, custom credibility items, meta description | none / derived | `settings.social = {facebook, youtube, instagram, whatsappGroup}`, `settings.estYear`, `settings.credItems` (string, one item per line `bn | en`; parser also accepts a `[{bn,en}]` array), `settings.metaDescription={bn,en}` | **⚙️ সেটিংস** |
 
 Not editable (by design): layout/markup, the theme token *names*, security rules, the admin
 panel's own labels (they are also strings — editable via ✏️ লেখা like everything else, so the
@@ -42,7 +42,7 @@ content/media     { [slot]: string(url) }                         read: all · w
 culture/{id}      {title, tag, text:{bn,en}, imageUrl, order, published, deleted, createdAt, updatedAt}
 settings/site     + designOverrides: {key: '#rrggbb'} (keys whitelisted) · fonts: {display, body} (whitelisted)
                   + homeSections: [{key, on}] (keys whitelisted) · social: {facebook,youtube,instagram,whatsappGroup}
-                  + estYear: number · credItems: [{bn,en}] · metaDescription: {bn,en}
+                  + estYear: number · credItems: string ('bn | en' per line; [{bn,en}] also accepted) · metaDescription: {bn,en}
 ```
 Indexes: `culture` needs `published + deleted + order` (add to `firestore.indexes.json`).
 
