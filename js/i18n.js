@@ -281,6 +281,19 @@ export const STRINGS = {
   'admin.strings.group.footer': { bn: 'ফুটার', en: 'Footer' },
   'admin.strings.group.cred': { bn: 'বিশ্বাসযোগ্যতা', en: 'Credibility' },
   'admin.strings.group.admin': { bn: 'অ্যাডমিন', en: 'Admin' },
+  // admin — 🖼️ UI ছবি media slots (Phase 6 Task 5)
+  'admin.media': { bn: 'UI ছবি', en: 'UI images' },
+  'admin.media.usingArt': { bn: 'আঁকা art/ default দেখাচ্ছে', en: 'Showing drawn art / default' },
+  'admin.media.remove': { bn: 'সরাও', en: 'Remove' },
+  'admin.media.save': { bn: 'সেভ করুন', en: 'Save' },
+  'admin.media.faviconHint': { bn: 'বর্গাকার (square) PNG সবচেয়ে ভালো দেখাবে', en: 'A square PNG works best' },
+  'admin.media.ogHint': { bn: 'সংরক্ষিত — এখনও কোথাও দেখানো হয় না', en: 'Reserved — not shown anywhere yet' },
+  // admin — 🏺 সংস্কৃতি culture cards (Phase 6 Task 5)
+  'admin.culture': { bn: 'সংস্কৃতি', en: 'Culture' },
+  'admin.culture.title': { bn: 'শিরোনাম', en: 'Title' },
+  'admin.culture.tag': { bn: 'ট্যাগ', en: 'Tag' },
+  'admin.culture.text': { bn: 'বিবরণ', en: 'Text' },
+  'admin.culture.image': { bn: 'ছবি', en: 'Image' },
 };
 
 // --- overrides layer (Phase 6: admin can override any default above) ---

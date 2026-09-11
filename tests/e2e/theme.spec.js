@@ -26,7 +26,7 @@ test('admin applies a theme from the 🎨 card; the public site reflects it; aud
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(14);
+  await expect(page.locator('.grid .tile')).toHaveCount(16);
   await page.goto('/admin/#design');
   await expect(page.locator('.theme-tile')).toHaveCount(5);
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');

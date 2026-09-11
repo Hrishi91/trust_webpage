@@ -9,7 +9,7 @@ async function login(page) {
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(14);
+  await expect(page.locator('.grid .tile')).toHaveCount(16);
 }
 test('wrong password fails', async ({ page }) => {
   await page.goto('/admin/');
@@ -96,4 +96,50 @@ test('✏️ লেখা — search filters rows by key', async ({ page }) => {
   await page.waitForSelector('input[name="nav.home.bn"]');
   await page.fill('input[type=search]', 'nav.donate');
   await expect(page.locator('.str-row:visible')).toHaveCount(1);
+});
+test('🏺 সংস্কৃতি — publish a card, it appears on home', async ({ page }) => {
+  await login(page);
+  await page.goto('/admin/#culture/new');
+  await page.fill('input[name="title.bn"]', 'ই২ই কার্ড');
+  await page.fill('input[name="title.en"]', 'E2E card');
+  await page.click('#adm-main button[type=submit]'); // publish
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  await expect(page.locator('.ccard')).toHaveCount(4);
+  await expect(page.locator('.ccard', { hasText: 'ই২ই কার্ড' })).toBeVisible();
+});
+// The Storage emulator (unlike production Storage) only ever serves http://127.0.0.1:9199/...
+// download URLs — never https. js/media-slots.js's httpsUrl() guard (spec §4: every
+// admin-controlled URL passes httpsUrl() before it is set as src/href) rejects any non-https
+// scheme by design, so a real emulator upload can never itself render as the public hero photo
+// in this test environment. The write path (real resize + Storage upload + Firestore save) is
+// still verified end-to-end via the emulator's REST API; the *rendering* assertion instead checks
+// that the security gate does its job — the drawn-art fallback stays up rather than an http:// url
+// ever reaching an <img src>.
+async function mediaField(field) {
+  const res = await fetch('http://127.0.0.1:8080/v1/projects/demo-trust/databases/(default)/documents/content/media', { headers: { Authorization: 'Bearer owner' } });
+  const body = await res.json();
+  return body.fields?.[field]?.stringValue;
+}
+test('🖼️ UI ছবি — upload the hero image, the httpsUrl() gate keeps drawn art up, then remove it', async ({ page }) => {
+  await login(page);
+  await page.goto('/admin/#media');
+  const heroCard = page.locator('.slot-card[data-slot="hero"]');
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGP8z8Dwn4GBgYGJAQoAHxcCAk+Uzr4AAAAASUVORK5CYII=', 'base64');
+  await heroCard.locator('input[type=file]').setInputFiles({ name: 'hero.png', mimeType: 'image/png', buffer: png });
+  await expect(heroCard.locator('img.thumb')).toBeVisible();
+  page.on('dialog', d => d.accept('password12345')); // reauth prompt on save
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  expect(await mediaField('hero')).toMatch(/^http:\/\/127\.0\.0\.1:9199\//); // real Storage round-trip landed in Firestore
+  await page.goto('/index.html');
+  await expect(page.locator('.hero svg.ganesh')).toBeVisible(); // non-https url never reaches an <img src>
+  await expect(page.locator('.hero.photo')).toHaveCount(0);
+  await page.goto('/admin/#media');
+  await page.locator('.slot-card[data-slot="hero"] .btn-sm.secondary').click();
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  expect(await mediaField('hero')).toBeUndefined();
+  await page.goto('/index.html');
+  await expect(page.locator('.hero svg.ganesh')).toBeVisible();
 });

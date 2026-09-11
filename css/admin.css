@@ -30,7 +30,7 @@ input[type=file]{width:100%;min-height:0;padding:.4rem 0;border:0;background:tra
 
 .btn,.btn-sm{border:0;border-radius:999px;background:var(--cta);color:var(--cta-ink);font:700 15px var(--body);cursor:pointer;padding:.7rem 1.2rem;min-height:44px}
 .btn-sm{padding:.5rem .9rem;font-size:14px}
-.btn.secondary{background:var(--ivory2);color:var(--ink);border:1px solid var(--line)}
+.btn.secondary,.btn-sm.secondary{background:var(--ivory2);color:var(--ink);border:1px solid var(--line)}
 .btn.danger{background:var(--sindoor);color:var(--ticker-ink)}
 
 .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
@@ -75,3 +75,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .str-row .bi{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
 .savebar{position:sticky;bottom:0;background:var(--ivory);padding:.6rem 0;border-top:1px solid var(--line)}
 @media(max-width:520px){.str-row .bi{grid-template-columns:1fr}}
+
+/* 🖼️ UI ছবি — media slots (Phase 6 Task 5) */
+.slot-card{display:grid;gap:.4rem}
+.slot-card .thumb{width:100%;max-width:280px;height:auto;aspect-ratio:auto;border-radius:12px}
