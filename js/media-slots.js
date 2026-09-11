@@ -16,7 +16,7 @@ export const SLOTS = [
     where: { bn: 'ব্রাউজার ট্যাব আইকন', en: 'Browser tab icon' },
     folder: 'public/ui/favicon', max: 1600 },
   { id: 'ogImage', label: { bn: 'শেয়ার ছবি (OG)', en: 'Share image (OG)' },
-    where: { bn: 'সাইটের লিঙ্ক শেয়ার করলে', en: 'Shown when the site link is shared' },
+    where: { bn: 'সংরক্ষিত — এখনও কোথাও দেখানো হয় না', en: 'Reserved — not shown anywhere yet' },
     folder: 'public/ui/og', max: 1600 },
   { id: 'donateBand', label: { bn: 'দান-ব্যান্ড ছবি', en: 'Donate-band image' },
     where: { bn: 'হোমে দানের অংশে', en: 'Home page, donate band section' },
@@ -48,11 +48,22 @@ export const SLOTS = [
 ];
 
 /**
+ * v → v, but only when it is a non-empty https:// string. Anything else (absent value, wrong
+ * protocol — including `javascript:`/`data:`/plain `http:` — or non-string Firestore garbage)
+ * returns '' so callers can just do `httpsUrl(x) || fallback` without a separate type check.
+ * Shared guard for every admin-supplied href/src that reaches the DOM unescaped (media slots,
+ * social links, map link, culture images): a non-https scheme is the one shape that can turn a
+ * plain link into script execution or a same-origin credential leak.
+ */
+export function httpsUrl(v) {
+  return typeof v === 'string' && v.startsWith('https://') ? v : '';
+}
+
+/**
  * media[id] → its URL, but only when it is a non-empty https:// string. Anything else (absent
  * slot, wrong protocol, non-string Firestore garbage) returns '' so callers can just do
  * `mediaUrl(media, 'hero') || fallbackArt()` without an extra type check.
  */
 export function mediaUrl(media, id) {
-  const v = media?.[id];
-  return typeof v === 'string' && v.startsWith('https://') ? v : '';
+  return httpsUrl(media?.[id]);
 }

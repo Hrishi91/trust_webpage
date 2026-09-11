@@ -2,7 +2,7 @@ import { getSettings, getContent, onAnnouncements } from './content.js';
 import { getLang, setLang, onLangChange, pick, t, setOverrides, STRINGS } from './i18n.js';
 import { el, digits, fmtDate } from './ui.js';
 import { resolveTheme, applyTheme, applyOverrides, isPreview } from './theme.js';
-import { mediaUrl } from './media-slots.js';
+import { mediaUrl, httpsUrl } from './media-slots.js';
 import { paintHeader, onResize } from './art.js';
 
 let unsubHeader = null;
@@ -118,12 +118,16 @@ export async function mountShell(active, pageTitleKey) {
     const soc = s.social || {};
     // Only non-empty links render, in a fixed order; brand names are proper nouns, not translated
     // copy (same pattern as the existing literal 'EN'/'বাং' language-toggle label above).
+    // httpsUrl() gates every admin-supplied href here — settings.social is free-text Firestore
+    // data, so an unvalidated `javascript:`/`data:` value must never reach the DOM as an <a href>.
+    const fb = httpsUrl(soc.facebook), yt = httpsUrl(soc.youtube), ig = httpsUrl(soc.instagram), wag = httpsUrl(soc.whatsappGroup);
     const socialItems = [
-      soc.facebook ? el('a', { href: soc.facebook, target: '_blank', rel: 'noopener', text: 'Facebook' }) : null,
-      soc.youtube ? el('a', { href: soc.youtube, target: '_blank', rel: 'noopener', text: 'YouTube' }) : null,
-      soc.instagram ? el('a', { href: soc.instagram, target: '_blank', rel: 'noopener', text: 'Instagram' }) : null,
-      soc.whatsappGroup ? el('a', { href: soc.whatsappGroup, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null,
+      fb ? el('a', { href: fb, target: '_blank', rel: 'noopener', text: 'Facebook' }) : null,
+      yt ? el('a', { href: yt, target: '_blank', rel: 'noopener', text: 'YouTube' }) : null,
+      ig ? el('a', { href: ig, target: '_blank', rel: 'noopener', text: 'Instagram' }) : null,
+      wag ? el('a', { href: wag, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null,
     ].filter(Boolean);
+    const mapHref = httpsUrl(s.mapUrl);
     document.getElementById('site-footer').replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
       // concept footer put a <br> before the "Reg. no." line (own line, muted); missing here ran
       // the address and reg. no. together on one line with no separator.
@@ -131,7 +135,7 @@ export async function mountShell(active, pageTitleKey) {
       el('div', {}, el('b', { text: t('footer.contact') }),
         s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
         wa ? el('a', { href: `https://wa.me/${wa}`, text: t('footer.whatsapp') }) : null,
-        s.mapUrl ? el('a', { href: s.mapUrl, target: '_blank', rel: 'noopener', text: t('footer.map') }) : null,
+        mapHref ? el('a', { href: mapHref, target: '_blank', rel: 'noopener', text: t('footer.map') }) : null,
         s.contacts.email ? el('a', { href: `mailto:${s.contacts.email}`, text: s.contacts.email }) : null),
       el('div', {}, el('b', { text: t('footer.pages') }),
         ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) }))),

@@ -5,7 +5,7 @@ import { el, countdown, fmtDate, bnDigits, digits, isLiveEvent } from '../ui.js'
 import { inr, sum } from '../money.js';
 import { ganeshSvg, diyaSvg, paintHero, paintGarland, onResize } from '../art.js';
 import { CULTURE } from '../culture.js';
-import { mediaUrl } from '../media-slots.js';
+import { mediaUrl, httpsUrl } from '../media-slots.js';
 import { orderSections, parseCredItems } from '../sections.js';
 import { barsView, donutView } from '../ledger-view.js';
 import { renderRich } from '../rich.js';
@@ -109,9 +109,9 @@ if (s) {
       const rows = cultureRows.length ? cultureRows : CULTURE;   // Firestore culture/{id} rows, falling back to the static defaults when the collection is empty
       return el('section', { class: 'culture' }, el('div', { class: 'wrap' },
         sectionHead(t('home.cultureHeading'), el('span', { class: 'pill', text: t('home.culturePill') })),
-        el('div', { class: 'cgrid' }, ...rows.map(c => el('article', { class: 'ccard' },
-          c.imageUrl ? el('img', { src: c.imageUrl, alt: '', loading: 'lazy' }) : (c.icon ? cultureIcon(c.icon) : null),
-          el('small', { text: pick(c.tag) }), el('h3', { text: pick(c.title) }), el('p', { text: pick(c.text) }))))));
+        el('div', { class: 'cgrid' }, ...rows.map(c => { const img = httpsUrl(c.imageUrl); return el('article', { class: 'ccard' },
+          img ? el('img', { src: img, alt: '', loading: 'lazy' }) : (c.icon ? cultureIcon(c.icon) : null),
+          el('small', { text: pick(c.tag) }), el('h3', { text: pick(c.title) }), el('p', { text: pick(c.text) })); }))));
     };
     let gallery = () => {
       if (s.sectionVisibility.gallery === false || !albums.length) return null;

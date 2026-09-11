@@ -51,6 +51,7 @@ Indexes: `culture` needs `published + deleted + order` (add to `firestore.indexe
 - `content/{doc}`: `allow read: if true; allow create, update: if isAdmin() && doc in ['strings','media']; allow delete: if false`.
 - `settings/site` write rule extends `validDesign()` with `validOverrides()` (every key in the whitelist, every value `matches('^#[0-9a-fA-F]{6}$')`), `validFonts()` (values in `['Baloo Da 2','Hind Siliguri','Tiro Bangla','Atma']`), `validHomeSections()` (list, keys in whitelist) — absent fields allowed.
 - `culture`: same pattern as `committee` (`isAdmin() && hasDeletedFlag()`; public read only when `published && !deleted`).
+- Every admin-controlled URL (media slots, social links, `mapUrl`, culture `imageUrl`) passes `httpsUrl()` (`''` unless it starts with `https://`) before it is set as `src`/`href`.
 - Public side: `applyOverrides()` re-validates keys and the hex regex before touching `style`; media URLs are set as `src`/`href` attributes only (never CSS `url()` from data, never `innerHTML`); strings go through `textContent`.
 - Storage: media uploads go under `public/ui/` through the existing `imageField` (resize ≤ 1600, ≤ 5 MB rule).
 
