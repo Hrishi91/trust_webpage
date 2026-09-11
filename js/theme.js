@@ -55,9 +55,12 @@ const FONT_STACK = {
  * entry simply clears that property back to the theme's own value, so a partially-filled
  * designOverrides never gets "stuck" showing a stale colour. Persists only the validated subset
  * (never the raw input) to localStorage('designOverrides') (unless persist:false, e.g. an admin
- * ?theme= preview) so the inline head-cache script in every HTML file re-applies exactly what was
- * actually accepted here — an entry that never made it onto <html> can never round-trip back in
- * on the next load either, keeping the cache in parity with this function's own whitelist.
+ * ?theme= preview) so the inline head-cache script in every HTML file can repaint before Firestore
+ * answers on the next load. That head-cache script only re-checks generic key/value SHAPE (an
+ * identifier-looking key, a value matching /^#[0-9a-fA-F]{6}$/) — it does not re-import
+ * OVERRIDE_KEYS, so it cannot itself enforce the 15-key whitelist. It doesn't need to: nothing
+ * reaches localStorage here unless it already passed the whitelist/regex check above, so the cache
+ * is only ever asked to repaint values this function already validated once.
  */
 export function applyOverrides(overrides, fonts, { persist = true } = {}) {
   if (typeof document === 'undefined') return;
