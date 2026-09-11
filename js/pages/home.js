@@ -1,5 +1,6 @@
 import { mountShell, section, sectionHead } from '../shell.js';
 import { listPublished, listCommittee, listTransparencyYears, listCulture } from '../content.js';
+import { loadHome } from './home-data.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, countdown, fmtDate, bnDigits, digits, isLiveEvent } from '../ui.js';
 import { inr, sum } from '../money.js';
@@ -15,8 +16,7 @@ const s = await mountShell('home');
 if (s) {
   let events, albums, history, people, years, cultureRows;
   try {
-    [events, albums, history, people, years, cultureRows] = await Promise.all([
-      listPublished('events'), listPublished('albums'), listPublished('history'), listCommittee(), listTransparencyYears(), listCulture()]);
+    ({ events, albums, history, people, years, cultureRows } = await loadHome({ listPublished, listCommittee, listTransparencyYears, listCulture }));
   } catch (err) { console.error(err); main.replaceChildren(el('p', { class: 'muted', text: t('common.error') })); events = null; }
   if (events !== null) {
     const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
