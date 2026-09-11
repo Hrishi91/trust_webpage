@@ -288,6 +288,7 @@ export const STRINGS = {
   'admin.media.save': { bn: 'সেভ করুন', en: 'Save' },
   'admin.media.faviconHint': { bn: 'বর্গাকার (square) PNG সবচেয়ে ভালো দেখাবে', en: 'A square PNG works best' },
   'admin.media.ogHint': { bn: 'সংরক্ষিত — এখনও কোথাও দেখানো হয় না', en: 'Reserved — not shown anywhere yet' },
+  'admin.media.nothingChanged': { bn: 'কিছু বদলায়নি', en: 'Nothing changed' },
   // admin — 🏺 সংস্কৃতি culture cards (Phase 6 Task 5)
   'admin.culture': { bn: 'সংস্কৃতি', en: 'Culture' },
   'admin.culture.title': { bn: 'শিরোনাম', en: 'Title' },

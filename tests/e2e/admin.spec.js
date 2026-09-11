@@ -132,6 +132,12 @@ test('🖼️ UI ছবি — upload the hero image, the httpsUrl() gate keeps 
   await page.click('.savebar button.btn');
   await expect(page.locator('.toast')).toBeVisible();
   expect(await mediaField('hero')).toMatch(/^http:\/\/127\.0\.0\.1:9199\//); // real Storage round-trip landed in Firestore
+  // No-op save: admin re-opens media panel and saves without changing anything — should show "Nothing changed" toast
+  await page.goto('/admin/#media');
+  await page.click('.savebar button.btn');
+  // Use locator(...).last() to get the most recent toast (since the old "সেভ হয়েছে" toast may still be visible)
+  await expect(page.locator('.toast').last()).toContainText('কিছু বদলায়নি'); // "Nothing changed" in Bengali
+  expect(await mediaField('hero')).toMatch(/^http:\/\/127\.0\.0\.1:9199\//); // field still present, not deleted
   await page.goto('/index.html');
   await expect(page.locator('.hero svg.ganesh')).toBeVisible(); // non-https url never reaches an <img src>
   await expect(page.locator('.hero.photo')).toHaveCount(0);
