@@ -1,22 +1,22 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDocs, updateDoc, query, where, orderBy, serverTimestamp } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { biField, boolField, textField, saveDoc, softDelete, toLocalInput } from '../forms.js';
 import { logAudit } from '../audit.js';
 
 const COLL = 'announcements';
 const L = {
-  text: { bn: 'বার্তা', en: 'Message' },
-  pinned: { bn: 'পিন করুন', en: 'Pin to top' },
-  isLive: { bn: 'এখন লাইভ', en: 'Live now' },
-  expiresAt: { bn: 'মেয়াদ শেষ (ঐচ্ছিক)', en: 'Expires at (optional)' },
-  edit: { bn: 'সম্পাদনা', en: 'Edit' },
-  expired: { bn: 'মেয়াদ শেষ', en: 'expired' },
+  text: STRINGS['admin.announcements.text'],
+  pinned: STRINGS['admin.announcements.pinned'],
+  isLive: STRINGS['admin.announcements.isLive'],
+  expiresAt: STRINGS['admin.announcements.expiresAt'],
+  edit: STRINGS['admin.announcements.edit'],
+  expired: STRINGS['admin.announcements.expired'],
 };
 
 registerSection(COLL, {
-  title: { bn: 'ঘোষণা', en: 'Announcements' }, icon: '📢',
+  title: STRINGS['admin.announcements'], icon: '📢',
   async render(box, ctx) {
     box.append(await mainPane(ctx));
   },

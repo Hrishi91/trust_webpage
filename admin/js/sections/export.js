@@ -1,13 +1,13 @@
 import { registerSection } from '../admin.js';
 import { collection, getDocs, doc, getDoc } from '../../../js/firebase.js';
-import { t } from '../../../js/i18n.js';
+import { t, STRINGS } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { logAudit } from '../audit.js';
 
 const COLLS = ['history', 'committee', 'albums', 'events', 'audit'];
 
 registerSection('export', {
-  title: { bn: 'ব্যাকআপ', en: 'Backup' }, icon: '📤',
+  title: STRINGS['admin.backup'], icon: '📤',
   async render(box, ctx) {
     box.append(el('div', { class: 'card' },
       el('p', { text: t('admin.export') }),

@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { sum, inr } from '../../../js/money.js';
 import { biField, textField, saveDoc, softDelete } from '../forms.js';
@@ -8,16 +8,16 @@ import { fileField } from '../upload.js';
 
 const COLL = 'transparency';
 const L = {
-  category: { bn: 'খাত', en: 'Category' },
-  amount: { bn: 'পরিমাণ (₹)', en: 'Amount (₹)' },
-  total: { bn: 'মোট', en: 'Total' },
-  docTitle: { bn: 'শিরোনাম', en: 'Title' },
-  docFile: { bn: 'PDF', en: 'PDF' },
-  notes: { bn: 'নোট', en: 'Notes' },
+  category: STRINGS['admin.transparency.category'],
+  amount: STRINGS['admin.transparency.amount'],
+  total: STRINGS['admin.transparency.total'],
+  docTitle: STRINGS['admin.transparency.docTitle'],
+  docFile: STRINGS['admin.transparency.docFile'],
+  notes: STRINGS['admin.transparency.notes'],
 };
 
 registerSection(COLL, {
-  title: { bn: 'হিসাব', en: 'Transparency' }, icon: '📊',
+  title: STRINGS['admin.transparency'], icon: '📊',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));

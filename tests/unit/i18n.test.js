@@ -1,6 +1,8 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { pick, t, getLang, setLang, LANGS, onLangChange } from '../../js/i18n.js';
+import {
+  pick, t, getLang, setLang, LANGS, onLangChange, setOverrides, getOverrides, STRINGS, STRING_GROUPS, defaultString,
+} from '../../js/i18n.js';
 
 beforeEach(() => setLang('bn'));
 
@@ -28,4 +30,21 @@ test('onLangChange does not fire for no-op or unknown lang', () => {
   const off = onLangChange(l => seen.push(l));
   setLang('bn'); setLang('fr'); assert.deepEqual(seen, []);
   off();
+});
+
+test('override wins over default; empty/missing override falls back', () => {
+  setOverrides({ 'nav.home': { bn: 'শুরু', en: '' } });
+  assert.equal(t('nav.home', 'bn'), 'শুরু'); assert.equal(t('nav.home', 'en'), 'Home');
+  setOverrides(null); assert.equal(t('nav.home', 'bn'), 'হোম');
+});
+test('setOverrides ignores non-object and non-string values', () => {
+  setOverrides({ 'nav.home': 'x', 'nav.about': { bn: 7 } }); assert.deepEqual(getOverrides(), {}); setOverrides(null);
+});
+test('every STRINGS key is in exactly one group', () => {
+  const all = Object.values(STRING_GROUPS).flat();
+  assert.deepEqual([...all].sort(), Object.keys(STRINGS).sort());
+  assert.equal(new Set(all).size, all.length);
+});
+test('defaultString returns the untouched default even when overridden', () => {
+  setOverrides({ 'nav.home': { bn: 'x' } }); assert.equal(defaultString('nav.home', 'bn'), 'হোম'); setOverrides(null);
 });

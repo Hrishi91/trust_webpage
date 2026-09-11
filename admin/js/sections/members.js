@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { sum, inr, balance } from '../../../js/money.js';
 import { normalizePhone } from '../../../js/phone.js';
@@ -8,20 +8,20 @@ import { biField, textField, boolField, saveDoc, softDelete } from '../forms.js'
 
 const COLL = 'members';
 const L = {
-  phone: { bn: 'মোবাইল নম্বর', en: 'Phone number' },
-  name: { bn: 'নাম', en: 'Name' },
-  role: { bn: 'পদ', en: 'Role' },
-  pledge: { bn: 'প্রতিশ্রুতি (₹)', en: 'Pledge (₹)' },
-  active: { bn: 'সক্রিয়', en: 'Active' },
-  inactive: { bn: 'নিষ্ক্রিয়', en: 'Inactive' },
-  date: { bn: 'তারিখ', en: 'Date' },
-  amount: { bn: 'পরিমাণ (₹)', en: 'Amount (₹)' },
-  note: { bn: 'নোট', en: 'Note' },
-  payments: { bn: 'পেমেন্ট', en: 'Payments' },
+  phone: STRINGS['admin.members.phone'],
+  name: STRINGS['admin.members.name'],
+  role: STRINGS['admin.members.role'],
+  pledge: STRINGS['admin.members.pledge'],
+  active: STRINGS['admin.members.active'],
+  inactive: STRINGS['admin.members.inactive'],
+  date: STRINGS['admin.members.date'],
+  amount: STRINGS['admin.members.amount'],
+  note: STRINGS['admin.members.note'],
+  payments: STRINGS['admin.members.payments'],
 };
 
 registerSection(COLL, {
-  title: { bn: 'সদস্য', en: 'Members' }, icon: '🧾',
+  title: STRINGS['admin.members'], icon: '🧾',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));

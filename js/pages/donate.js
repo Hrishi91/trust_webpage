@@ -1,14 +1,14 @@
 import { mountShell, section, sectionHead, pageHeader } from '../shell.js';
 import { listDonorWall } from '../content.js';
-import { pick, t, getLang } from '../i18n.js';
+import { pick, t, getLang, STRINGS } from '../i18n.js';
 import { el, fmtDate, toast, digits } from '../ui.js';
 import { inr } from '../money.js';
 import { parsePurposes } from '../ledger.js';
 
-const COPY_LABEL = { bn: 'কপি করুন', en: 'Copy' };
-const NAME_LABEL = { bn: 'নাম', en: 'Name' };
-const AMOUNT_LABEL = { bn: 'পরিমাণ (₹)', en: 'Amount (₹)' };
-const REF_LABEL = { bn: 'UPI রেফারেন্স', en: 'UPI reference' };
+const COPY_LABEL = STRINGS['donate.copy'];
+const NAME_LABEL = STRINGS['donate.name'];
+const AMOUNT_LABEL = STRINGS['donate.amount'];
+const REF_LABEL = STRINGS['donate.ref'];
 
 const main = document.getElementById('main');
 const s = await mountShell('donate', t('donate.title'));
@@ -32,7 +32,7 @@ if (s) {
         const wa = digits(s.contacts.whatsapp);
         return el('div', { class: 'notice' },
           el('p', { text: t('donate.soon') }),
-          wa ? el('a', { class: 'btn', href: `https://wa.me/${wa}`, target: '_blank', rel: 'noopener', text: 'WhatsApp' }) : null);
+          wa ? el('a', { class: 'btn', href: `https://wa.me/${wa}`, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null);
       }
       const payHref = `upi://pay?pa=${encodeURIComponent(s.upiId)}&pn=${encodeURIComponent(pick(s.name))}&cu=INR`;
       return el('div', { class: 'upibig' },
@@ -83,7 +83,7 @@ if (s) {
         el('div', { class: 'chips' }, ...p.amounts.map(a => el('i', { text: inr(a, lang), onclick: () => { amountField.value = String(a); amountField.focus(); } })))))) : null;
       main.replaceChildren(pageHeader({ crumb: t('nav.donate'), title: t('donate.title'), lead: s.has80G ? t('donate.tax80g') : '' }),
         section(el('div', { class: 'dgrid' },
-          el('div', {}, upiCard(), purposeCards ? sectionHead(pick({ bn: 'কোন খাতে', en: 'For what' })) : null, purposeCards),
+          el('div', {}, upiCard(), purposeCards ? sectionHead(t('donate.purposeHeading')) : null, purposeCards),
           el('div', {}, confirmCard(), el('div', { class: 'form wall-card' }, el('span', { class: 'eyebrow', text: t('donate.wall') }),
             errored ? el('p', { class: 'muted', text: t('common.error') }) : wall.length ? el('div', { class: 'wall' }, ...wall.map(d => el('div', { class: 'donor' },
               el('span', { text: d.isAnonymous ? t('donate.anonymous') : d.donorName }), el('span', { text: inr(d.amount, lang) }), el('span', { class: 'muted', text: fmtDate(d.date, lang) })))) : el('p', { class: 'muted', text: t('common.empty') }),

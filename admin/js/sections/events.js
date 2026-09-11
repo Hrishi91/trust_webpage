@@ -1,12 +1,12 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { biField, textField, listView, saveDoc, softDelete, toLocalInput as toLocal } from '../forms.js';
 
 const COLL = 'events';
 registerSection(COLL, {
-  title: { bn: 'অনুষ্ঠান', en: 'Events' }, icon: '📅',
+  title: STRINGS['nav.events'], icon: '📅',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     if (id === undefined) {
@@ -18,11 +18,11 @@ registerSection(COLL, {
     }
     const cur = id === 'new' ? {} : (await getDoc(doc(ctx.db, COLL, id))).data() ?? {};
     const f = {
-      title: biField({ bn: 'নাম', en: 'Title' }, 'title', cur.title),
-      start: textField({ bn: 'শুরু', en: 'Start' }, 'start', toLocal(cur.start), { type: 'datetime-local', required: true }),
-      end: textField({ bn: 'শেষ (ঐচ্ছিক)', en: 'End (optional)' }, 'end', toLocal(cur.end), { type: 'datetime-local' }),
-      venue: biField({ bn: 'স্থান', en: 'Venue' }, 'venue', cur.venue),
-      desc: biField({ bn: 'বিবরণ', en: 'Description' }, 'desc', cur.desc, { multiline: true }),
+      title: biField(STRINGS['admin.events.title'], 'title', cur.title),
+      start: textField(STRINGS['admin.events.start'], 'start', toLocal(cur.start), { type: 'datetime-local', required: true }),
+      end: textField(STRINGS['admin.events.end'], 'end', toLocal(cur.end), { type: 'datetime-local' }),
+      venue: biField(STRINGS['admin.events.venue'], 'venue', cur.venue),
+      desc: biField(STRINGS['admin.events.desc'], 'desc', cur.desc, { multiline: true }),
     };
     const read = () => {
       const start = new Date(f.start.read()).toISOString();

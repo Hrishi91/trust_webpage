@@ -1,19 +1,19 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { biField, textField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'roster';
 const L = {
-  date: { bn: 'তারিখ', en: 'Date' },
-  duty: { bn: 'দায়িত্ব', en: 'Duty' },
-  members: { bn: 'সদস্যরা', en: 'Members' },
-  note: { bn: 'নোট', en: 'Note' },
+  date: STRINGS['admin.roster.date'],
+  duty: STRINGS['admin.roster.duty'],
+  members: STRINGS['admin.roster.members'],
+  note: STRINGS['admin.roster.note'],
 };
 
 registerSection(COLL, {
-  title: { bn: 'দায়িত্ব তালিকা', en: 'Duty roster' }, icon: '🗓️',
+  title: STRINGS['admin.roster'], icon: '🗓️',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));

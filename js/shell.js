@@ -74,7 +74,7 @@ export async function mountShell(active, pageTitle) {
         el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('br') : null, pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
       links,
       el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') }),
-      el('button', { class: 'burger', type: 'button', 'aria-label': pick({ bn: 'মেনু', en: 'Menu' }), 'aria-expanded': 'false',
+      el('button', { class: 'burger', type: 'button', 'aria-label': t('nav.menu'), 'aria-expanded': 'false',
         onclick: e => { const open = links.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); } },
         el('span', { class: 'bars', 'aria-hidden': 'true' }))));
     const header = document.getElementById('site-header');
@@ -87,14 +87,14 @@ export async function mountShell(active, pageTitle) {
       // concept footer put a <br> before the "Reg. no." line (own line, muted); missing here ran
       // the address and reg. no. together on one line with no separator.
       el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('br') : null, s.regNo ? el('span', { class: 'muted', text: `Reg. no. ${s.regNo}` }) : null),
-      el('div', {}, el('b', { text: pick({ bn: 'যোগাযোগ', en: 'Contact' }) }),
+      el('div', {}, el('b', { text: t('footer.contact') }),
         s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
-        wa ? el('a', { href: `https://wa.me/${wa}`, text: 'WhatsApp' }) : null,
-        s.mapUrl ? el('a', { href: s.mapUrl, target: '_blank', rel: 'noopener', text: pick({ bn: 'মানচিত্রে দেখুন', en: 'View on map' }) }) : null,
+        wa ? el('a', { href: `https://wa.me/${wa}`, text: t('footer.whatsapp') }) : null,
+        s.mapUrl ? el('a', { href: s.mapUrl, target: '_blank', rel: 'noopener', text: t('footer.map') }) : null,
         s.contacts.email ? el('a', { href: `mailto:${s.contacts.email}`, text: s.contacts.email }) : null),
-      el('div', {}, el('b', { text: pick({ bn: 'পাতা', en: 'Pages' }) }),
+      el('div', {}, el('b', { text: t('footer.pages') }),
         ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) }))),
-      el('div', {}, el('b', { text: pick({ bn: 'ট্রাস্ট', en: 'Trust' }) }),
+      el('div', {}, el('b', { text: t('footer.trust') }),
         el('a', { href: 'transparency.html', text: t('tr.docs') }), el('a', { href: 'committee.html', text: t('nav.committee') }),
         el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }))),
     ));

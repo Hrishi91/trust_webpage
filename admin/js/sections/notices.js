@@ -1,17 +1,17 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { biField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'notices';
 const L = {
-  title: { bn: 'শিরোনাম', en: 'Title' },
-  body: { bn: 'বিবরণ (HTML: <p> <b> <ul> <li>)', en: 'Body (HTML allowed)' },
+  title: STRINGS['admin.notices.title'],
+  body: STRINGS['admin.notices.body'],
 };
 
 registerSection(COLL, {
-  title: { bn: 'নোটিশ', en: 'Notices' }, icon: '📋',
+  title: STRINGS['admin.notices'], icon: '📋',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));

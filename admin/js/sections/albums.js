@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc, getDocs, collection, query, where, orderBy, setDoc, updateDoc, writeBatch, serverTimestamp } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { biField, textField, boolField, listView, saveDoc, softDelete } from '../forms.js';
 import { imageField, multiImageField } from '../upload.js';
@@ -8,7 +8,7 @@ import { logAudit } from '../audit.js';
 
 const COLL = 'albums';
 registerSection(COLL, {
-  title: { bn: 'গ্যালারি', en: 'Gallery' }, icon: '🖼️',
+  title: STRINGS['nav.gallery'], icon: '🖼️',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     if (id === undefined) {
@@ -20,10 +20,10 @@ registerSection(COLL, {
     }
     const cur = id === 'new' ? {} : (await getDoc(doc(ctx.db, COLL, id))).data() ?? {};
     const f = {
-      title: biField({ bn: 'অ্যালবামের নাম', en: 'Album title' }, 'title', cur.title),
-      year: textField({ bn: 'বছর', en: 'Year' }, 'year', cur.year ?? new Date().getFullYear(), { type: 'number', required: true }),
-      cover: imageField(ctx, { bn: 'কভার ছবি', en: 'Cover photo' }, cur.coverUrl, { folder: `public/albums/${id}`, max: 1200 }),
-      featured: boolField({ bn: 'সেরা মুহূর্ত strip-এ দেখাও', en: 'Show in best-moments strip' }, 'featured', cur.featured ?? false),
+      title: biField(STRINGS['admin.albums.title'], 'title', cur.title),
+      year: textField(STRINGS['admin.albums.year'], 'year', cur.year ?? new Date().getFullYear(), { type: 'number', required: true }),
+      cover: imageField(ctx, STRINGS['admin.albums.cover'], cur.coverUrl, { folder: `public/albums/${id}`, max: 1200 }),
+      featured: boolField(STRINGS['admin.albums.featured'], 'featured', cur.featured ?? false),
     };
     // f.cover.read() only changes when the admin picks a file through the cover widget itself —
     // it never reflects the photos list's own auto-set cover (below). Omitting coverUrl here when
@@ -70,7 +70,7 @@ registerSection(COLL, {
     const renderPhotos = async () => {
       const snap = await getDocs(query(photosColl, where('deleted', '==', false), orderBy('order')));
       const photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      heading.textContent = `${pick({ bn: 'ছবি', en: 'Photos' })} (${photos.length})`;
+      heading.textContent = `${t('admin.albums.photosHeading')} (${photos.length})`;
       listBox.replaceChildren(...photos.map((p, i) => {
         const cap = el('input', { value: pick(p.caption), placeholder: 'caption' });
         cap.onchange = async () => {
@@ -104,7 +104,7 @@ registerSection(COLL, {
     // so the multiImageField widget (its progress bar, status text, and in-flight <input> element)
     // stays attached across the whole multi-select upload instead of being torn down and rebuilt
     // after every single photo, which used to leave an idle-looking picker mid-upload.
-    const uploader = multiImageField(ctx, { bn: 'ছবি যোগ করুন (একাধিক)', en: 'Add photos (multiple)' }, {
+    const uploader = multiImageField(ctx, STRINGS['admin.albums.addPhotos'], {
       folder: `public/albums/${id}`,
       onEach: async url => {
         const pref = doc(photosColl);

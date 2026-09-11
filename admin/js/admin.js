@@ -97,7 +97,7 @@ async function route() {
   const def = sections.get(key);
   $('adm-title').textContent = def ? pick(def.title) : 'Admin';
   if (!def) { main.append(dashboard()); return; }
-  main.append(el('a', { class: 'back', href: '#', text: '‹ ' + pick({ bn: 'ড্যাশবোর্ড', en: 'Dashboard' }) }));
+  main.append(el('a', { class: 'back', href: '#', text: '‹ ' + t('admin.dashboard') }));
   const box = el('div'); main.append(box);
   try { await def.render(box, ctx()); }
   catch (err) { console.error(err); box.replaceChildren(el('p', { class: 'err', text: t('common.error') })); toast(t('common.error'), 'err'); }

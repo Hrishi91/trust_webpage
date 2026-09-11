@@ -1,12 +1,12 @@
 import { mountShell, pageHeader, section } from '../shell.js';
 import { listTransparencyYears } from '../content.js';
 import { db, doc, getDoc } from '../firebase.js';
-import { t, pick, getLang } from '../i18n.js';
+import { t, pick, getLang, STRINGS } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
 import { sum, inr } from '../money.js';
 import { barsView, donutView } from '../ledger-view.js';
 
-const TOTAL_LABEL = { bn: 'মোট', en: 'Total' };
+const TOTAL_LABEL = STRINGS['tr.total'];
 
 const main = document.getElementById('main');
 const s = await mountShell('transparency', t('tr.title'));
@@ -89,11 +89,11 @@ if (s) {
           el('div', { class: 'card' }, el('h2', { text: t('tr.income') }), ledgerTable(inc, lang)),
           el('div', { class: 'card' }, el('h2', { text: t('tr.expense') }), ledgerTable(exp, lang)),
           docs.length ? el('div', { class: 'acc' }, ...docs.map((d, i) => el('details', i === 0 ? { open: '' } : {}, el('summary', { text: pick(d.title, lang) }),
-            el('p', {}, el('a', { href: d.url, target: '_blank', rel: 'noopener', text: pick({ bn: 'ডাউনলোড', en: 'Download' }) }))))) : null,
-          el('div', { class: 'legal' }, el('b', { text: pick({ bn: 'আইনি তথ্য', en: 'Legal' }) }),
-            el('div', {}, t('tr.regNo'), el('span', { text: s.regNo || pick({ bn: 'প্রক্রিয়াধীন', en: 'in progress' }) })),
-            el('div', {}, '80G', el('span', { text: s.has80G ? t('donate.tax80g') : pick({ bn: 'রেজিস্ট্রেশনের পরে', en: 'after registration' }) })),
-            el('div', {}, pick({ bn: 'ঠিকানা', en: 'Address' }), el('span', { text: pick(s.address) }))),
+            el('p', {}, el('a', { href: d.url, target: '_blank', rel: 'noopener', text: t('tr.download') }))))) : null,
+          el('div', { class: 'legal' }, el('b', { text: t('tr.legal') }),
+            el('div', {}, t('tr.regNo'), el('span', { text: s.regNo || t('tr.inProgress') })),
+            el('div', {}, t('cred.80g'), el('span', { text: s.has80G ? t('donate.tax80g') : t('tr.afterReg') })),
+            el('div', {}, t('tr.address'), el('span', { text: pick(s.address) }))),
           data.notes && pick(data.notes, lang) ? el('p', { class: 'muted', text: pick(data.notes, lang) }) : null);
       })();
 

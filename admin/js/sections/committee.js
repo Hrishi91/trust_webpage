@@ -1,13 +1,13 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el } from '../../../js/ui.js';
 import { biField, boolField, listView, saveDoc, softDelete } from '../forms.js';
 import { imageField } from '../upload.js';
 
 const COLL = 'committee';
 registerSection(COLL, {
-  title: { bn: 'কমিটি', en: 'Committee' }, icon: '👥',
+  title: STRINGS['nav.committee'], icon: '👥',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     if (id === undefined) {
@@ -20,11 +20,11 @@ registerSection(COLL, {
     }
     const cur = id === 'new' ? {} : (await getDoc(doc(ctx.db, COLL, id))).data() ?? {};
     const f = {
-      name: biField({ bn: 'নাম', en: 'Name' }, 'name', cur.name),
-      post: biField({ bn: 'পদ', en: 'Post' }, 'post', cur.post),
-      photo: imageField(ctx, { bn: 'ছবি', en: 'Photo' }, cur.photoUrl, { folder: 'public/committee', max: 600 }),
-      isPublic: boolField({ bn: 'ওয়েবসাইটে দেখাও', en: 'Show on website' }, 'isPublic', cur.isPublic ?? true),
-      officer: boolField({ bn: 'পদাধিকারী (সামনে দেখাও)', en: 'Office-bearer (show first)' }, 'officer', cur.officer ?? false),
+      name: biField(STRINGS['admin.committee.name'], 'name', cur.name),
+      post: biField(STRINGS['admin.committee.post'], 'post', cur.post),
+      photo: imageField(ctx, STRINGS['admin.committee.photo'], cur.photoUrl, { folder: 'public/committee', max: 600 }),
+      isPublic: boolField(STRINGS['admin.committee.isPublic'], 'isPublic', cur.isPublic ?? true),
+      officer: boolField(STRINGS['admin.committee.officer'], 'officer', cur.officer ?? false),
     };
     const form = el('form', { class: 'card' }, ...Object.values(f).map(x => x.node),
       el('div', { class: 'row' },

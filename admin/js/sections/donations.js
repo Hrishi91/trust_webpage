@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick } from '../../../js/i18n.js';
+import { t, pick, STRINGS } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { sum, inr } from '../../../js/money.js';
 import { textField, boolField, saveDoc, softDelete } from '../forms.js';
@@ -8,28 +8,28 @@ import { textField, boolField, saveDoc, softDelete } from '../forms.js';
 const COLL = 'donations';
 const MODES = ['cash', 'upi', 'bank'];
 const MODE_LABEL = {
-  cash: { bn: 'নগদ', en: 'Cash' },
-  upi: { bn: 'UPI', en: 'UPI' },
-  bank: { bn: 'ব্যাঙ্ক', en: 'Bank' },
+  cash: STRINGS['admin.donations.modeCash'],
+  upi: STRINGS['admin.donations.modeUpi'],
+  bank: STRINGS['admin.donations.modeBank'],
 };
 const L = {
-  count: { bn: 'সংখ্যা', en: 'Count' },
-  total: { bn: 'মোট', en: 'Total' },
-  wall: { bn: 'দেয়ালে দেখানো হচ্ছে', en: 'On donor wall' },
-  year: { bn: 'বছর', en: 'Year' },
-  save: { bn: 'সেভ করুন', en: 'Save' },
-  donorName: { bn: 'দাতার নাম', en: 'Donor name' },
-  amount: { bn: 'পরিমাণ (₹)', en: 'Amount (₹)' },
-  date: { bn: 'তারিখ', en: 'Date' },
-  mode: { bn: 'মাধ্যম', en: 'Mode' },
-  receiptNo: { bn: 'রসিদ নং', en: 'Receipt no.' },
-  anonymous: { bn: 'নাম প্রকাশে অনিচ্ছুক', en: 'Anonymous' },
-  showOnWall: { bn: 'দেয়ালে দেখান', en: 'Show on donor wall' },
-  note: { bn: 'নোট', en: 'Note' },
+  count: STRINGS['admin.donations.count'],
+  total: STRINGS['admin.donations.total'],
+  wall: STRINGS['admin.donations.wall'],
+  year: STRINGS['admin.donations.year'],
+  save: STRINGS['admin.donations.save'],
+  donorName: STRINGS['admin.donations.donorName'],
+  amount: STRINGS['admin.donations.amount'],
+  date: STRINGS['admin.donations.date'],
+  mode: STRINGS['admin.donations.mode'],
+  receiptNo: STRINGS['admin.donations.receiptNo'],
+  anonymous: STRINGS['admin.donations.anonymous'],
+  showOnWall: STRINGS['admin.donations.showOnWall'],
+  note: STRINGS['admin.donations.note'],
 };
 
 registerSection(COLL, {
-  title: { bn: 'দান', en: 'Donations' }, icon: '💰',
+  title: STRINGS['admin.donations'], icon: '💰',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));

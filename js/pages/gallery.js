@@ -26,7 +26,7 @@ if (s) {
         const featured = albums.filter(a => a.featured && a.coverUrl).slice(0, 4);
         main.replaceChildren(pageHeader({ crumb: t('nav.gallery'), title: t('gallery.albums') }),
           section(...[
-            featured.length ? sectionHead(pick({ bn: 'সেরা মুহূর্ত', en: 'Best moments' })) : null,
+            featured.length ? sectionHead(t('gallery.best')) : null,
             featured.length ? el('div', { class: 'best' }, ...featured.map(a => el('a', { href: `gallery.html?album=${a.id}` }, el('img', { src: a.coverUrl, alt: pick(a.title), loading: 'lazy' })))) : null,
             sectionHead(t('gallery.albums')),
             albums.length ? el('div', { class: 'albums' }, ...albums.map(a => el('a', { class: 'album', href: `gallery.html?album=${a.id}` },
