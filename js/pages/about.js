@@ -4,6 +4,7 @@ import { db, collection, getDocs, query, where, orderBy } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
 import { renderRich } from '../rich.js';
+import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('about', t('nav.about'));
@@ -23,7 +24,7 @@ if (s) {
     const render = () => {
       const lang = getLang(), num = n => lang === 'bn' ? bnDigits(n) : String(n);
       const sorted = [...items].sort((a, b) => b.year - a.year);
-      main.replaceChildren(pageHeader({ crumb: pick(s.name), title: t('nav.about'), lead: pick(s.tagline) }),
+      main.replaceChildren(pageHeader({ crumb: pick(s.name), title: t('nav.about'), lead: pick(s.tagline), image: mediaUrl(s.media, 'header.about') }),
         section(items.length ? el('div', { class: 'tl' }, ...sorted.flatMap(h => [
           el('div', { class: 'yr' }, num(h.year), el('small', { text: pick(h.title) })),
           el('article', { class: 'card' }, el('h3', { text: pick(h.title) }), el('div', { class: 'rich' }, renderRich(pick(h.body))),

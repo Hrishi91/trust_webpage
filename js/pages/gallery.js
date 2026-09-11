@@ -3,6 +3,7 @@ import { listPublished, listPhotos, getPublished } from '../content.js';
 import { db, doc, getDoc } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
+import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('gallery', t('nav.gallery'));
@@ -24,7 +25,7 @@ if (s) {
       const render = () => {
         const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
         const featured = albums.filter(a => a.featured && a.coverUrl).slice(0, 4);
-        main.replaceChildren(pageHeader({ crumb: t('nav.gallery'), title: t('gallery.albums') }),
+        main.replaceChildren(pageHeader({ crumb: t('nav.gallery'), title: t('gallery.albums'), image: mediaUrl(s.media, 'header.gallery') }),
           section(...[
             featured.length ? sectionHead(t('gallery.best')) : null,
             featured.length ? el('div', { class: 'best' }, ...featured.map(a => el('a', { href: `gallery.html?album=${a.id}` }, el('img', { src: a.coverUrl, alt: pick(a.title), loading: 'lazy' })))) : null,
@@ -65,7 +66,7 @@ if (s) {
         };
         const render = () => {
           const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
-          main.replaceChildren(pageHeader({ crumb: t('gallery.albums'), title: `${num(album.year)} · ${pick(album.title)}` }),
+          main.replaceChildren(pageHeader({ crumb: t('gallery.albums'), title: `${num(album.year)} · ${pick(album.title)}`, image: mediaUrl(s.media, 'header.gallery') }),
             section(el('a', { href: 'gallery.html', text: '‹ ' + t('gallery.albums') }),
               el('div', { class: 'masonry' }, ...photos.map((p, i) => el('img', { class: 'cover', src: p.url, alt: pick(p.caption), loading: 'lazy', onclick: () => open(i) })))));
         };

@@ -4,6 +4,7 @@ import { pick, t, getLang, STRINGS } from '../i18n.js';
 import { el, fmtDate, toast, digits } from '../ui.js';
 import { inr } from '../money.js';
 import { parsePurposes } from '../ledger.js';
+import { mediaUrl } from '../media-slots.js';
 
 const COPY_LABEL = STRINGS['donate.copy'];
 const NAME_LABEL = STRINGS['donate.name'];
@@ -81,7 +82,7 @@ if (s) {
       refField = el('input', { type: 'text', placeholder: pick(REF_LABEL), 'aria-label': pick(REF_LABEL) });
       const purposeCards = purposes.length ? el('div', { class: 'purpose' }, ...purposes.map(p => el('div', { class: 'pcard' }, el('b', { text: pick(p.title) }),
         el('div', { class: 'chips' }, ...p.amounts.map(a => el('i', { text: inr(a, lang), onclick: () => { amountField.value = String(a); amountField.focus(); } })))))) : null;
-      main.replaceChildren(pageHeader({ crumb: t('nav.donate'), title: t('donate.title'), lead: s.has80G ? t('donate.tax80g') : '' }),
+      main.replaceChildren(pageHeader({ crumb: t('nav.donate'), title: t('donate.title'), lead: s.has80G ? t('donate.tax80g') : '', image: mediaUrl(s.media, 'header.donate') }),
         section(el('div', { class: 'dgrid' },
           el('div', {}, upiCard(), purposeCards ? sectionHead(t('donate.purposeHeading')) : null, purposeCards),
           el('div', {}, confirmCard(), el('div', { class: 'form wall-card' }, el('span', { class: 'eyebrow', text: t('donate.wall') }),

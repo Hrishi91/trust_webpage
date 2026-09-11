@@ -2,6 +2,7 @@ import { mountShell, section, pageHeader } from '../shell.js';
 import { listPublished } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, fmtDate, isLiveEvent } from '../ui.js';
+import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('events', t('nav.events'));
@@ -31,7 +32,7 @@ if (s) {
       const row = e => { const live = isLiveEvent(e, now);   // js/ui.js: end || start+2h (amended after Task 7 review)
         return el('div', { class: live ? 'ev live' : 'ev' }, el('time', { text: time(e.start) }),
           el('div', {}, el('b', { text: pick(e.title) }), el('span', { text: [pick(e.venue), pick(e.desc)].filter(Boolean).join(' · ') }), live ? el('span', { class: 'pulse', text: t('live.badge') }) : null)); };
-      main.replaceChildren(pageHeader({ crumb: t('nav.events'), title: t('events.upcoming') }),
+      main.replaceChildren(pageHeader({ crumb: t('nav.events'), title: t('events.upcoming'), image: mediaUrl(s.media, 'header.events') }),
         section(...[
           days.length ? el('div', { class: 'days tabs', role: 'tablist' }, ...days.map(d => el('button', { type: 'button', class: d === selectedDay ? 'active' : '', 'aria-pressed': String(d === selectedDay),
             text: fmtDate(up.find(e => dayKey(e) === d).start, lang), onclick: () => { selectedDay = d; render(); } }))) : null,

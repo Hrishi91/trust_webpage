@@ -2,6 +2,7 @@ import { mountShell, pageHeader, section, sectionHead } from '../shell.js';
 import { listCommittee } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
+import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('committee', t('nav.committee'));
@@ -18,7 +19,7 @@ if (s) {
     const render = () => {
       const officers = people.filter(p => p.officer), rest = people.filter(p => !p.officer);
       const ring = p => el('div', { class: 'ring' }, p.photoUrl ? el('img', { src: p.photoUrl, alt: '', loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) }));
-      main.replaceChildren(pageHeader({ crumb: t('nav.committee'), title: t('committee.title') }),
+      main.replaceChildren(pageHeader({ crumb: t('nav.committee'), title: t('committee.title'), image: mediaUrl(s.media, 'header.committee') }),
         section(...[
           officers.length ? el('div', { class: 'officers' }, ...officers.map(p => el('div', { class: 'officer person' }, ring(p), el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) })))) : null,
           rest.length ? sectionHead(t('committee.members'), el('span', { class: 'pill', text: `${getLang() === 'bn' ? bnDigits(rest.length) : rest.length}` })) : null,
