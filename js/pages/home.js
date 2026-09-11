@@ -50,7 +50,7 @@ if (s) {
     };
     const cred = () => {
       const items = [];
-      if (s.estYear) items.push(el('span', { text: `Est. ${num(s.estYear)}` }));
+      if (s.estYear) items.push(el('span', { text: `${t('cred.est')} ${num(s.estYear)}` }));
       if (s.regNo) items.push(el('span', {}, el('b', { text: t('cred.registered') }), ` ${t('tr.regNo')} ${s.regNo}`));
       if (s.has80G) items.push(el('span', {}, el('b', { text: t('cred.80g') }), ` ${t('donate.tax80g')}`));
       if (years.length) items.push(el('span', {}, el('b', { text: t('tr.title') }), ` ${t('home.ledgerPublished')}`));

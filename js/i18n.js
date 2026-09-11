@@ -160,6 +160,7 @@ export const STRINGS = {
   // credibility strip (home hero)
   'cred.registered': { bn: 'Registered Trust', en: 'Registered Trust' },
   'cred.80g': { bn: '80G', en: '80G' },
+  'cred.est': { bn: 'প্রতিষ্ঠিত', en: 'Est.' },
   // home page (inline literals moved in during Phase 6 Task 1)
   'home.glance': { bn: 'এক নজরে', en: 'At a glance' },
   'home.pujaStarts': { bn: 'পুজো শুরু', en: 'Puja starts' },
