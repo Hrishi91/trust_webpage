@@ -7,7 +7,7 @@ import { renderRich } from '../rich.js';
 import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('about', t('nav.about'));
+const s = await mountShell('about', 'nav.about');
 if (s) {
   const preview = new URLSearchParams(location.search).has('preview');
   let items;

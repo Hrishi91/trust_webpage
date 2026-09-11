@@ -5,7 +5,7 @@ import { el, bnDigits } from '../ui.js';
 import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('committee', t('nav.committee'));
+const s = await mountShell('committee', 'nav.committee');
 if (s) {
   let people = [];
   try {

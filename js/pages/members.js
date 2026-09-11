@@ -11,7 +11,7 @@ import { normalizePhone } from '../phone.js';
 import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('members', t('nav.members'));
+const s = await mountShell('members', 'nav.members');
 if (s) {
   if (s.sectionVisibility.members === false) {
     main.replaceChildren(el('p', { class: 'muted', text: t('common.empty') }));

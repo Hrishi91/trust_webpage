@@ -12,7 +12,7 @@ const AMOUNT_LABEL = STRINGS['donate.amount'];
 const REF_LABEL = STRINGS['donate.ref'];
 
 const main = document.getElementById('main');
-const s = await mountShell('donate', t('donate.title'));
+const s = await mountShell('donate', 'donate.title');
 if (s) {
   if (s.sectionVisibility.donate === false) {
     main.replaceChildren(el('p', { class: 'muted', text: t('common.empty') }));

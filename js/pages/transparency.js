@@ -10,7 +10,7 @@ import { mediaUrl } from '../media-slots.js';
 const TOTAL_LABEL = STRINGS['tr.total'];
 
 const main = document.getElementById('main');
-const s = await mountShell('transparency', t('tr.title'));
+const s = await mountShell('transparency', 'tr.title');
 if (s) {
   if (s.sectionVisibility.transparency === false) {
     main.replaceChildren(el('p', { class: 'muted', text: t('common.empty') }));

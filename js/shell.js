@@ -1,5 +1,5 @@
 import { getSettings, getContent, onAnnouncements } from './content.js';
-import { getLang, setLang, onLangChange, pick, t, setOverrides } from './i18n.js';
+import { getLang, setLang, onLangChange, pick, t, setOverrides, STRINGS } from './i18n.js';
 import { el, digits, fmtDate } from './ui.js';
 import { resolveTheme, applyTheme, applyOverrides, isPreview } from './theme.js';
 import { mediaUrl } from './media-slots.js';
@@ -40,7 +40,12 @@ export function pageHeader({ crumb, title, lead, image }) {
   return ph;
 }
 
-export async function mountShell(active, pageTitle) {
+// `pageTitleKey`: an i18n.js STRINGS key (e.g. 'nav.about'), resolved with t() inside renderNav()
+// below — never a pre-resolved string — so document.title picks up a content/strings override
+// and re-resolves on langchange, same as every other piece of nav/footer copy. A caller passing a
+// string that isn't a STRINGS key (defensive fallback only; every current call site passes a key)
+// gets that string back as-is, so nothing that predates this behaves differently.
+export async function mountShell(active, pageTitleKey) {
   const [s, c] = await Promise.all([getSettings(), getContent()]);
   setOverrides(c.strings);
   s.media = c.media;
@@ -80,6 +85,7 @@ export async function mountShell(active, pageTitle) {
   // never by an announcements update, so an open burger menu survives ticker refreshes.
   const renderNav = () => {
     document.documentElement.lang = getLang();
+    const pageTitle = pageTitleKey ? (Object.prototype.hasOwnProperty.call(STRINGS, pageTitleKey) ? t(pageTitleKey) : pageTitleKey) : '';
     document.title = pageTitle ? `${pageTitle} · ${pick(s.name)}` : pick(s.name);
     // GitHub Pages has no server render, so this is the only place document.title/description
     // ever get the admin's override — social-media scrapers that don't run JS still see the

@@ -6,7 +6,7 @@ import { el, bnDigits } from '../ui.js';
 import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('gallery', t('nav.gallery'));
+const s = await mountShell('gallery', 'nav.gallery');
 if (s) {
   const params = new URLSearchParams(location.search);
   const albumId = params.get('album');

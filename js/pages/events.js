@@ -5,7 +5,7 @@ import { el, fmtDate, isLiveEvent } from '../ui.js';
 import { mediaUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
-const s = await mountShell('events', t('nav.events'));
+const s = await mountShell('events', 'nav.events');
 if (s) {
   let all, errored = false;
   try {
