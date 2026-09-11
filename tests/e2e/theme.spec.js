@@ -50,3 +50,51 @@ test('admin applies a theme from the 🎨 card; the public site reflects it; aud
   await page.click('.theme-tile[data-theme-name="siddhi"] button.apply');
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');
 });
+// Phase 6 Task 6: 🎨 ডিজাইন colour override — one row's hex text input round-trips to the public
+// site's inline <html> custom property, then "থিমের রং-এ ফেরাও" removes it back to the theme's
+// own value (siddhi's --sindoor, from css/tokens.css). Runs after the theme-apply test above so
+// the active theme is back to 'siddhi' by the time this asserts the reset value.
+test('🎨 colour override — sindoor hex reaches <html> on the public site, then resets to the theme value', async ({ page }) => {
+  await page.goto('/admin/');
+  await page.fill('input[name=email]', 'admin@example.com');
+  await page.fill('input[name=password]', 'password12345');
+  await page.click('button[type=submit]');
+  await expect(page.locator('.grid .tile')).toHaveCount(16);
+  page.on('dialog', d => d.accept('password12345'));
+  await page.goto('/admin/#design');
+  const sindoorText = page.locator('.colour-row[data-key="sindoor"] input[type=text]');
+  await sindoorText.fill('#112233');
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  expect((await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sindoor'))).trim()).toBe('#112233');
+  await page.goto('/admin/#design');
+  await page.click('.colour-row[data-key="sindoor"] button.btn-sm.secondary');
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  expect((await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sindoor'))).trim()).toBe('#c9361a');
+});
+// Phase 6 Task 6: হোম-এর section — toggling a section's checkbox off and saving actually removes
+// it from the rendered home page; toggling it back on restores it (js/sections.js's orderSections()
+// is unit-tested separately — this is the admin-write + public-render round trip).
+test('🎨 home sections — turning off "culture" hides it on the home page; turning it back on restores it', async ({ page }) => {
+  await page.goto('/admin/');
+  await page.fill('input[name=email]', 'admin@example.com');
+  await page.fill('input[name=password]', 'password12345');
+  await page.click('button[type=submit]');
+  await expect(page.locator('.grid .tile')).toHaveCount(16);
+  page.on('dialog', d => d.accept('password12345'));
+  await page.goto('/admin/#design');
+  await page.uncheck('input[name="sec.culture"]');
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  await expect(page.locator('.culture')).toHaveCount(0);
+  await page.goto('/admin/#design');
+  await page.check('input[name="sec.culture"]');
+  await page.click('.savebar button.btn');
+  await expect(page.locator('.toast')).toBeVisible();
+  await page.goto('/index.html');
+  await expect(page.locator('.culture')).toHaveCount(1);
+});

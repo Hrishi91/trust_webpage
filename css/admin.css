@@ -79,3 +79,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 /* 🖼️ UI ছবি — media slots (Phase 6 Task 5) */
 .slot-card{display:grid;gap:.4rem}
 .slot-card .thumb{width:100%;max-width:280px;height:auto;aspect-ratio:auto;border-radius:12px}
+
+/* 🎨 ডিজাইন — colour overrides, fonts, home-section order (Phase 6 Task 6) */
+.colour-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.5rem;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--line)}
+input[type=color]{width:44px;height:44px;padding:0;border-radius:10px}
+.colour-row input[type=text]{width:90px;min-height:44px}
+.badge.ok{background:var(--durva);color:#fff}
+.badge.warn{background:var(--pitambar);color:var(--ink)}
+.sec-row{display:flex;gap:.5rem;align-items:center;min-height:44px}
+@media(max-width:520px){
+  .colour-row{grid-template-columns:1fr auto;grid-template-areas:"label label" "swatch badge" "reset reset"}
+  .colour-row>span{grid-area:label}
+  .colour-row>.row{grid-area:swatch}
+  .colour-row>.badge{grid-area:badge;justify-self:end}
+  .colour-row>.btn-sm{grid-area:reset}
+}
