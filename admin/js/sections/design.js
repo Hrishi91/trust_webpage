@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import {
   THEMES, THEME_META, resolveTheme, applyTheme, applyOverrides, clearOverrides, OVERRIDE_KEYS, FONTS,
@@ -27,7 +27,7 @@ const GROUND = {
 // but the click handler is an arrow function nested inside render() and re-invoking through the
 // captured `def` reference is simpler to reason about than tracking `this` through that closure.
 const def = {
-  title: STRINGS['admin.design'], icon: '🎨',
+  title: 'admin.design', titleKey: 'admin.design', icon: '🎨',
   async render(box, ctx) {
     const ref = doc(ctx.db, 'settings', 'site');
     const cur = (await getDoc(ref)).data() ?? {};

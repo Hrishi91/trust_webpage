@@ -1,17 +1,19 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { biField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'notices';
+// Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
+// picks up content/strings overrides and the current language (final-review fix wave, I2).
 const L = {
-  title: STRINGS['admin.notices.title'],
-  body: STRINGS['admin.notices.body'],
+  title: 'admin.notices.title',
+  body: 'admin.notices.body',
 };
 
 registerSection(COLL, {
-  title: STRINGS['admin.notices'], icon: '📋',
+  title: 'admin.notices', titleKey: 'admin.notices', icon: '📋',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));
@@ -46,8 +48,8 @@ async function formPane(ctx, idParam) {
   const isNew = idParam === 'new';
   const cur = isNew ? {} : (await getDoc(doc(ctx.db, COLL, idParam))).data() ?? {};
 
-  const title = biField(L.title, 'title', cur.title ?? {});
-  const body = biField(L.body, 'body', cur.body ?? {}, { multiline: true });
+  const title = biField(t(L.title), 'title', cur.title ?? {});
+  const body = biField(t(L.body), 'body', cur.body ?? {}, { multiline: true });
 
   const save = publish => async e => {
     e.preventDefault();

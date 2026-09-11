@@ -1,35 +1,37 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { sum, inr } from '../../../js/money.js';
 import { textField, boolField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'donations';
 const MODES = ['cash', 'upi', 'bank'];
-const MODE_LABEL = {
-  cash: STRINGS['admin.donations.modeCash'],
-  upi: STRINGS['admin.donations.modeUpi'],
-  bank: STRINGS['admin.donations.modeBank'],
+// Keys, not resolved {bn,en} objects — resolved with t(...) at the point of use so every render
+// picks up content/strings overrides and the current language (final-review fix wave, I2).
+const MODE_KEY = {
+  cash: 'admin.donations.modeCash',
+  upi: 'admin.donations.modeUpi',
+  bank: 'admin.donations.modeBank',
 };
 const L = {
-  count: STRINGS['admin.donations.count'],
-  total: STRINGS['admin.donations.total'],
-  wall: STRINGS['admin.donations.wall'],
-  year: STRINGS['admin.donations.year'],
-  save: STRINGS['admin.donations.save'],
-  donorName: STRINGS['admin.donations.donorName'],
-  amount: STRINGS['admin.donations.amount'],
-  date: STRINGS['admin.donations.date'],
-  mode: STRINGS['admin.donations.mode'],
-  receiptNo: STRINGS['admin.donations.receiptNo'],
-  anonymous: STRINGS['admin.donations.anonymous'],
-  showOnWall: STRINGS['admin.donations.showOnWall'],
-  note: STRINGS['admin.donations.note'],
+  count: 'admin.donations.count',
+  total: 'admin.donations.total',
+  wall: 'admin.donations.wall',
+  year: 'admin.donations.year',
+  save: 'admin.donations.save',
+  donorName: 'admin.donations.donorName',
+  amount: 'admin.donations.amount',
+  date: 'admin.donations.date',
+  mode: 'admin.donations.mode',
+  receiptNo: 'admin.donations.receiptNo',
+  anonymous: 'admin.donations.anonymous',
+  showOnWall: 'admin.donations.showOnWall',
+  note: 'admin.donations.note',
 };
 
 registerSection(COLL, {
-  title: STRINGS['admin.donations'], icon: '💰',
+  title: 'admin.donations', titleKey: 'admin.donations', icon: '💰',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));
@@ -54,9 +56,9 @@ async function listPane(ctx) {
     const wallCount = yearRows.filter(r => r.showOnWall).length;
 
     const summary = el('div', { class: 'card' },
-      el('p', { text: `${pick(L.count)}: ${yearRows.length} · ${pick(L.total)}: ${inr(total, ctx.lang)}` }),
-      el('p', { text: MODES.map(m => `${pick(MODE_LABEL[m])} ${inr(byMode[m], ctx.lang)}`).join(' · ') }),
-      el('p', { text: `${pick(L.wall)}: ${wallCount}` }),
+      el('p', { text: `${t(L.count)}: ${yearRows.length} · ${t(L.total)}: ${inr(total, ctx.lang)}` }),
+      el('p', { text: MODES.map(m => `${t(MODE_KEY[m])} ${inr(byMode[m], ctx.lang)}`).join(' · ') }),
+      el('p', { text: `${t(L.wall)}: ${wallCount}` }),
     );
     const list = el('div');
     if (!yearRows.length) list.append(el('p', { text: t('common.empty') }));
@@ -64,10 +66,10 @@ async function listPane(ctx) {
       list.append(el('div', { class: 'list-item' },
         el('a', {
           href: '#', class: 'grow',
-          text: `${fmtDate(d.date, ctx.lang)} · ${d.isAnonymous ? t('donate.anonymous') : d.donorName} · ${inr(d.amount, ctx.lang)} · ${pick(MODE_LABEL[d.mode] ?? MODE_LABEL.cash)}`,
+          text: `${fmtDate(d.date, ctx.lang)} · ${d.isAnonymous ? t('donate.anonymous') : d.donorName} · ${inr(d.amount, ctx.lang)} · ${t(MODE_KEY[d.mode] ?? MODE_KEY.cash)}`,
           onclick: e => { e.preventDefault(); ctx.navigate(`#${COLL}/${d.id}`); },
         }),
-        d.showOnWall ? el('span', { class: 'badge pub', text: pick(L.wall) }) : null,
+        d.showOnWall ? el('span', { class: 'badge pub', text: t(L.wall) }) : null,
       ));
     });
     body.replaceChildren(summary, list);
@@ -81,7 +83,7 @@ async function listPane(ctx) {
   outer.append(
     el('div', { class: 'row' },
       el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) }),
-      el('label', {}, el('span', { text: pick(L.year) }), yearSelect),
+      el('label', {}, el('span', { text: t(L.year) }), yearSelect),
     ),
     body,
   );
@@ -97,17 +99,17 @@ async function formPane(ctx, id) {
     : (cur.receiptNo ?? '');
 
   const f = {
-    donorName: textField(L.donorName, 'donorName', cur.donorName ?? '', { required: true }),
-    amount: textField(L.amount, 'amount', cur.amount ?? '', { type: 'number', required: true }),
-    date: textField(L.date, 'date', dateVal, { type: 'date', required: true }),
-    receiptNo: textField(L.receiptNo, 'receiptNo', receiptDefault),
-    note: textField(L.note, 'note', cur.note ?? ''),
+    donorName: textField(t(L.donorName), 'donorName', cur.donorName ?? '', { required: true }),
+    amount: textField(t(L.amount), 'amount', cur.amount ?? '', { type: 'number', required: true }),
+    date: textField(t(L.date), 'date', dateVal, { type: 'date', required: true }),
+    receiptNo: textField(t(L.receiptNo), 'receiptNo', receiptDefault),
+    note: textField(t(L.note), 'note', cur.note ?? ''),
   };
   const modeSelect = el('select', { name: 'mode' },
-    ...MODES.map(m => el('option', { value: m, selected: (cur.mode ?? 'cash') === m, text: pick(MODE_LABEL[m]) })));
-  const modeField = el('label', {}, el('span', { text: pick(L.mode) }), modeSelect);
-  const isAnonymous = boolField(L.anonymous, 'isAnonymous', cur.isAnonymous ?? false);
-  const showOnWall = boolField(L.showOnWall, 'showOnWall', cur.showOnWall ?? true);
+    ...MODES.map(m => el('option', { value: m, selected: (cur.mode ?? 'cash') === m, text: t(MODE_KEY[m]) })));
+  const modeField = el('label', {}, el('span', { text: t(L.mode) }), modeSelect);
+  const isAnonymous = boolField(t(L.anonymous), 'isAnonymous', cur.isAnonymous ?? false);
+  const showOnWall = boolField(t(L.showOnWall), 'showOnWall', cur.showOnWall ?? true);
 
   const read = () => {
     const date = f.date.read();
@@ -130,7 +132,7 @@ async function formPane(ctx, id) {
     f.donorName.node, f.amount.node, f.date.node, modeField, f.receiptNo.node,
     isAnonymous.node, showOnWall.node, f.note.node,
     el('div', { class: 'row' },
-      el('button', { class: 'btn', type: 'submit', text: pick(L.save) }),
+      el('button', { class: 'btn', type: 'submit', text: t(L.save) }),
       id !== 'new' ? el('button', {
         class: 'btn danger', type: 'button', text: t('admin.delete'),
         onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } },

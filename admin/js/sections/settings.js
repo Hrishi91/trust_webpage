@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc, setDoc, serverTimestamp } from '../../../js/firebase.js';
-import { t, STRINGS } from '../../../js/i18n.js';
+import { t } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { biField, textField, boolField, toLocalInput } from '../forms.js';
 import { logAudit } from '../audit.js';
@@ -10,41 +10,41 @@ const SECTIONS = ['about', 'committee', 'gallery', 'events', 'donate', 'transpar
 const SOCIAL_KEYS = ['facebook', 'youtube', 'instagram', 'whatsappGroup'];
 
 registerSection('settings', {
-  title: STRINGS['admin.settings'], icon: '⚙️',
+  title: 'admin.settings', titleKey: 'admin.settings', icon: '⚙️',
   async render(box, ctx) {
     const ref = doc(ctx.db, 'settings', 'site');
     const cur = (await getDoc(ref)).data() ?? {};
     const vis = cur.sectionVisibility ?? {};
     const social = cur.social ?? {};
     const f = {
-      name: biField(STRINGS['admin.settings.name'], 'name', cur.name),
-      tagline: biField(STRINGS['admin.settings.tagline'], 'tagline', cur.tagline),
-      address: biField(STRINGS['admin.settings.address'], 'address', cur.address, { multiline: true }),
-      logoUrl: textField(STRINGS['admin.settings.logoUrl'], 'logoUrl', cur.logoUrl),
-      mapUrl: textField(STRINGS['admin.settings.mapUrl'], 'mapUrl', cur.mapUrl),
-      phone: textField(STRINGS['admin.settings.phone'], 'phone', cur.contacts?.phone),
-      whatsapp: textField(STRINGS['admin.settings.whatsapp'], 'whatsapp', cur.contacts?.whatsapp),
-      email: textField(STRINGS['admin.settings.email'], 'email', cur.contacts?.email, { type: 'email' }),
-      regNo: textField(STRINGS['admin.settings.regNo'], 'regNo', cur.regNo),
-      has80G: boolField(STRINGS['admin.settings.has80G'], 'has80G', cur.has80G),
-      upiId: textField(STRINGS['admin.settings.upiId'], 'upiId', cur.upiId),
-      upiQrUrl: textField(STRINGS['admin.settings.upiQrUrl'], 'upiQrUrl', cur.upiQrUrl),
-      pujaDate: textField(STRINGS['admin.settings.pujaDate'], 'pujaDate', toLocalInput(cur.pujaDate), { type: 'datetime-local' }),
-      theme: biField(STRINGS['home.thisTheme'], 'theme', cur.theme),
-      maintenance: boolField(STRINGS['admin.settings.maintenance'], 'maintenance', cur.maintenance),
-      donatePurposes: textField(STRINGS['admin.settings.donatePurposes'], 'donatePurposes', cur.donatePurposes ?? '', { multiline: true }),
+      name: biField(t('admin.settings.name'), 'name', cur.name),
+      tagline: biField(t('admin.settings.tagline'), 'tagline', cur.tagline),
+      address: biField(t('admin.settings.address'), 'address', cur.address, { multiline: true }),
+      logoUrl: textField(t('admin.settings.logoUrl'), 'logoUrl', cur.logoUrl),
+      mapUrl: textField(t('admin.settings.mapUrl'), 'mapUrl', cur.mapUrl),
+      phone: textField(t('admin.settings.phone'), 'phone', cur.contacts?.phone),
+      whatsapp: textField(t('admin.settings.whatsapp'), 'whatsapp', cur.contacts?.whatsapp),
+      email: textField(t('admin.settings.email'), 'email', cur.contacts?.email, { type: 'email' }),
+      regNo: textField(t('admin.settings.regNo'), 'regNo', cur.regNo),
+      has80G: boolField(t('admin.settings.has80G'), 'has80G', cur.has80G),
+      upiId: textField(t('admin.settings.upiId'), 'upiId', cur.upiId),
+      upiQrUrl: textField(t('admin.settings.upiQrUrl'), 'upiQrUrl', cur.upiQrUrl),
+      pujaDate: textField(t('admin.settings.pujaDate'), 'pujaDate', toLocalInput(cur.pujaDate), { type: 'datetime-local' }),
+      theme: biField(t('home.thisTheme'), 'theme', cur.theme),
+      maintenance: boolField(t('admin.settings.maintenance'), 'maintenance', cur.maintenance),
+      donatePurposes: textField(t('admin.settings.donatePurposes'), 'donatePurposes', cur.donatePurposes ?? '', { multiline: true }),
       // Phase 6 Task 6: social links (validated https-or-empty client-side below and again in
       // firestore.rules' validSocial()), established year, custom credibility items, meta description.
-      facebook: textField(STRINGS['admin.settings.facebook'], 'social.facebook', social.facebook, { type: 'url' }),
-      youtube: textField(STRINGS['admin.settings.youtube'], 'social.youtube', social.youtube, { type: 'url' }),
-      instagram: textField(STRINGS['admin.settings.instagram'], 'social.instagram', social.instagram, { type: 'url' }),
-      whatsappGroup: textField(STRINGS['admin.settings.whatsappGroup'], 'social.whatsappGroup', social.whatsappGroup, { type: 'url' }),
-      estYear: textField(STRINGS['admin.settings.estYear'], 'estYear', cur.estYear ?? '', { type: 'number' }),
-      credItems: textField(STRINGS['admin.settings.credItems'], 'credItems', cur.credItems ?? '', { multiline: true }),
-      metaDescription: biField(STRINGS['admin.settings.metaDescription'], 'metaDescription', cur.metaDescription, { multiline: true }),
+      facebook: textField(t('admin.settings.facebook'), 'social.facebook', social.facebook, { type: 'url' }),
+      youtube: textField(t('admin.settings.youtube'), 'social.youtube', social.youtube, { type: 'url' }),
+      instagram: textField(t('admin.settings.instagram'), 'social.instagram', social.instagram, { type: 'url' }),
+      whatsappGroup: textField(t('admin.settings.whatsappGroup'), 'social.whatsappGroup', social.whatsappGroup, { type: 'url' }),
+      estYear: textField(t('admin.settings.estYear'), 'estYear', cur.estYear ?? '', { type: 'number' }),
+      credItems: textField(t('admin.settings.credItems'), 'credItems', cur.credItems ?? '', { multiline: true }),
+      metaDescription: biField(t('admin.settings.metaDescription'), 'metaDescription', cur.metaDescription, { multiline: true }),
     };
-    const showPrefix = STRINGS['admin.settings.showPrefix'];
-    const visFields = SECTIONS.map(s => boolField({ bn: `${showPrefix.bn} ${s}`, en: `${showPrefix.en} ${s}` }, `vis.${s}`, vis[s] !== false));
+    const showPrefix = t('admin.settings.showPrefix');
+    const visFields = SECTIONS.map(s => boolField(`${showPrefix} ${s}`, `vis.${s}`, vis[s] !== false));
     const form = el('form', { class: 'card' },
       f.name.node, f.tagline.node, f.address.node, f.logoUrl.node, f.mapUrl.node,
       f.phone.node, f.whatsapp.node, f.email.node, f.regNo.node, f.has80G.node,

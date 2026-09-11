@@ -1,6 +1,6 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc, setDoc, deleteField } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { SLOTS, httpsUrl } from '../../../js/media-slots.js';
 import { el, toast } from '../../../js/ui.js';
 import { imageField } from '../upload.js';
@@ -9,7 +9,7 @@ import { logAudit } from '../audit.js';
 // `def` is named (not passed inline to registerSection) so the save handler below can re-invoke
 // def.render(box, ctx) after a successful write — same pattern as sections/strings.js.
 const def = {
-  title: STRINGS['admin.media'], icon: '🖼️',
+  title: 'admin.media', titleKey: 'admin.media', icon: '🖼️',
   async render(box, ctx) {
     // Snapshot taken once per render; save() below diffs each slot's field.read() against this,
     // so an untouched or round-tripped slot is correctly left out of the write.

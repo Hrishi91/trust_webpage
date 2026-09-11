@@ -100,7 +100,7 @@ function dashboard() {
   const grid = el('div', { class: 'grid' });
   for (const [key, def] of sections) {
     grid.append(el('a', { class: 'card tile', href: `#${key}` },
-      el('span', { class: 'icon', text: def.icon }), el('span', { text: pick(def.title) })));
+      el('span', { class: 'icon', text: def.icon }), el('span', { text: def.titleKey ? t(def.titleKey) : pick(def.title) })));
   }
   return grid;
 }
@@ -110,7 +110,7 @@ async function route() {
   const main = $('adm-main'); main.replaceChildren();
   const key = location.hash.replace(/^#/, '').split('/')[0];
   const def = sections.get(key);
-  $('adm-title').textContent = def ? pick(def.title) : 'Admin';
+  $('adm-title').textContent = def ? (def.titleKey ? t(def.titleKey) : pick(def.title)) : 'Admin';
   if (!def) { main.append(dashboard()); return; }
   main.append(el('a', { class: 'back', href: '#', text: '‹ ' + t('admin.dashboard') }));
   const box = el('div'); main.append(box);

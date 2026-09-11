@@ -1,23 +1,25 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { sum, inr } from '../../../js/money.js';
 import { biField, textField, saveDoc, softDelete } from '../forms.js';
 import { fileField } from '../upload.js';
 
 const COLL = 'transparency';
+// Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
+// picks up content/strings overrides and the current language (final-review fix wave, I2).
 const L = {
-  category: STRINGS['admin.transparency.category'],
-  amount: STRINGS['admin.transparency.amount'],
-  total: STRINGS['admin.transparency.total'],
-  docTitle: STRINGS['admin.transparency.docTitle'],
-  docFile: STRINGS['admin.transparency.docFile'],
-  notes: STRINGS['admin.transparency.notes'],
+  category: 'admin.transparency.category',
+  amount: 'admin.transparency.amount',
+  total: 'admin.transparency.total',
+  docTitle: 'admin.transparency.docTitle',
+  docFile: 'admin.transparency.docFile',
+  notes: 'admin.transparency.notes',
 };
 
 registerSection(COLL, {
-  title: STRINGS['admin.transparency'], icon: '📊',
+  title: 'admin.transparency', titleKey: 'admin.transparency', icon: '📊',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));
@@ -61,13 +63,13 @@ function rowsSection(ctx, sectionLabel, initialRows, onAnyChange) {
   // read that const in its temporal dead zone.
   const updateTotal = () => {
     const total = sum(rows.map(r => ({ amount: Number(r.amt.read()) || 0 })));
-    totalEl.textContent = `${pick(L.total)}: ${inr(total, ctx.lang)}`;
+    totalEl.textContent = `${t(L.total)}: ${inr(total, ctx.lang)}`;
   };
   const recompute = () => { updateTotal(); onAnyChange?.(); };
 
   const addRow = (cur = {}) => {
-    const cat = biField(L.category, 'category', cur.category ?? {});
-    const amt = textField(L.amount, 'amount', cur.amount ?? '', { type: 'number' });
+    const cat = biField(t(L.category), 'category', cur.category ?? {});
+    const amt = textField(t(L.amount), 'amount', cur.amount ?? '', { type: 'number' });
     const removeBtn = el('button', { class: 'btn-sm', type: 'button', text: '✕' });
     const wrap = el('div', { class: 'row rows-item' }, cat.node, amt.node, removeBtn);
     const entry = { wrap, cat, amt };
@@ -85,7 +87,7 @@ function rowsSection(ctx, sectionLabel, initialRows, onAnyChange) {
   updateTotal();
 
   const addBtn = el('button', { class: 'btn-sm', type: 'button', text: t('admin.addRow'), onclick: () => addRow() });
-  const node = el('div', {}, el('h3', { text: pick(sectionLabel) }), list, addBtn, totalEl);
+  const node = el('div', {}, el('h3', { text: sectionLabel }), list, addBtn, totalEl);
   // Empty-category rows are dropped on save — a blank row left over from clicking "+ Row" and
   // not filling it in shouldn't persist as junk data.
   const read = () => rows.map(r => ({ category: r.cat.read(), amount: Number(r.amt.read()) || 0 }))
@@ -101,8 +103,8 @@ function documentsSection(ctx, initialDocs, getYear) {
   const rows = [];
 
   const addRow = (cur = {}) => {
-    const title = biField(L.docTitle, 'title', cur.title ?? {});
-    const file = fileField(ctx, L.docFile, cur.url ?? '', { folder: `public/transparency/${getYear() || 'draft'}` });
+    const title = biField(t(L.docTitle), 'title', cur.title ?? {});
+    const file = fileField(ctx, t(L.docFile), cur.url ?? '', { folder: `public/transparency/${getYear() || 'draft'}` });
     const removeBtn = el('button', { class: 'btn-sm', type: 'button', text: '✕' });
     const wrap = el('div', { class: 'row rows-item' }, title.node, file.node, removeBtn);
     const entry = { wrap, title, file };
@@ -142,7 +144,7 @@ async function formPane(ctx, idParam) {
   updateBalance();
 
   const documents = documentsSection(ctx, cur.documents ?? [], getYear);
-  const notes = biField(L.notes, 'notes', cur.notes ?? {}, { multiline: true });
+  const notes = biField(t(L.notes), 'notes', cur.notes ?? {}, { multiline: true });
 
   const validate = () => {
     const yearStr = yearField.read();

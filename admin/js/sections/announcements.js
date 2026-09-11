@@ -1,22 +1,24 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDocs, updateDoc, query, where, orderBy, serverTimestamp } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { biField, boolField, textField, saveDoc, softDelete, toLocalInput } from '../forms.js';
 import { logAudit } from '../audit.js';
 
 const COLL = 'announcements';
+// Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
+// picks up content/strings overrides and the current language (final-review fix wave, I2).
 const L = {
-  text: STRINGS['admin.announcements.text'],
-  pinned: STRINGS['admin.announcements.pinned'],
-  isLive: STRINGS['admin.announcements.isLive'],
-  expiresAt: STRINGS['admin.announcements.expiresAt'],
-  edit: STRINGS['admin.announcements.edit'],
-  expired: STRINGS['admin.announcements.expired'],
+  text: 'admin.announcements.text',
+  pinned: 'admin.announcements.pinned',
+  isLive: 'admin.announcements.isLive',
+  expiresAt: 'admin.announcements.expiresAt',
+  edit: 'admin.announcements.edit',
+  expired: 'admin.announcements.expired',
 };
 
 registerSection(COLL, {
-  title: STRINGS['admin.announcements'], icon: '📢',
+  title: 'admin.announcements', titleKey: 'admin.announcements', icon: '📢',
   async render(box, ctx) {
     box.append(await mainPane(ctx));
   },
@@ -30,10 +32,10 @@ async function mainPane(ctx) {
   function renderForm(cur = {}, id = null) {
     editingId = id;
     const f = {
-      text: biField(L.text, 'text', cur.text ?? {}, { multiline: true }),
-      pinned: boolField(L.pinned, 'pinned', cur.pinned ?? false),
-      isLive: boolField(L.isLive, 'isLive', cur.isLive ?? false),
-      expiresAt: textField(L.expiresAt, 'expiresAt', toLocalInput(cur.expiresAt ?? ''), { type: 'datetime-local' }),
+      text: biField(t(L.text), 'text', cur.text ?? {}, { multiline: true }),
+      pinned: boolField(t(L.pinned), 'pinned', cur.pinned ?? false),
+      isLive: boolField(t(L.isLive), 'isLive', cur.isLive ?? false),
+      expiresAt: textField(t(L.expiresAt), 'expiresAt', toLocalInput(cur.expiresAt ?? ''), { type: 'datetime-local' }),
     };
     const save = async e => {
       e.preventDefault();
@@ -79,13 +81,13 @@ async function mainPane(ctx) {
       if (d.isLive) badges.push('🔴');
       if (d.expiresAt) {
         const exp = new Date(d.expiresAt).getTime();
-        badges.push(exp > now ? `⏳ ${fmtDate(d.expiresAt, ctx.lang)}` : pick(L.expired));
+        badges.push(exp > now ? `⏳ ${fmtDate(d.expiresAt, ctx.lang)}` : t(L.expired));
       }
       if (!d.published) badges.push(t('admin.draft'));
       list.append(el('div', { class: 'list-item' },
         el('span', { class: 'grow', text: `${pick(d.text)} · ${fmtDate(d.order, ctx.lang)}` }),
         ...badges.map(b => el('span', { class: 'badge', text: b })),
-        el('button', { class: 'btn-sm', type: 'button', text: pick(L.edit), onclick: () => renderForm(d, d.id) }),
+        el('button', { class: 'btn-sm', type: 'button', text: t(L.edit), onclick: () => renderForm(d, d.id) }),
         el('button', {
           class: 'btn-sm', type: 'button', text: d.published ? t('admin.unpublish') : t('admin.publish'),
           onclick: async () => {

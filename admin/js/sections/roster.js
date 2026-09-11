@@ -1,19 +1,21 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { biField, textField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'roster';
+// Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
+// picks up content/strings overrides and the current language (final-review fix wave, I2).
 const L = {
-  date: STRINGS['admin.roster.date'],
-  duty: STRINGS['admin.roster.duty'],
-  members: STRINGS['admin.roster.members'],
-  note: STRINGS['admin.roster.note'],
+  date: 'admin.roster.date',
+  duty: 'admin.roster.duty',
+  members: 'admin.roster.members',
+  note: 'admin.roster.note',
 };
 
 registerSection(COLL, {
-  title: STRINGS['admin.roster'], icon: '🗓️',
+  title: 'admin.roster', titleKey: 'admin.roster', icon: '🗓️',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));
@@ -36,7 +38,7 @@ async function listPane(ctx) {
     const n = (d.memberPhones ?? []).length;
     box.append(el('div', { class: 'list-item' },
       el('a', {
-        href: '#', class: 'grow', text: `${fmtDate(d.date, ctx.lang)} · ${pick(d.duty)} · ${n} ${pick(L.members)}`,
+        href: '#', class: 'grow', text: `${fmtDate(d.date, ctx.lang)} · ${pick(d.duty)} · ${n} ${t(L.members)}`,
         onclick: e => { e.preventDefault(); ctx.navigate(`#${COLL}/${d.id}`); },
       }),
       el('span', { class: `badge ${d.published ? 'pub' : ''}`, text: d.published ? t('admin.published') : t('admin.draft') }),
@@ -49,9 +51,9 @@ async function formPane(ctx, idParam) {
   const isNew = idParam === 'new';
   const cur = isNew ? {} : (await getDoc(doc(ctx.db, COLL, idParam))).data() ?? {};
 
-  const dateField = textField(L.date, 'date', cur.date ?? '', { type: 'date', required: true });
-  const duty = biField(L.duty, 'duty', cur.duty ?? {});
-  const note = textField(L.note, 'note', cur.note ?? '');
+  const dateField = textField(t(L.date), 'date', cur.date ?? '', { type: 'date', required: true });
+  const duty = biField(t(L.duty), 'duty', cur.duty ?? {});
+  const note = textField(t(L.note), 'note', cur.note ?? '');
 
   // Members checkbox list: active, non-deleted members ordered like the members section's
   // own list. `active` is filtered client-side — no composite (deleted, active, order) index
@@ -64,7 +66,7 @@ async function formPane(ctx, idParam) {
     input.checked = selected.has(m.id);
     return { phone: m.id, input, node: el('label', { class: 'row' }, input, el('span', { text: `${pick(m.name)} · ${m.id}` })) };
   });
-  const membersBox = el('div', {}, el('span', { text: pick(L.members) }), ...checks.map(c => c.node));
+  const membersBox = el('div', {}, el('span', { text: t(L.members) }), ...checks.map(c => c.node));
   if (!checks.length) membersBox.append(el('p', { text: t('common.empty') }));
 
   const save = publish => async e => {

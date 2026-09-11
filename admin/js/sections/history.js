@@ -1,12 +1,12 @@
 import { registerSection } from '../admin.js';
 import { doc, getDoc } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { biField, textField, listView, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'history';
 registerSection(COLL, {
-  title: STRINGS['nav.about'], icon: '📜',
+  title: 'nav.about', titleKey: 'nav.about', icon: '📜',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     if (id === undefined) {
@@ -20,10 +20,10 @@ registerSection(COLL, {
     }
     const cur = id === 'new' ? {} : (await getDoc(doc(ctx.db, COLL, id))).data() ?? {};
     const f = {
-      year: textField(STRINGS['admin.history.year'], 'year', cur.year ?? new Date().getFullYear(), { type: 'number', required: true }),
-      title: biField(STRINGS['admin.history.title'], 'title', cur.title),
-      body: biField(STRINGS['admin.history.body'], 'body', cur.body, { multiline: true }),
-      images: textField(STRINGS['admin.history.images'], 'images', (cur.images ?? []).join(', ')),
+      year: textField(t('admin.history.year'), 'year', cur.year ?? new Date().getFullYear(), { type: 'number', required: true }),
+      title: biField(t('admin.history.title'), 'title', cur.title),
+      body: biField(t('admin.history.body'), 'body', cur.body, { multiline: true }),
+      images: textField(t('admin.history.images'), 'images', (cur.images ?? []).join(', ')),
     };
     const read = () => ({ year: Number(f.year.read()), title: f.title.read(), body: f.body.read(),
                           images: f.images.read().split(',').map(x => x.trim()).filter(Boolean), order: cur.order ?? Number(f.year.read()) });

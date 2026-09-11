@@ -1,27 +1,29 @@
 import { registerSection } from '../admin.js';
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../../js/firebase.js';
-import { t, pick, STRINGS } from '../../../js/i18n.js';
+import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { sum, inr, balance } from '../../../js/money.js';
 import { normalizePhone } from '../../../js/phone.js';
 import { biField, textField, boolField, saveDoc, softDelete } from '../forms.js';
 
 const COLL = 'members';
+// Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
+// picks up content/strings overrides and the current language (final-review fix wave, I2).
 const L = {
-  phone: STRINGS['admin.members.phone'],
-  name: STRINGS['admin.members.name'],
-  role: STRINGS['admin.members.role'],
-  pledge: STRINGS['admin.members.pledge'],
-  active: STRINGS['admin.members.active'],
-  inactive: STRINGS['admin.members.inactive'],
-  date: STRINGS['admin.members.date'],
-  amount: STRINGS['admin.members.amount'],
-  note: STRINGS['admin.members.note'],
-  payments: STRINGS['admin.members.payments'],
+  phone: 'admin.members.phone',
+  name: 'admin.members.name',
+  role: 'admin.members.role',
+  pledge: 'admin.members.pledge',
+  active: 'admin.members.active',
+  inactive: 'admin.members.inactive',
+  date: 'admin.members.date',
+  amount: 'admin.members.amount',
+  note: 'admin.members.note',
+  payments: 'admin.members.payments',
 };
 
 registerSection(COLL, {
-  title: STRINGS['admin.members'], icon: '🧾',
+  title: 'admin.members', titleKey: 'admin.members', icon: '🧾',
   async render(box, ctx) {
     const [, id] = location.hash.slice(1).split('/');
     box.append(id === undefined ? await listPane(ctx) : await formPane(ctx, id));
@@ -45,7 +47,7 @@ async function listPane(ctx) {
         text: `${pick(d.name)} · ${d.id} · ${t('mem.due')} ${inr(due, ctx.lang)}`,
         onclick: e => { e.preventDefault(); ctx.navigate(`#${COLL}/${d.id}`); },
       }),
-      !d.active ? el('span', { class: 'badge', text: pick(L.inactive) }) : null,
+      !d.active ? el('span', { class: 'badge', text: t(L.inactive) }) : null,
     ));
   });
   return box;
@@ -60,9 +62,9 @@ function paymentsSection(ctx, initialRows, updateTotals) {
   const today = new Date().toISOString().slice(0, 10);
 
   const addRow = (cur = {}) => {
-    const date = textField(L.date, 'date', cur.date ?? today, { type: 'date' });
-    const amount = textField(L.amount, 'amount', cur.amount ?? '', { type: 'number' });
-    const note = textField(L.note, 'note', cur.note ?? '');
+    const date = textField(t(L.date), 'date', cur.date ?? today, { type: 'date' });
+    const amount = textField(t(L.amount), 'amount', cur.amount ?? '', { type: 'number' });
+    const note = textField(t(L.note), 'note', cur.note ?? '');
     const removeBtn = el('button', { class: 'btn-sm', type: 'button', text: '✕' });
     const wrap = el('div', { class: 'row rows-item' }, date.node, amount.node, note.node, removeBtn);
     const entry = { wrap, date, amount, note };
@@ -79,7 +81,7 @@ function paymentsSection(ctx, initialRows, updateTotals) {
   list.addEventListener('input', updateTotals);
 
   const addBtn = el('button', { class: 'btn-sm', type: 'button', text: t('admin.addPayment'), onclick: () => addRow() });
-  const node = el('div', {}, el('h3', { text: pick(L.payments) }), list, addBtn);
+  const node = el('div', {}, el('h3', { text: t(L.payments) }), list, addBtn);
   // A row with no positive amount is dropped on save (a blank row left from clicking
   // "+ Payment" and not filling it in shouldn't persist as junk data).
   const read = () => rows.map(r => ({ date: r.date.read(), amount: Number(r.amount.read()) || 0, note: r.note.read() }))
@@ -92,19 +94,19 @@ async function formPane(ctx, idParam) {
   const cur = isNew ? {} : (await getDoc(doc(ctx.db, COLL, idParam))).data() ?? {};
 
   // Phone is the doc id, immutable after create — disabled on edit.
-  const phoneField = textField(L.phone, 'phone', isNew ? '' : idParam, { required: true });
+  const phoneField = textField(t(L.phone), 'phone', isNew ? '' : idParam, { required: true });
   if (!isNew) phoneField.node.querySelector('input').disabled = true;
 
-  const name = biField(L.name, 'name', cur.name ?? {});
-  const role = biField(L.role, 'role', cur.role ?? {});
-  const pledgeField = textField(L.pledge, 'pledge', cur.pledge ?? 0, { type: 'number' });
-  const active = boolField(L.active, 'active', cur.active ?? true);
+  const name = biField(t(L.name), 'name', cur.name ?? {});
+  const role = biField(t(L.role), 'role', cur.role ?? {});
+  const pledgeField = textField(t(L.pledge), 'pledge', cur.pledge ?? 0, { type: 'number' });
+  const active = boolField(t(L.active), 'active', cur.active ?? true);
 
   const totalsEl = el('p', { class: 'muted' });
   const updateTotals = () => {
     const paidNow = sum(payments.read());
     const pledgeNow = Number(pledgeField.read()) || 0;
-    totalsEl.textContent = `${pick(L.payments)} — ${t('mem.paid')}: ${inr(paidNow, ctx.lang)} · ${t('mem.due')}: ${inr(balance(pledgeNow, payments.read()), ctx.lang)}`;
+    totalsEl.textContent = `${t(L.payments)} — ${t('mem.paid')}: ${inr(paidNow, ctx.lang)} · ${t('mem.due')}: ${inr(balance(pledgeNow, payments.read()), ctx.lang)}`;
   };
   const payments = paymentsSection(ctx, cur.payments ?? [], () => updateTotals());
   pledgeField.node.querySelector('input').addEventListener('input', updateTotals);

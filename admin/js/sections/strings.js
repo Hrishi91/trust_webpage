@@ -7,7 +7,7 @@ import { logAudit } from '../audit.js';
 // `def` is named (not passed inline to registerSection) so the save handler below can re-invoke
 // def.render(box, ctx) after a successful write — same pattern as sections/design.js.
 const def = {
-  title: STRINGS['admin.strings'], icon: '✏️',
+  title: 'admin.strings', titleKey: 'admin.strings', icon: '✏️',
   async render(box, ctx) {
     // Snapshot taken once per render; save() below diffs every row against this, not a live read,
     // so a row that round-trips back to its original value during editing is correctly seen as
