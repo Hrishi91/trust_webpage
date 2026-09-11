@@ -22,7 +22,11 @@ main,#adm-main{max-width:760px;padding:1rem;margin:0 auto}
 
 label{display:block;margin:.5rem 0}
 label span{display:block;font-size:13px;letter-spacing:.04em;color:var(--muted);font-weight:600;margin-bottom:.25rem}
+label.row{display:flex;align-items:center;gap:.6rem;min-height:44px;cursor:pointer}
+label.row span{display:inline;font-size:15px;color:var(--ink);font-weight:500;margin-bottom:0}
 input,textarea,select{width:100%;font:16px var(--body);padding:.75rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory2);color:var(--ink);min-height:44px}
+input[type=checkbox]{width:22px;height:22px;min-height:0;padding:0;margin:0;flex:0 0 auto;accent-color:var(--sindoor);border-radius:6px}
+input[type=file]{width:100%;min-height:0;padding:.4rem 0;border:0;background:transparent}
 
 .btn,.btn-sm{border:0;border-radius:999px;background:var(--cta);color:var(--cta-ink);font:700 15px var(--body);cursor:pointer;padding:.7rem 1.2rem;min-height:44px}
 .btn-sm{padding:.5rem .9rem;font-size:14px}
