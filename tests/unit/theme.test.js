@@ -1,9 +1,44 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import {
   THEMES, DEFAULT_THEME, THEME_META, resolveTheme, isPreview, applyTheme,
   OVERRIDE_KEYS, FONTS, applyOverrides, clearOverrides,
 } from '../../js/theme.js';
+
+const root = fileURLToPath(new URL('../../', import.meta.url));
+const HTML_FILES = [
+  'about.html', 'committee.html', 'donate.html', 'events.html', 'gallery.html',
+  'index.html', 'members.html', 'transparency.html', 'admin/index.html',
+];
+// Fix round 1, finding 1: the inline head-cache script (identical in all 9 HTML files) must
+// gate a cached designOverrides key on the same shape OVERRIDE_KEYS itself satisfies — the old
+// /^[a-zA-Z]+$/ silently dropped any key with a digit in it (bg2, ivory2), so those two colours
+// never re-applied before Firestore answered on the next page load.
+const HEAD_CACHE_KEY_REGEX_SRC = '/^[a-zA-Z][a-zA-Z0-9]*$/';
+
+test('OVERRIDE_KEYS all satisfy the inline head-cache script\'s key regex, and every HTML file uses that exact regex source', () => {
+  for (const key of OVERRIDE_KEYS) {
+    assert.match(key, /^[a-zA-Z][a-zA-Z0-9]*$/, `${key} must satisfy the head-cache key regex`);
+  }
+  for (const file of HTML_FILES) {
+    const html = readFileSync(root + file, 'utf8');
+    assert.ok(html.includes(HEAD_CACHE_KEY_REGEX_SRC), `${file} inline head-cache script must contain ${HEAD_CACHE_KEY_REGEX_SRC}`);
+  }
+});
+
+test('the inline head-cache script is byte-identical across all 9 HTML files', () => {
+  const extract = html => {
+    const m = html.match(/<script>try\{var d=localStorage[^<]*<\/script>/);
+    assert.ok(m, 'head-cache script not found');
+    return m[0];
+  };
+  const scripts = HTML_FILES.map(file => extract(readFileSync(root + file, 'utf8')));
+  for (let i = 1; i < scripts.length; i++) {
+    assert.equal(scripts[i], scripts[0], `${HTML_FILES[i]} head-cache script differs from ${HTML_FILES[0]}`);
+  }
+});
 
 test('five themes, siddhi default, every theme has bn+en meta', () => {
   assert.deepEqual(THEMES, ['siddhi', 'mukha', 'dhokra', 'atreyee', 'bangarh']);
@@ -100,6 +135,11 @@ test('applyOverrides: valid hex colours become kebab custom properties (ctaInk/h
     assert.equal(props['--display'], '"Atma", "Hind Siliguri", sans-serif');
     assert.equal(props['--body'], undefined, 'unwhitelisted font never reaches style');
     assert.ok(store.designOverrides, 'persists by default');
+    // Fix round 1, finding 10: only the validated subset is persisted, never the raw input —
+    // an unknown key or invalid value must not round-trip back in via the head-cache script.
+    const persisted = JSON.parse(store.designOverrides);
+    assert.deepEqual(persisted.overrides, { sindoor: '#112233', ctaInk: '#aabbcc', heroAccent: '#ffffff', tickerInk: '#000000' });
+    assert.deepEqual(persisted.fonts, { display: 'Atma', body: '' });
   } finally { cleanupDom(); }
 });
 
@@ -113,6 +153,11 @@ test('applyOverrides: persist:false does not touch localStorage', () => {
 
 test('applyOverrides: absent/empty overrides and fonts clear every property (theme default)', () => {
   const { props } = fakeDom();
+  // Pre-populate as if a previous applyOverrides() call had set these, so this assertion actually
+  // proves removeProperty() ran for each — an empty `props` from the start would pass trivially
+  // even if the clearing branch were silently broken.
+  props['--sindoor'] = '#112233';
+  props['--display'] = '"Atma", "Hind Siliguri", sans-serif';
   try {
     applyOverrides({}, { display: '', body: '' });
     assert.deepEqual(props, {});

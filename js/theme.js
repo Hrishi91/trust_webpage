@@ -53,28 +53,30 @@ const FONT_STACK = {
  * though firestore.rules already enforces the same whitelist/regex on write — because nothing but
  * a validated colour literal may ever reach `style` on <html> (spec §4); an absent/invalid/unknown
  * entry simply clears that property back to the theme's own value, so a partially-filled
- * designOverrides never gets "stuck" showing a stale colour. Persists the raw objects to
- * localStorage('designOverrides') (unless persist:false, e.g. an admin ?theme= preview) so the
- * inline head-cache script in every HTML file can re-apply them before Firestore answers on the
- * next load — that script re-validates independently, so persisting the raw (unvalidated) input
- * here is safe.
+ * designOverrides never gets "stuck" showing a stale colour. Persists only the validated subset
+ * (never the raw input) to localStorage('designOverrides') (unless persist:false, e.g. an admin
+ * ?theme= preview) so the inline head-cache script in every HTML file re-applies exactly what was
+ * actually accepted here — an entry that never made it onto <html> can never round-trip back in
+ * on the next load either, keeping the cache in parity with this function's own whitelist.
  */
 export function applyOverrides(overrides, fonts, { persist = true } = {}) {
   if (typeof document === 'undefined') return;
   const style = document.documentElement.style;
+  const validOverrides = {};
   for (const key of OVERRIDE_KEYS) {
     const v = overrides?.[key];
     const prop = `--${KEBAB[key] || key}`;
-    if (typeof v === 'string' && HEX.test(v)) style.setProperty(prop, v);
+    if (typeof v === 'string' && HEX.test(v)) { style.setProperty(prop, v); validOverrides[key] = v; }
     else style.removeProperty(prop);
   }
+  const validFonts = { display: '', body: '' };
   for (const slot of ['display', 'body']) {
     const name = fonts?.[slot];
-    if (typeof name === 'string' && FONTS.includes(name)) style.setProperty(`--${slot}`, FONT_STACK[slot](name));
+    if (typeof name === 'string' && FONTS.includes(name)) { style.setProperty(`--${slot}`, FONT_STACK[slot](name)); validFonts[slot] = name; }
     else style.removeProperty(`--${slot}`);
   }
   if (persist) {
-    try { localStorage.setItem('designOverrides', JSON.stringify({ overrides: overrides || {}, fonts: fonts || { display: '', body: '' } })); }
+    try { localStorage.setItem('designOverrides', JSON.stringify({ overrides: validOverrides, fonts: validFonts })); }
     catch { /* private mode */ }
   }
 }
