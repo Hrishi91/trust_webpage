@@ -11,7 +11,7 @@ registerSection('export', {
   async render(box, ctx) {
     box.append(el('div', { class: 'card' },
       el('p', { text: t('admin.export') }),
-      el('button', { class: 'btn', type: 'button', text: 'JSON ⬇', onclick: async e => {
+      el('button', { class: 'btn', type: 'button', text: t('admin.exportJson'), onclick: async e => {
         const btn = e.currentTarget; btn.disabled = true;
         try {
           const out = { exportedAt: new Date().toISOString(), settings: (await getDoc(doc(ctx.db, 'settings', 'site'))).data() ?? null };

@@ -26,3 +26,64 @@ export function applyTheme(name, { persist = true } = {}) {
   if (persist) { try { localStorage.setItem('design', safe); } catch { /* private mode */ } }
   document.dispatchEvent(new CustomEvent('themechange'));
 }
+
+// --- Phase 6 ("nothing static"): colour/font overrides layered on top of the chosen theme ---
+// settings.designOverrides — the exact 15-key whitelist firestore.rules' validOverrideValues()
+// enforces server-side; kept in sync by hand (rules cannot import this file). Most keys map
+// straight to their CSS custom property name; the three that don't are spelled out below.
+export const OVERRIDE_KEYS = [
+  'bg', 'bg2', 'ivory', 'ivory2', 'ink', 'muted', 'sindoor', 'pitambar', 'durva', 'gold',
+  'cta', 'ctaInk', 'card', 'heroAccent', 'tickerInk',
+];
+const KEBAB = { ctaInk: 'cta-ink', heroAccent: 'hero-accent', tickerInk: 'ticker-ink' };
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
+// settings.fonts.{display,body} — the only four families the site actually loads (css/tokens.css
+// preconnects/links exactly these); loading an admin-chosen arbitrary Google Font would be a new
+// external-origin vector, so this list is also enforced server-side (firestore.rules validFontValues()).
+export const FONTS = ['Baloo Da 2', 'Hind Siliguri', 'Tiro Bangla', 'Atma'];
+const FONT_STACK = {
+  display: name => `"${name}", "Hind Siliguri", sans-serif`,
+  body: name => `"${name}", "Noto Sans Bengali", system-ui, sans-serif`,
+};
+
+/**
+ * Apply settings.designOverrides + settings.fonts as inline custom properties on <html>, on top
+ * of whichever theme applyTheme() already stamped. Every key/value is re-validated here — even
+ * though firestore.rules already enforces the same whitelist/regex on write — because nothing but
+ * a validated colour literal may ever reach `style` on <html> (spec §4); an absent/invalid/unknown
+ * entry simply clears that property back to the theme's own value, so a partially-filled
+ * designOverrides never gets "stuck" showing a stale colour. Persists the raw objects to
+ * localStorage('designOverrides') (unless persist:false, e.g. an admin ?theme= preview) so the
+ * inline head-cache script in every HTML file can re-apply them before Firestore answers on the
+ * next load — that script re-validates independently, so persisting the raw (unvalidated) input
+ * here is safe.
+ */
+export function applyOverrides(overrides, fonts, { persist = true } = {}) {
+  if (typeof document === 'undefined') return;
+  const style = document.documentElement.style;
+  for (const key of OVERRIDE_KEYS) {
+    const v = overrides?.[key];
+    const prop = `--${KEBAB[key] || key}`;
+    if (typeof v === 'string' && HEX.test(v)) style.setProperty(prop, v);
+    else style.removeProperty(prop);
+  }
+  for (const slot of ['display', 'body']) {
+    const name = fonts?.[slot];
+    if (typeof name === 'string' && FONTS.includes(name)) style.setProperty(`--${slot}`, FONT_STACK[slot](name));
+    else style.removeProperty(`--${slot}`);
+  }
+  if (persist) {
+    try { localStorage.setItem('designOverrides', JSON.stringify({ overrides: overrides || {}, fonts: fonts || { display: '', body: '' } })); }
+    catch { /* private mode */ }
+  }
+}
+
+/** Reset every override/font custom property to the theme's own value and drop the cache. */
+export function clearOverrides() {
+  if (typeof document === 'undefined') return;
+  const style = document.documentElement.style;
+  for (const key of OVERRIDE_KEYS) style.removeProperty(`--${KEBAB[key] || key}`);
+  style.removeProperty('--display'); style.removeProperty('--body');
+  try { localStorage.removeItem('designOverrides'); } catch { /* private mode */ }
+}

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Admin</title>
-<script>try{var d=localStorage.getItem('design');if(/^(siddhi|mukha|dhokra|atreyee|bangarh)$/.test(d))document.documentElement.setAttribute('data-theme',d)}catch(e){}</script>
+<script>try{var d=localStorage.getItem('design');if(/^(siddhi|mukha|dhokra|atreyee|bangarh)$/.test(d))document.documentElement.setAttribute('data-theme',d);var o=JSON.parse(localStorage.getItem('designOverrides')||'null');if(o){var m={ctaInk:'cta-ink',heroAccent:'hero-accent',tickerInk:'ticker-ink'};var st=document.documentElement.style;var ov=o.overrides||{};for(var k in ov){if(!/^[a-zA-Z]+$/.test(k))continue;var v=ov[k];if(typeof v!=='string'||!/^#[0-9a-fA-F]{6}$/.test(v))continue;st.setProperty('--'+(m[k]||k),v)}var F=['Baloo Da 2','Hind Siliguri','Tiro Bangla','Atma'];if(o.fonts&&F.indexOf(o.fonts.display)>-1)st.setProperty('--display','"'+o.fonts.display+'", "Hind Siliguri", sans-serif');if(o.fonts&&F.indexOf(o.fonts.body)>-1)st.setProperty('--body','"'+o.fonts.body+'", "Noto Sans Bengali", system-ui, sans-serif')}}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Tiro+Bangla&family=Atma:wght@500;700&display=swap">

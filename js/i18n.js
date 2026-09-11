@@ -62,6 +62,7 @@ export const STRINGS = {
   'admin.up': { bn: '↑', en: '↑' }, 'admin.down': { bn: '↓', en: '↓' },
   'admin.preview': { bn: 'প্রিভিউ', en: 'Preview' },
   'admin.export': { bn: 'সব ডেটা JSON export', en: 'Export all data as JSON' },
+  'admin.exportJson': { bn: 'JSON ⬇', en: 'JSON ⬇' },
   'admin.loginFailed': { bn: 'লগইন হয়নি', en: 'Login failed.' },
   'admin.tooMany': { bn: 'অনেকবার চেষ্টা হয়েছে — কয়েক মিনিট পরে আবার', en: 'Too many attempts — wait a few minutes.' },
   'admin.wrongPassword': { bn: 'ভুল পাসওয়ার্ড', en: 'Wrong password' },

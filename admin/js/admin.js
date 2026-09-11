@@ -2,9 +2,10 @@ import {
   db, storage, auth, doc, getDoc, signInWithEmailAndPassword, signOut, onAuthStateChanged,
   reauthenticateWithCredential, EmailAuthProvider,
 } from '../../js/firebase.js';
-import { t, getLang, setLang, onLangChange, pick } from '../../js/i18n.js';
+import { t, getLang, setLang, onLangChange, pick, setOverrides } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
-import { resolveTheme, applyTheme } from '../../js/theme.js';
+import { resolveTheme, applyTheme, applyOverrides } from '../../js/theme.js';
+import { getContent } from '../../js/content.js';
 // sections/registerSection live in registry.js, not here — see that file for why:
 // admin.js and every section file reference each other, and keeping the Map directly in
 // this module makes a section's top-level registerSection() call crash (or, with a
@@ -13,8 +14,17 @@ import { sections, registerSection } from './registry.js';
 export { registerSection };
 
 const $ = id => document.getElementById(id);
-// Admin follows the theme chosen in 🎨 ডিজাইন. settings/site is publicly readable, so this runs before login.
-getDoc(doc(db, 'settings', 'site')).then(s => applyTheme(resolveTheme(s.data()?.design))).catch(err => console.warn('[admin] theme', err));
+// Admin follows the theme AND the string/colour/font overrides chosen in ✏️ লেখা / 🎨 ডিজাইন —
+// its own labels are editable too (spec §1: "the only truly fixed text is the login form before
+// any data loads"). settings/site and content/{strings,media} are all publicly readable, so this
+// runs before login. onAuthStateChanged's route() below may resolve first (it does not wait on
+// this promise) — acceptable, per the brief: labels/colours simply update on the next route().
+Promise.all([getDoc(doc(db, 'settings', 'site')), getContent()]).then(([snap, c]) => {
+  setOverrides(c.strings);
+  applyTheme(resolveTheme(snap.data()?.design));
+  applyOverrides(snap.data()?.designOverrides, snap.data()?.fonts);
+  applyStrings();
+}).catch(err => console.warn('[admin] theme', err));
 let user = null;
 
 function applyStrings() {

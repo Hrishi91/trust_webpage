@@ -1,7 +1,8 @@
-import { getSettings, onAnnouncements } from './content.js';
-import { getLang, setLang, onLangChange, pick, t } from './i18n.js';
+import { getSettings, getContent, onAnnouncements } from './content.js';
+import { getLang, setLang, onLangChange, pick, t, setOverrides } from './i18n.js';
 import { el, digits, fmtDate } from './ui.js';
-import { resolveTheme, applyTheme, isPreview } from './theme.js';
+import { resolveTheme, applyTheme, applyOverrides, isPreview } from './theme.js';
+import { mediaUrl } from './media-slots.js';
 import { paintHeader, onResize } from './art.js';
 
 let unsubHeader = null;
@@ -19,22 +20,38 @@ const NAV = [
 
 const OM_MARK = 'ॐ';
 function brandMark(s) {
-  return s.logoUrl ? el('img', { src: s.logoUrl, alt: '', class: 'mark' }) : el('span', { class: 'mark om', text: OM_MARK, 'aria-hidden': 'true' });
+  const url = mediaUrl(s.media, 'brandMark') || s.logoUrl;
+  return url ? el('img', { src: url, alt: '', class: 'mark' }) : el('span', { class: 'mark om', text: OM_MARK, 'aria-hidden': 'true' });
 }
 
 export function section(...children) { return el('section', {}, el('div', { class: 'wrap' }, ...children)); }
 export function sectionHead(title, aside) { return el('div', { class: 'sh' }, el('h2', { text: title }), aside ?? null); }
-export function pageHeader({ crumb, title, lead }) {
+// `image`: a page-header media slot URL (js/media-slots.js `header.<page>`). When set, a photo
+// (`<img>`, opacity-faded by CSS) replaces the painted-canvas background instead of layering with
+// it — the two backgrounds were never designed to combine, and one image slot per header keeps
+// the admin's choice unambiguous.
+export function pageHeader({ crumb, title, lead, image }) {
+  const copy = el('div', { class: 'wrap' },
+    crumb ? el('span', { class: 'crumb', text: crumb }) : null, el('h1', { text: title }), lead ? el('p', { text: lead }) : null);
+  if (image) return el('div', { class: 'ph photo' }, el('img', { class: 'ph-img', src: image, alt: '' }), copy);
   const c = el('canvas', { class: 'ph-bg', 'aria-hidden': 'true' });
-  const ph = el('div', { class: 'ph' }, c, el('div', { class: 'wrap' },
-    crumb ? el('span', { class: 'crumb', text: crumb }) : null, el('h1', { text: title }), lead ? el('p', { text: lead }) : null));
+  const ph = el('div', { class: 'ph' }, c, copy);
   requestAnimationFrame(() => paintHeader(c)); unsubHeader?.(); unsubHeader = onResize(() => paintHeader(c));   // pages re-render on langchange — never stack listeners
   return ph;
 }
 
 export async function mountShell(active, pageTitle) {
-  const s = await getSettings();
+  const [s, c] = await Promise.all([getSettings(), getContent()]);
+  setOverrides(c.strings);
+  s.media = c.media;
   applyTheme(resolveTheme(s.design, location.search), { persist: !isPreview(location.search) });
+  applyOverrides(s.designOverrides, s.fonts, { persist: !isPreview(location.search) });
+  const favUrl = mediaUrl(s.media, 'favicon');
+  if (favUrl) {
+    let link = document.querySelector('link[rel="icon"]');
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = favUrl;
+  }
   document.documentElement.lang = getLang();
   let ann = [], live = false;
   const buildTicker = () => ann.length ? el('div', { class: 'ticker live-strip', 'aria-label': t('live.announcements') },
@@ -64,6 +81,15 @@ export async function mountShell(active, pageTitle) {
   const renderNav = () => {
     document.documentElement.lang = getLang();
     document.title = pageTitle ? `${pageTitle} · ${pick(s.name)}` : pick(s.name);
+    // GitHub Pages has no server render, so this is the only place document.title/description
+    // ever get the admin's override — social-media scrapers that don't run JS still see the
+    // static <meta> baked into each HTML file (documented limitation, spec §2).
+    const desc = pick(s.metaDescription);
+    if (desc) {
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
+      meta.content = desc;
+    }
     const links = el('div', { class: 'links' },
       ...NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false)
             .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));
@@ -83,10 +109,19 @@ export async function mountShell(active, pageTitle) {
   };
   const renderFooter = () => {
     const wa = digits(s.contacts.whatsapp);
+    const soc = s.social || {};
+    // Only non-empty links render, in a fixed order; brand names are proper nouns, not translated
+    // copy (same pattern as the existing literal 'EN'/'বাং' language-toggle label above).
+    const socialItems = [
+      soc.facebook ? el('a', { href: soc.facebook, target: '_blank', rel: 'noopener', text: 'Facebook' }) : null,
+      soc.youtube ? el('a', { href: soc.youtube, target: '_blank', rel: 'noopener', text: 'YouTube' }) : null,
+      soc.instagram ? el('a', { href: soc.instagram, target: '_blank', rel: 'noopener', text: 'Instagram' }) : null,
+      soc.whatsappGroup ? el('a', { href: soc.whatsappGroup, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null,
+    ].filter(Boolean);
     document.getElementById('site-footer').replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
       // concept footer put a <br> before the "Reg. no." line (own line, muted); missing here ran
       // the address and reg. no. together on one line with no separator.
-      el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('br') : null, s.regNo ? el('span', { class: 'muted', text: `Reg. no. ${s.regNo}` }) : null),
+      el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('br') : null, s.regNo ? el('span', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null),
       el('div', {}, el('b', { text: t('footer.contact') }),
         s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
         wa ? el('a', { href: `https://wa.me/${wa}`, text: t('footer.whatsapp') }) : null,
@@ -96,7 +131,8 @@ export async function mountShell(active, pageTitle) {
         ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) }))),
       el('div', {}, el('b', { text: t('footer.trust') }),
         el('a', { href: 'transparency.html', text: t('tr.docs') }), el('a', { href: 'committee.html', text: t('nav.committee') }),
-        el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }))),
+        el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }),
+        socialItems.length ? el('div', { class: 'social' }, ...socialItems) : null)),
     ));
   };
   renderTicker(); renderNav(); renderFooter();

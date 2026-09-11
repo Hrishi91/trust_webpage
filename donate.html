@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Donate</title>
 <meta name="description" content="Donate to the Ganesh Puja Trust via UPI and see the donor wall.">
-<script>try{var d=localStorage.getItem('design');if(/^(siddhi|mukha|dhokra|atreyee|bangarh)$/.test(d))document.documentElement.setAttribute('data-theme',d)}catch(e){}</script>
+<script>try{var d=localStorage.getItem('design');if(/^(siddhi|mukha|dhokra|atreyee|bangarh)$/.test(d))document.documentElement.setAttribute('data-theme',d);var o=JSON.parse(localStorage.getItem('designOverrides')||'null');if(o){var m={ctaInk:'cta-ink',heroAccent:'hero-accent',tickerInk:'ticker-ink'};var st=document.documentElement.style;var ov=o.overrides||{};for(var k in ov){if(!/^[a-zA-Z]+$/.test(k))continue;var v=ov[k];if(typeof v!=='string'||!/^#[0-9a-fA-F]{6}$/.test(v))continue;st.setProperty('--'+(m[k]||k),v)}var F=['Baloo Da 2','Hind Siliguri','Tiro Bangla','Atma'];if(o.fonts&&F.indexOf(o.fonts.display)>-1)st.setProperty('--display','"'+o.fonts.display+'", "Hind Siliguri", sans-serif');if(o.fonts&&F.indexOf(o.fonts.body)>-1)st.setProperty('--body','"'+o.fonts.body+'", "Noto Sans Bengali", system-ui, sans-serif')}}catch(e){}</script>
 <link rel="preconnect" href="https://www.gstatic.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
