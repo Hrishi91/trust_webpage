@@ -229,3 +229,64 @@ test('notices + roster: active members and admin read; inactive/removed/other/an
   }
   await assertSucceeds(E.member.firestore().collection('roster').where('memberPhones', 'array-contains', '+919999999999').where('published', '==', true).where('deleted', '==', false).get());
 });
+
+// ---- Phase 6 Task 2: content/strings, content/media, culture, settings overrides ----
+test('content: strings/media readable by anyone; only admin writes; only those two doc ids; no delete', async () => {
+  await E.seed(async db => {
+    await db.doc('content/strings').set({ 'nav.home': { bn: 'ক', en: 'k' } });
+    await db.doc('content/media').set({ hero: 'https://example.com/hero.jpg' });
+  });
+  await assertSucceeds(E.anon.firestore().doc('content/strings').get());
+  await assertSucceeds(E.anon.firestore().doc('content/media').get());
+  await assertFails(E.anon.firestore().doc('content/strings').set({ x: { bn: 'a', en: 'b' } }));
+  await assertFails(E.other.firestore().doc('content/strings').set({ x: { bn: 'a', en: 'b' } }));
+  await assertSucceeds(E.admin.firestore().doc('content/strings').set({ 'nav.home': { bn: 'গ', en: 'g' } }));
+  await assertSucceeds(E.admin.firestore().doc('content/media').set({ hero: 'https://example.com/new.jpg' }));
+  await assertFails(E.admin.firestore().doc('content/other').set({ x: 1 }));
+  await assertFails(E.admin.firestore().doc('content/strings').delete());
+});
+
+test('culture: published+not-deleted for public; admin sees all; write needs deleted flag; no delete', async () => {
+  await E.seed(async db => {
+    await db.doc('culture/p').set(pub);
+    await db.doc('culture/d').set(draft);
+    await db.doc('culture/g').set(gone);
+  });
+  const a = E.anon.firestore();
+  await assertSucceeds(a.doc('culture/p').get());
+  await assertFails(a.doc('culture/d').get());
+  await assertFails(a.doc('culture/g').get());
+  await assertSucceeds(a.collection('culture').where('published', '==', true).where('deleted', '==', false).get());
+  await assertFails(a.collection('culture').get());
+  await assertSucceeds(E.admin.firestore().collection('culture').get());
+  await assertFails(E.other.firestore().doc('culture/new').set(pub));
+  await assertSucceeds(E.admin.firestore().doc('culture/new').set(pub));
+  await assertFails(E.admin.firestore().doc('culture/nodel').set({ title: pub.title, published: true, order: 9 }));   // hasDeletedFlag
+  await assertFails(E.admin.firestore().doc('culture/new').update({ deleted: 'yes' }));                               // hasDeletedFlag
+  await assertFails(E.admin.firestore().doc('culture/new').delete());
+});
+
+test('settings: designOverrides validated per whitelisted key as #rrggbb', async () => {
+  await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ designOverrides: { sindoor: '#c9361a' } }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ tagline: { bn: 'x', en: 'y' } }, { merge: true })); // designOverrides absent is fine
+  await assertFails(E.admin.firestore().doc('settings/site').set({ designOverrides: { sindoor: 'red' } }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ designOverrides: { evil: '#000000' } }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ designOverrides: 'nope' }, { merge: true }));
+  await assertFails(E.anon.firestore().doc('settings/site').set({ designOverrides: { sindoor: '#c9361a' } }, { merge: true }));
+});
+
+test('settings: fonts validated against the whitelist, empty string allowed (theme default)', async () => {
+  await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ fonts: { display: 'Atma' } }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ fonts: { display: '', body: 'Hind Siliguri' } }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ fonts: { display: 'Comic Sans' } }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ fonts: { evil: 'Atma' } }, { merge: true }));
+});
+
+test('settings: homeSections must be a list within the size cap; per-element shape is validated client-side (Task 3)', async () => {
+  await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ homeSections: [{ key: 'hero', on: true }] }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ homeSections: 'nope' }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ homeSections: Array.from({ length: 12 }, (_, i) => ({ key: 'x' + i, on: true })) }, { merge: true }));
+});

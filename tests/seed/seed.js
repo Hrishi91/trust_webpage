@@ -10,6 +10,7 @@ import './_emulator-env.js';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { CULTURE } from '../../js/culture.js';
 
 const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST;
 const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
@@ -26,7 +27,7 @@ const bi = (bn, en) => ({ bn, en });
 // "create + publish an event" test) that a plain upsert-by-fixed-ID below would never touch —
 // left alone, a stray published doc from one run corrupts item-count assertions on the next.
 // recursiveDelete also clears albums/*/photos subcollections.
-for (const coll of ['history', 'events', 'albums', 'committee', 'donations', 'transparency', 'announcements', 'members', 'notices', 'roster']) {
+for (const coll of ['history', 'events', 'albums', 'committee', 'culture', 'donations', 'transparency', 'announcements', 'members', 'notices', 'roster']) {
   await db.recursiveDelete(db.collection(coll));
 }
 
@@ -39,6 +40,11 @@ await db.doc('settings/site').set({
   pujaDate: new Date(Date.now() + 10 * 86400000).toISOString(), maintenance: false, defaultLang: 'bn', design: 'siddhi',
   donatePurposes: 'প্রতিমা | Idol | 501,1101\nভোগ | Bhog | 301,501',
   sectionVisibility: { about: true, committee: true, gallery: true, events: true, donate: true, transparency: true, members: true, culture: true },
+  // Phase 6 ("nothing static") fields — untouched defaults, same as a freshly seeded site before
+  // any admin edit; homeSections:[]/designOverrides:{}/fonts blank all mean "use code defaults".
+  homeSections: [], designOverrides: {}, fonts: { display: '', body: '' },
+  social: { facebook: '', youtube: '', instagram: '', whatsappGroup: '' },
+  estYear: 2021, credItems: '', metaDescription: bi('', ''),
 });
 const base = { deleted: false, createdAt: new Date() };
 await db.doc('history/h1').set({ ...base, year: 2025, title: bi('২০২৫', '2025'), body: bi('<p>গত বছর</p>', '<p>Last year</p>'), images: [], order: 2025, published: true });
@@ -51,6 +57,16 @@ await db.doc('albums/a1/photos/p2').set({ ...base, url: 'https://placehold.co/80
 await db.doc('albums/a2').set({ ...base, title: bi('ড্রাফট', 'Draft album'), year: 2024, coverUrl: '', order: 2024000, published: false, featured: false });
 await db.doc('committee/c1').set({ ...base, name: bi('সভাপতি', 'President'), post: bi('সভাপতি', 'President'), photoUrl: '', order: 1, isPublic: true, officer: true });
 await db.doc('committee/c2').set({ ...base, name: bi('গোপন', 'Hidden'), post: bi('', ''), photoUrl: '', order: 2, isPublic: false, officer: false });
+
+// Phase 6: content overrides start empty (defaults from js/i18n.js / media-slots fallback art
+// apply until the admin edits something), and culture cards are seeded from the current static
+// defaults in js/culture.js so the admin edits existing rows instead of starting from nothing.
+await db.doc('content/strings').set({});
+await db.doc('content/media').set({});
+for (const [i, c] of CULTURE.entries()) {
+  await db.doc(`culture/cu${i + 1}`).set({ ...base, title: c.title, tag: c.tag, text: c.text, imageUrl: '', order: i + 1, published: true });
+}
+await db.doc('culture/cu4').set({ ...base, title: bi('ড্রাফট', 'Draft'), tag: bi('', ''), text: bi('', ''), imageUrl: '', order: 4, published: false });
 
 // Phase 2–4: members (phone auth), notices, roster, donations, transparency, announcements.
 // member-1 is also created as an Auth-emulator phone user so `npm run e2e`/manual OTP login can

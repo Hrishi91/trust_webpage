@@ -16,10 +16,61 @@ service cloud.firestore {
       return !('design' in request.resource.data)
         || request.resource.data.design in ['siddhi', 'mukha', 'dhokra', 'atreyee', 'bangarh'];
     }
+    // Phase 6: settings.designOverrides is a subset of the theme's colour tokens as '#rrggbb'.
+    // Rules cannot iterate a map's values, so every whitelisted key is checked individually —
+    // absent keys are fine, present keys must be a hex colour string.
+    function hexColor(v) { return v is string && v.matches('^#[0-9a-fA-F]{6}$'); }
+    function validOverrideValues(o) {
+      return o is map
+        && o.keys().hasOnly(['bg','bg2','ivory','ivory2','ink','muted','sindoor','pitambar','durva','gold','cta','ctaInk','card','heroAccent','tickerInk'])
+        && (!('bg' in o) || hexColor(o.bg))
+        && (!('bg2' in o) || hexColor(o.bg2))
+        && (!('ivory' in o) || hexColor(o.ivory))
+        && (!('ivory2' in o) || hexColor(o.ivory2))
+        && (!('ink' in o) || hexColor(o.ink))
+        && (!('muted' in o) || hexColor(o.muted))
+        && (!('sindoor' in o) || hexColor(o.sindoor))
+        && (!('pitambar' in o) || hexColor(o.pitambar))
+        && (!('durva' in o) || hexColor(o.durva))
+        && (!('gold' in o) || hexColor(o.gold))
+        && (!('cta' in o) || hexColor(o.cta))
+        && (!('ctaInk' in o) || hexColor(o.ctaInk))
+        && (!('card' in o) || hexColor(o.card))
+        && (!('heroAccent' in o) || hexColor(o.heroAccent))
+        && (!('tickerInk' in o) || hexColor(o.tickerInk));
+    }
+    function validOverrides() {
+      return !('designOverrides' in request.resource.data) || validOverrideValues(request.resource.data.designOverrides);
+    }
+    // Phase 6: settings.fonts — only the four families the site actually loads, or '' meaning
+    // "use the theme's default" (the admin UI saves '' for an unset select).
+    function validFontValues(f) {
+      return f is map
+        && f.keys().hasOnly(['display', 'body'])
+        && (!('display' in f) || f.display in ['', 'Baloo Da 2', 'Hind Siliguri', 'Tiro Bangla', 'Atma'])
+        && (!('body' in f) || f.body in ['', 'Baloo Da 2', 'Hind Siliguri', 'Tiro Bangla', 'Atma']);
+    }
+    function validFonts() {
+      return !('fonts' in request.resource.data) || validFontValues(request.resource.data.fonts);
+    }
+    // Phase 6: settings.homeSections — rules cannot validate list elements, only that it is a
+    // list within a sane size; each element's {key, on} shape is validated client-side (js/sections.js).
+    function validHomeSections() {
+      return !('homeSections' in request.resource.data)
+        || (request.resource.data.homeSections is list && request.resource.data.homeSections.size() <= 11);
+    }
 
     match /settings/site {
       allow read: if true;
-      allow create, update: if isAdmin() && validDesign();
+      allow create, update: if isAdmin() && validDesign() && validOverrides() && validFonts() && validHomeSections();
+      allow delete: if false;
+    }
+
+    // Phase 6: admin-editable string/media overrides. Fixed doc ids only — no arbitrary docs
+    // under content/*, and never hard-deletable (nothing else reads content/* to check a flag).
+    match /content/{doc} {
+      allow read: if true;
+      allow create, update: if isAdmin() && doc in ['strings', 'media'];
       allow delete: if false;
     }
 
@@ -37,6 +88,14 @@ service cloud.firestore {
 
     match /committee/{id} {
       allow read: if isAdmin() || (resource.data.isPublic == true && resource.data.deleted == false);
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+
+    // Phase 6: culture cards — same published+deleted shape as history/events, not committee's
+    // isPublic (culture has no "hide but keep" concept beyond the shared soft-delete).
+    match /culture/{id} {
+      allow read: if isAdmin() || isLive();
       allow create, update: if isAdmin() && hasDeletedFlag();
       allow delete: if false;
     }

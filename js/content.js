@@ -17,6 +17,12 @@ export const DEFAULT_SETTINGS = {
   contacts: { phone: '', whatsapp: '', email: '' }, regNo: '', has80G: false, upiId: '', upiQrUrl: '',
   pujaDate: '', maintenance: false, defaultLang: 'bn', design: 'siddhi', donatePurposes: '',
   sectionVisibility: { about: true, committee: true, gallery: true, events: true, donate: false, transparency: false, members: false, culture: true },
+  // Phase 6 ("nothing static"): colour/font overrides on top of the chosen theme, home section
+  // order/visibility, social links + a few settings-card extras. Untouched defaults reproduce
+  // today's site exactly — see docs/superpowers/specs/2026-09-11-phase-6-template-complete.md.
+  designOverrides: {}, fonts: { display: '', body: '' }, homeSections: [],
+  social: { facebook: '', youtube: '', instagram: '', whatsappGroup: '' },
+  estYear: '', credItems: '', metaDescription: { bn: '', en: '' },
 };
 
 let settingsPromise;
@@ -38,10 +44,25 @@ export function getSettings() {
   return settingsPromise;
 }
 
+// content/strings + content/media (Phase 6 overrides). Each doc is read independently and a
+// failure on either one never blocks the other or the page — unlike getSettings(), a broken read
+// here just means "no overrides today", not "the site is down", so it resolves to {} rather than
+// failing closed. Memoised the same way (module-level promise, one read per page load).
+let contentPromise;
+export function getContent() {
+  const readDoc = name => getDoc(doc(db, 'content', name)).then(s => s.data() ?? {}).catch(err => { console.warn('[content]', err); return {}; });
+  contentPromise ??= Promise.all([readDoc('strings'), readDoc('media')]).then(([strings, media]) => ({ strings, media }));
+  return contentPromise;
+}
+
 const rows = snap => snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
 export async function listPublished(coll) {
   return rows(await getDocs(query(collection(db, coll), where('published', '==', true), where('deleted', '==', false), orderBy('order'))));
+}
+// culture/{id} — same published+!deleted+order semantics as every other listPublished() collection.
+export async function listCulture() {
+  return listPublished('culture');
 }
 export async function listCommittee() {
   return rows(await getDocs(query(collection(db, 'committee'), where('isPublic', '==', true), where('deleted', '==', false), orderBy('order'))));
