@@ -2,7 +2,7 @@ import { registerSection } from '../admin.js';
 import { doc, getDoc, setDoc, serverTimestamp } from '../../../js/firebase.js';
 import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
-import { THEMES, THEME_META, resolveTheme } from '../../../js/theme.js';
+import { THEMES, THEME_META, resolveTheme, applyTheme } from '../../../js/theme.js';
 import { logAudit } from '../audit.js';
 
 // `def` is named (not passed inline to registerSection) so the apply-click handler below can
@@ -25,6 +25,7 @@ const def = {
           const next = { design: name, updatedAt: serverTimestamp() };
           await setDoc(ref, next, { merge: true });
           await logAudit(ctx, 'update', 'settings/site', { design: cur.design ?? null }, { design: name });
+          applyTheme(name);
           toast(t('admin.saved'));
           box.replaceChildren();
           await def.render(box, ctx);

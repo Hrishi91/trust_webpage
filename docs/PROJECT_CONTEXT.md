@@ -160,6 +160,12 @@ whitelist + unchanged indexes/storage), and every page verified against producti
 - **`scripts/shots.mjs`**: renders all 8 pages × 5 themes × 3 widths (390/768/1366) to
   `test-results/shots/<theme>/<page>-<width>.png` and warns on any horizontal overflow — the gate is
   zero warnings.
+- **Phase 5b Task 1**: the default (siddhi) token block moved out of `css/site.css` into its own
+  `css/tokens.css` (loaded by all 8 public pages and by `/admin/`), and `/admin/` (`css/admin.css`
+  rewritten against the shared tokens; `admin/js/admin.js` reads `settings/site.design` and calls
+  `applyTheme()` before login; `admin/js/sections/design.js` re-applies live on Apply) now follows
+  the same chosen theme as the public site instead of a fixed orange look — same markup/behaviour,
+  CSS-only restyle.
 
 ### Decisions and their causes (from the spec, §2)
 

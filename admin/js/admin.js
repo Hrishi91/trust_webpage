@@ -4,6 +4,7 @@ import {
 } from '../../js/firebase.js';
 import { t, getLang, setLang, onLangChange, pick } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
+import { resolveTheme, applyTheme } from '../../js/theme.js';
 // sections/registerSection live in registry.js, not here — see that file for why:
 // admin.js and every section file reference each other, and keeping the Map directly in
 // this module makes a section's top-level registerSection() call crash (or, with a
@@ -12,6 +13,8 @@ import { sections, registerSection } from './registry.js';
 export { registerSection };
 
 const $ = id => document.getElementById(id);
+// Admin follows the theme chosen in 🎨 ডিজাইন. settings/site is publicly readable, so this runs before login.
+getDoc(doc(db, 'settings', 'site')).then(s => applyTheme(resolveTheme(s.data()?.design))).catch(err => console.warn('[admin] theme', err));
 let user = null;
 
 function applyStrings() {

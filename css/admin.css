@@ -1,34 +1,65 @@
-:root { --bg:#faf7f2; --card:#fff; --ink:#222; --accent:#c2410c; --muted:#777; --err:#b91c1c; --ok:#15803d; }
-* { box-sizing: border-box; }
-body { margin:0; font: 16px/1.5 system-ui, "Noto Sans Bengali", sans-serif; background:var(--bg); color:var(--ink); }
-.adm-top { display:flex; align-items:center; gap:.5rem; padding:.75rem 1rem; background:var(--accent); color:#fff; position:sticky; top:0; }
-.grow { flex:1; }
-main { padding:1rem; max-width:720px; margin:0 auto; }
-.card { background:var(--card); border-radius:12px; padding:1rem; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:1rem; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:.75rem; }
-.tile { display:flex; flex-direction:column; align-items:center; gap:.25rem; text-decoration:none; color:inherit; }
-.tile .icon { font-size:2rem; }
-label { display:block; margin:.5rem 0; }
-label span { display:block; font-size:.85rem; color:var(--muted); }
-input, textarea, select { width:100%; padding:.6rem; border:1px solid #ccc; border-radius:8px; font:inherit; }
-.bi { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
-.btn, .btn-sm { border:0; border-radius:8px; padding:.6rem 1rem; background:var(--accent); color:#fff; font:inherit; cursor:pointer; }
-.btn-sm { padding:.3rem .6rem; font-size:.85rem; }
-.btn.secondary { background:#e5e7eb; color:var(--ink); }
-.btn.danger { background:var(--err); }
-.row { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
-.list-item { display:flex; align-items:center; gap:.5rem; padding:.5rem 0; border-bottom:1px solid #eee; }
-.badge { font-size:.75rem; padding:.1rem .5rem; border-radius:999px; background:#e5e7eb; }
-.badge.pub { background:#dcfce7; color:var(--ok); }
-.err { color:var(--err); min-height:1.2em; }
-.back { display:inline-block; margin-bottom:.5rem; }
-.toast { position:fixed; left:50%; bottom:1.5rem; transform:translateX(-50%); background:#333; color:#fff; padding:.6rem 1rem; border-radius:8px; }
-.toast-err { background:var(--err); }
-.thumb { width:72px; height:72px; object-fit:cover; border-radius:8px; }
-progress { width:100%; }
+/* Admin panel styles — same design tokens as the public site (css/tokens.css + css/themes.css),
+   loaded before this file in admin/index.html. Admin follows the theme chosen in 🎨 ডিজাইন
+   (see admin/js/admin.js and admin/js/sections/design.js) — no admin-only colours here. */
+*{box-sizing:border-box}
+body{margin:0;background:var(--ivory);color:var(--ink);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display)}
+
+.adm-top{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;background:var(--bg);color:var(--hero-ink);border-bottom:3px solid var(--pitambar);position:sticky;top:0;min-height:56px;z-index:10}
+#adm-title{font:700 20px var(--display)}
+.grow{flex:1}
+.adm-top .btn-sm{background:transparent;border:1px solid var(--hero-muted);color:var(--hero-ink);min-height:44px}
+
+main,#adm-main{max-width:760px;padding:1rem;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem;margin-bottom:1rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;min-height:112px;text-decoration:none;color:var(--ink);font:700 15px var(--body);background:var(--card);border:1px solid var(--line);border-radius:var(--r);transition:transform .15s ease,border-color .15s ease}
+.tile .icon{font-size:2.2rem}
+.tile:hover,.tile:focus-visible{border-color:var(--pitambar);transform:translateY(-2px)}
+
+.bi{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+
+label{display:block;margin:.5rem 0}
+label span{display:block;font-size:13px;letter-spacing:.04em;color:var(--muted);font-weight:600;margin-bottom:.25rem}
+input,textarea,select{width:100%;font:16px var(--body);padding:.75rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory2);color:var(--ink);min-height:44px}
+
+.btn,.btn-sm{border:0;border-radius:999px;background:var(--cta);color:var(--cta-ink);font:700 15px var(--body);cursor:pointer;padding:.7rem 1.2rem;min-height:44px}
+.btn-sm{padding:.5rem .9rem;font-size:14px}
+.btn.secondary{background:var(--ivory2);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--sindoor);color:var(--ticker-ink)}
+
+.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.list-item{display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--line);padding:.7rem 0}
+.rows-list{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0}
+.rows-item{padding:.5rem 0;border-bottom:1px solid var(--line)}
+
+.badge{font-size:.75rem;padding:.1rem .6rem;border-radius:999px;background:var(--ivory2);color:var(--muted)}
+.badge.pub{background:var(--durva);color:#fff}
+
+.err{color:var(--sindoor);min-height:1.2em}
+.muted{color:var(--muted)}
+.back{display:inline-block;margin-bottom:.5rem;color:var(--sindoor);font-weight:600;text-decoration:none}
+.file-link{color:var(--sindoor);font-weight:600}
+
+.toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);background:var(--ink);color:var(--ivory);padding:.6rem 1.2rem;border-radius:999px}
+.toast-err{background:var(--sindoor);color:var(--ticker-ink)}
+
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:12px}
+progress{width:100%;accent-color:var(--cta)}
+
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem}
-.theme-tile.current{outline:3px solid var(--accent)}
+.theme-tile.current{outline:3px solid var(--pitambar)}
 .swatch{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;height:56px;border-radius:8px;overflow:hidden;margin-bottom:.5rem}
-.swatch .s1{background:var(--bg)}.swatch .s2{background:var(--sindoor)}.swatch .s3{background:var(--pitambar)}.swatch .s4{background:var(--ivory)}
-/* siddhi is the default theme; its tokens live in css/site.css :root, which admin doesn't load */
-.swatch[data-theme="siddhi"]{--bg:#0f1230;--sindoor:#e2401c;--pitambar:#f7b733;--ivory:#fff7ea}
+.swatch .s1{background:var(--bg)}
+.swatch .s2{background:var(--sindoor)}
+.swatch .s3{background:var(--pitambar)}
+.swatch .s4{background:var(--ivory)}
+/* The page theme may not be siddhi (this card lists all five), so siddhi's own swatch needs its
+   colours spelled out literally — copied from css/tokens.css's --bg/--sindoor/--pitambar/--ivory —
+   rather than reading the (possibly-overridden) custom properties everything else here uses. */
+.swatch[data-theme="siddhi"]{--bg:#0f1230;--sindoor:#c9361a;--pitambar:#f7b733;--ivory:#fff7ea}
+
+#adm-login .card{max-width:420px;margin:2rem auto}
+
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}

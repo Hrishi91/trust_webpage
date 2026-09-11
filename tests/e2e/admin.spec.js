@@ -55,3 +55,20 @@ test('soft delete asks confirm + reauth and hides the row', async ({ page }) => 
   const body = await res.json();
   expect(body.fields.deleted.booleanValue).toBe(true); // soft-deleted
 });
+test('admin panel follows the stored theme and uses the site fonts', async ({ page }) => {
+  await login(page);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'siddhi');
+  expect(await page.locator('.adm-top').evaluate(e => getComputedStyle(e).backgroundColor)).toBe('rgb(15, 18, 48)');
+  const tiles = page.locator('.grid .tile');
+  const count = await tiles.count();
+  for (let i = 0; i < count; i++) {
+    const box = await tiles.nth(i).boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  }
+  await page.goto('/admin/#design');
+  page.on('dialog', d => d.accept('password12345'));
+  await page.click('.theme-tile[data-theme-name="atreyee"] button.apply');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'atreyee');
+  await page.click('.theme-tile[data-theme-name="siddhi"] button.apply');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'siddhi');
+});
