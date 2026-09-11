@@ -77,18 +77,44 @@ test('✏️ লেখা — override a string, see it publicly, then reset it'
   await page.goto('/admin/#strings');
   await page.waitForSelector('input[name="nav.home.bn"]');
   await page.fill('input[name="nav.home.bn"]', 'শুরু');
+  // donate.copy (group "donate") and admin.culture (group "admin") aren't in the "nav" group that
+  // opens by default — the search box force-opens a matched row's <details> (same mechanism the
+  // search test below checks), used here only to reach the inputs, then cleared before Save so
+  // every row (not just the last-searched one) is included in the write.
+  await page.fill('input[type=search]', 'donate.copy');
+  await page.fill('input[name="donate.copy.bn"]', 'কপি');
+  await page.fill('input[type=search]', 'admin.culture');
+  await page.fill('input[name="admin.culture.bn"]', 'শিল্পকলা');
+  await page.fill('input[type=search]', '');
   page.on('dialog', d => d.accept('password12345'));
   await page.click('.savebar button.btn');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   await expect(page.locator('.links a').first()).toHaveText('শুরু');
+  // I2: donate.js used to capture STRINGS['donate.copy'] once at module load and pick() it — an
+  // override could never reach the copy button. Now it calls t('donate.copy') at render time.
+  await page.goto('/donate.html');
+  await expect(page.locator('.upibig button.btn')).toHaveText('কপি');
+  // I2: every registerSection title: used to be pick()'d straight from the raw STRINGS object,
+  // bypassing overrides — admin.js now prefers def.titleKey (t() at render time) when present.
+  await page.goto('/admin/#');
+  await expect(page.locator('.grid .tile', { hasText: 'শিল্পকলা' })).toBeVisible();
   await page.goto('/admin/#strings');
   await page.waitForSelector('input[name="nav.home.bn"]');
   await page.click('.str-row:has(input[name="nav.home.bn"]) .btn-sm');
+  await page.fill('input[type=search]', 'donate.copy');
+  await page.click('.str-row:has(input[name="donate.copy.bn"]) .btn-sm');
+  await page.fill('input[type=search]', 'admin.culture');
+  await page.click('.str-row:has(input[name="admin.culture.bn"]) .btn-sm');
+  await page.fill('input[type=search]', '');
   await page.click('.savebar button.btn');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   await expect(page.locator('.links a').first()).toHaveText('হোম');
+  await page.goto('/donate.html');
+  await expect(page.locator('.upibig button.btn')).toHaveText('কপি করুন');
+  await page.goto('/admin/#');
+  await expect(page.locator('.grid .tile', { hasText: 'সংস্কৃতি' })).toBeVisible();
 });
 test('✏️ লেখা — search filters rows by key', async ({ page }) => {
   await login(page);

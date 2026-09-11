@@ -1,15 +1,10 @@
 import { mountShell, section, sectionHead, pageHeader } from '../shell.js';
 import { listDonorWall } from '../content.js';
-import { pick, t, getLang, STRINGS } from '../i18n.js';
+import { pick, t, getLang } from '../i18n.js';
 import { el, fmtDate, toast, digits } from '../ui.js';
 import { inr } from '../money.js';
 import { parsePurposes } from '../ledger.js';
-import { mediaUrl } from '../media-slots.js';
-
-const COPY_LABEL = STRINGS['donate.copy'];
-const NAME_LABEL = STRINGS['donate.name'];
-const AMOUNT_LABEL = STRINGS['donate.amount'];
-const REF_LABEL = STRINGS['donate.ref'];
+import { mediaUrl, httpsUrl } from '../media-slots.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('donate', 'donate.title');
@@ -37,12 +32,12 @@ if (s) {
       }
       const payHref = `upi://pay?pa=${encodeURIComponent(s.upiId)}&pn=${encodeURIComponent(pick(s.name))}&cu=INR`;
       return el('div', { class: 'upibig' },
-        s.upiQrUrl ? el('img', { src: s.upiQrUrl, alt: t('donate.scan'), style: 'width:160px;height:160px;object-fit:contain' }) : null,
+        httpsUrl(s.upiQrUrl) ? el('img', { src: httpsUrl(s.upiQrUrl), alt: t('donate.scan'), style: 'width:160px;height:160px;object-fit:contain' }) : null,
         el('div', {},
           el('p', {}, el('code', { class: 'upi-id', text: s.upiId })),
           el('div', { class: 'row' },
             el('button', {
-              class: 'btn', type: 'button', text: pick(COPY_LABEL),
+              class: 'btn', type: 'button', text: t('donate.copy'),
               onclick: async () => {
                 if (!navigator.clipboard || !navigator.clipboard.writeText) return;
                 try {
@@ -77,9 +72,9 @@ if (s) {
 
     const render = () => {
       const lang = getLang();
-      nameField = el('input', { type: 'text', placeholder: pick(NAME_LABEL), 'aria-label': pick(NAME_LABEL) });
-      amountField = el('input', { type: 'number', min: '0', placeholder: pick(AMOUNT_LABEL), 'aria-label': pick(AMOUNT_LABEL) });
-      refField = el('input', { type: 'text', placeholder: pick(REF_LABEL), 'aria-label': pick(REF_LABEL) });
+      nameField = el('input', { type: 'text', placeholder: t('donate.name'), 'aria-label': t('donate.name') });
+      amountField = el('input', { type: 'number', min: '0', placeholder: t('donate.amount'), 'aria-label': t('donate.amount') });
+      refField = el('input', { type: 'text', placeholder: t('donate.ref'), 'aria-label': t('donate.ref') });
       const purposeCards = purposes.length ? el('div', { class: 'purpose' }, ...purposes.map(p => el('div', { class: 'pcard' }, el('b', { text: pick(p.title) }),
         el('div', { class: 'chips' }, ...p.amounts.map(a => el('i', { text: inr(a, lang), onclick: () => { amountField.value = String(a); amountField.focus(); } })))))) : null;
       main.replaceChildren(pageHeader({ crumb: t('nav.donate'), title: t('donate.title'), lead: s.has80G ? t('donate.tax80g') : '', image: mediaUrl(s.media, 'header.donate') }),
