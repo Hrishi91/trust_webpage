@@ -24,6 +24,11 @@ Promise.all([getDoc(doc(db, 'settings', 'site')), getContent()]).then(([snap, c]
   applyTheme(resolveTheme(snap.data()?.design));
   applyOverrides(snap.data()?.designOverrides, snap.data()?.fonts);
   applyStrings();
+  // route() may already have rendered a section (with pre-override strings) before this promise
+  // settled — re-render it now so it picks up the overrides too. Guarded on `user`: before auth
+  // resolves there is nothing routed yet (#adm-main is empty/hidden), and route() itself no-ops
+  // without a user, so calling it early would be a silent, misleading no-op rather than a real skip.
+  if (user) route();
 }).catch(err => console.warn('[admin] theme', err));
 let user = null;
 

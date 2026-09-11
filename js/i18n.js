@@ -261,8 +261,8 @@ export const STRINGS = {
 
 // --- overrides layer (Phase 6: admin can override any default above) ---
 let overrides = {};
-/** Read-only snapshot of the current overrides map. */
-export function getOverrides() { return overrides; }
+/** Read-only snapshot of the current overrides map (a shallow copy — callers may not mutate the live map). */
+export function getOverrides() { return { ...overrides }; }
 /**
  * Replace the overrides map. Pass null to clear. Silently drops any entry that
  * isn't a plain {bn?, en?} object with string values — malformed Firestore data
