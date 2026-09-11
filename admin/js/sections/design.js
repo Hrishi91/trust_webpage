@@ -125,6 +125,14 @@ const def = {
 
     const saveBtn = el('button', { class: 'btn', type: 'button', text: t('admin.design.saveOverrides') });
     saveBtn.onclick = async () => {
+      // A non-empty colour text input that isn't a valid #rrggbb is a typo, not "use the theme" —
+      // silently dropping it (the old behaviour) let an admin believe a colour was saved when it
+      // never reached designOverrides at all. Caught before reauth so a bad hex code never costs a
+      // password re-entry for a write that was never going to include it anyway.
+      for (const key of OVERRIDE_KEYS) {
+        const v = colourState[key].text.value.trim();
+        if (v && !HEX.test(v)) { toast(`${t('admin.design.invalidHex')} ${t(`admin.design.colour.${key}`)}`, 'err'); return; }
+      }
       if (!(await ctx.reauth())) return;
       try {
         const designOverrides = {};
@@ -139,7 +147,10 @@ const def = {
         // updateDoc (not setDoc merge:true) — a merged write only merges MAP FIELDS by key, so a
         // colour row cleared back to "use theme" would never actually leave designOverrides;
         // updateDoc replaces designOverrides/fonts/homeSections wholesale, which is what "the row
-        // left empty is omitted" requires.
+        // left empty is omitted" requires. updateDoc() also requires the target document to already
+        // exist (unlike setDoc's create-or-merge) — settings/site is seeded on production and by
+        // tests/seed/seed.js before any admin ever reaches this card, so that precondition always
+        // holds in practice; it is not re-created here.
         await updateDoc(ref, { designOverrides, fonts, homeSections, updatedAt: serverTimestamp() });
         await logAudit(ctx, 'update', 'settings/site', before, after);
         applyOverrides(designOverrides, fonts);

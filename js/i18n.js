@@ -82,6 +82,7 @@ export const STRINGS = {
   'admin.design.colours': { bn: 'রং', en: 'Colours' },
   'admin.design.colourHint': { bn: 'খালি রাখলে থিমের নিজের রং দেখাবে। কনট্রাস্ট ব্যাজ শুধু পরামর্শ — সেভ আটকায় না।', en: 'Leave a field blank to use the theme\'s own colour. The contrast badge is advisory only — it never blocks saving.' },
   'admin.design.resetColour': { bn: 'থিমের রং-এ ফেরাও', en: 'Reset to theme colour' },
+  'admin.design.invalidHex': { bn: 'ভুল রং কোড (যেমন #c9361a)', en: 'Invalid colour code (e.g. #c9361a)' },
   'admin.design.fonts': { bn: 'ফন্ট', en: 'Fonts' },
   'admin.design.fonts.display': { bn: 'শিরোনামের ফন্ট', en: 'Display font' },
   'admin.design.fonts.body': { bn: 'লেখার ফন্ট', en: 'Body font' },
