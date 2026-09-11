@@ -297,3 +297,16 @@ test('settings: homeSections must be a list within the size cap; per-element sha
   await assertFails(E.admin.firestore().doc('settings/site').set({ homeSections: 'nope' }, { merge: true }));
   await assertFails(E.admin.firestore().doc('settings/site').set({ homeSections: Array.from({ length: 12 }, (_, i) => ({ key: 'x' + i, on: true })) }, { merge: true }));
 });
+
+// Phase 6 Task 6: settings.social — each of the four links must be '' or https://.
+test('settings: social must be https:// or empty per whitelisted key', async () => {
+  await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ social: { facebook: 'https://facebook.com/x' } }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ social: { facebook: '', youtube: '', instagram: '', whatsappGroup: '' } }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ tagline: { bn: 'x', en: 'y' } }, { merge: true })); // social absent is fine
+  await assertFails(E.admin.firestore().doc('settings/site').set({ social: { facebook: 'http://facebook.com/x' } }, { merge: true })); // not https
+  await assertFails(E.admin.firestore().doc('settings/site').set({ social: { facebook: 'javascript:alert(1)' } }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ social: { evil: 'https://x.com' } }, { merge: true })); // unknown key
+  await assertFails(E.admin.firestore().doc('settings/site').set({ social: 'nope' }, { merge: true }));
+  await assertFails(E.anon.firestore().doc('settings/site').set({ social: { facebook: 'https://facebook.com/x' } }, { merge: true }));
+});
