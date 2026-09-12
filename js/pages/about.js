@@ -12,6 +12,12 @@ if (s) {
   const preview = new URLSearchParams(location.search).has('preview');
   let items;
   try {
+    // Phase 7 Task 4 (item 31): see js/pages/transparency.js's own comment on this same pattern —
+    // a dynamic import only fetches js/firebase-auth.js when ?preview is actually present,
+    // restoring the admin's persisted Auth session for this elevated read without an ordinary
+    // about.html visit ever requesting it (the pwa.spec.js assertion that about.html never
+    // requests firebase-auth.js never passes ?preview, so it never triggers this branch).
+    if (preview) await import('../firebase-auth.js');
     items = preview
       ? (await getDocs(query(collection(db, 'history'), where('deleted', '==', false), orderBy('order')))).docs.map(d => ({ id: d.id, ...d.data() }))
       : await listPublished('history');

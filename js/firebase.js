@@ -1,4 +1,8 @@
-// Single Firebase entry point. Every other module imports from here — never from gstatic directly.
+// Single Firebase entry point for app/Firestore/Storage — every module that doesn't need Auth
+// imports from here, never from gstatic directly. Auth lives in js/firebase-auth.js instead
+// (Phase 7 Task 4, item 31): most pages never sign anyone in, so they must never pay for the
+// firebase-auth.js SDK chunk (41 KB, per the site-basics audit) or an initializeAuth() call.
+// Only js/pages/members.js and admin/js/admin.js import js/firebase-auth.js.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app-check.js';
 import {
@@ -6,11 +10,6 @@ import {
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
   serverTimestamp, onSnapshot, Timestamp, writeBatch, arrayUnion, deleteField,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
-import {
-  initializeAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  reauthenticateWithCredential, EmailAuthProvider, browserLocalPersistence,
-  RecaptchaVerifier, signInWithPhoneNumber,
-} from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import {
   getStorage, connectStorageEmulator, ref, uploadBytesResumable, getDownloadURL, deleteObject,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-storage.js';
@@ -37,28 +36,15 @@ if (IS_LOCAL) {
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
 });
-// Persistence is fixed at construction (not set post-hoc) so every tab — admin or public — uses
-// the same backend from the first instant Auth exists. getAuth() defaults to
-// indexedDBLocalPersistence; a page that later called setPersistence(browserLocalPersistence) left
-// a window where a second same-origin tab could initialise Auth against the default IndexedDB
-// backend before the switch happened. The SDK's cross-tab persistence sync then cleared the first
-// tab's session outright — onAuthStateChanged(null) fired there with no error, no isAdmin() call,
-// no network request (reproduced with Playwright: /admin/ login, then open committee.html in the
-// same context — #adm-main.hidden flipped true and auth.currentUser went null within ~1s and
-// stayed null). initializeAuth's persistence option applies before any tab can race ahead of it.
-export const auth = initializeAuth(app, { persistence: browserLocalPersistence, popupRedirectResolver: undefined });
 export const storage = getStorage(app);
 
 if (IS_LOCAL) {
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectStorageEmulator(storage, '127.0.0.1', 9199);
 }
 
 export {
   collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, orderBy, limit,
   serverTimestamp, onSnapshot, Timestamp, writeBatch, arrayUnion, deleteField,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged, reauthenticateWithCredential,
-  EmailAuthProvider, RecaptchaVerifier, signInWithPhoneNumber,
   ref, uploadBytesResumable, getDownloadURL, deleteObject,
 };

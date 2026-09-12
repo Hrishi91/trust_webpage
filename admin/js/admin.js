@@ -1,7 +1,8 @@
+import { db, storage, doc, getDoc } from '../../js/firebase.js';
 import {
-  db, storage, auth, doc, getDoc, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  auth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
   reauthenticateWithCredential, EmailAuthProvider,
-} from '../../js/firebase.js';
+} from '../../js/firebase-auth.js';
 import { t, getLang, setLang, onLangChange, pick, setOverrides } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
 import { resolveTheme, applyTheme, applyOverrides } from '../../js/theme.js';

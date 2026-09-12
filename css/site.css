@@ -467,3 +467,25 @@ footer a{min-height:44px;padding-block:.7rem}
   .ph{background:#fff!important}
   .ph canvas{display:none}
 }
+/* Phase 7 Task 4 (item 30, unsized-images): the concept's .story/.pics figures were authored for
+   canvas placeholders and already size the canvas (`.story .scene canvas`/`.tl .pics canvas`
+   above); the actual markup renders <img> in both, which had no width/height/aspect-ratio of its
+   own — the ancestor figure reserved the box but the image itself could still trigger a layout
+   shift on load. `.hero.photo .art img` set a width but never a height/aspect-ratio either. */
+.story .scene img{width:100%;height:100%;object-fit:cover;display:block}
+.tl .pics img{width:100%;height:100%;object-fit:cover;display:block}
+.hero.photo .art img{aspect-ratio:4/3}
+/* Phase 7 Task 4 (item 28, static app-shell): fixed-height skeletons for the home page's
+   below-the-fold sections (index.html <main>, scripts/sync-shell.mjs) — reserves the box before
+   Firestore answers so the swap to real content doesn't shift the page, without trying to fake
+   each section's exact real height (which varies with content anyway). Swept away by
+   js/pages/home.js's first main.replaceChildren() the moment real data arrives. */
+.sec-skel{min-height:320px}
+/* Visually hidden but still announced — the loading-status note baked into every page's <main>
+   skeleton (replaces the old literal "…" placeholder) and the aria-live region it lives in are
+   read by a screen reader but never take up visible layout space (so they cannot themselves cause
+   a layout shift). Standard "sr-only" clip-based recipe. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* The <noscript> note (item 28: JS-off visitors get a real message, not just a static shell with
+   dead buttons) sits right after the skip link, styled as a plain content banner. */
+noscript{display:block;background:var(--card);color:var(--ink);text-align:center;padding:.7rem 1rem;border-bottom:1px solid var(--line)}

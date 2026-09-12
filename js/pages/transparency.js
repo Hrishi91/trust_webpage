@@ -32,6 +32,13 @@ if (s) {
     let previewDoc = null;
     if (preview && yearParam) {
       try {
+        // Phase 7 Task 4 (item 31): js/firebase.js no longer initialises Auth, so a plain page
+        // load here never has a live Auth instance wired to `db` — Firestore has no ID token to
+        // attach, and an admin's persisted session (from /admin/) would eval-error against rules
+        // that gate this read. A dynamic (not static) import of js/firebase-auth.js only runs —
+        // and only ever fetches the firebase-auth.js chunk — when an admin actually opens a
+        // ?preview=1 link, so an ordinary visit to this page still never requests it.
+        await import('../firebase-auth.js');
         const snap = await getDoc(doc(db, 'transparency', yearParam));
         if (snap.exists()) previewDoc = { id: snap.id, ...snap.data() };
       } catch (err) {

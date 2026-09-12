@@ -1,8 +1,9 @@
 import { mountShell, pageHeader, section } from '../shell.js';
 import { getMyMember, listNotices, listMyRoster } from '../content.js';
+import { IS_LOCAL } from '../firebase.js';
 import {
-  auth, IS_LOCAL, RecaptchaVerifier, signInWithPhoneNumber, signOut, onAuthStateChanged,
-} from '../firebase.js';
+  auth, RecaptchaVerifier, signInWithPhoneNumber, signOut, onAuthStateChanged,
+} from '../firebase-auth.js';
 import { t, pick, getLang } from '../i18n.js';
 import { el, toast, fmtDate } from '../ui.js';
 import { inr, sum, balance } from '../money.js';
