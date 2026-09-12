@@ -928,3 +928,13 @@ independent layers, not one. `docs/user-guide/deploy.md` Step 6 rewritten with a
 warning, both secrets, the repo variable, and the decrypt command; `docs/pending.md`'s owner steps
 updated to match. `tests/unit/backup.test.js` gained round-trip/refusal/tamper tests for
 `encrypt`/`decrypt`/`planEncryption`.
+
+`docs(privacy): disclose error diagnostics, Google processing, reCAPTCHA, on-device storage` — C2.
+`js/page-defaults.js`'s `privacy` default body (bn+en) gained: an error-diagnostics bullet (message,
+URL with no query, user-agent, stack trace, kept ≤ 90 days — matches `js/errors.js`/`firestore.rules`
+exactly); a "who else processes this data" section replacing the flat "never shared with any third
+party" claim with Google Firebase (hosting/database) and Google reCAPTCHA (member login, admin
+protection), linking Google's own privacy policy; an on-device-storage section (theme/language in
+localStorage, offline page cache in the service worker, Firestore's own offline cache; no tracking
+or advertising cookies). `node scripts/sync-head.mjs` run (no head/description text changed, so only
+`js/sw-version.js`/`sw.js` needed a bump for this file).
