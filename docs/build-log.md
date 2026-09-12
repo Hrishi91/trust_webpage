@@ -905,3 +905,26 @@ list, not treated as a blocker.
 
 **Phase 7 is now fully live and CI-verified.** `docs/pending.md`'s Phase 7 Task 7/Task 8 lines marked
 done.
+
+## 2026-09-13 — Phase 7 final review fix wave
+
+Base `e9707c6`. A senior whole-branch review of Phase 7 found 2 critical, 6 important, and 8 minor
+items; every subject below is one commit, docs staged in the same commit. Brief:
+`.superpowers/sdd/2026-09-12-phase-7-site-basics/final-fix-wave.md`; report:
+`.superpowers/sdd/2026-09-12-phase-7-site-basics/final-fix-wave-report.md`.
+
+`fix(backup): encrypt artifacts and refuse on a public repo` — C1. This repo is public; a GitHub
+Actions artifact inherits the repo's own visibility (no separate ACL), so the scheduled backup
+(`scripts/backup.mjs`) would have published members' phone-linked ids, hidden donations,
+notices/roster, non-public committee rows, and client error reports to anyone on the internet.
+`scripts/backup.mjs` now encrypts the export (AES-256-GCM, key = `scrypt(BACKUP_PASSPHRASE, salt)`,
+random salt+iv prepended to the auth tag + ciphertext) entirely in memory before anything touches
+disk — plaintext JSON is never written; refuses (exit 0 if `BACKUP_OPTIONAL=1`, else exit 1) when
+`BACKUP_PASSPHRASE` is missing, independently of the existing `FIREBASE_SA` gate. New
+`scripts/backup-decrypt.mjs` reverses it. `.github/workflows/backup.yml` passes both secrets,
+uploads only `backup-*.json.enc`, and gained a job-level guard step failing when
+`github.event.repository.private == false && vars.ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS != 'true'` — two
+independent layers, not one. `docs/user-guide/deploy.md` Step 6 rewritten with a bold public-repo
+warning, both secrets, the repo variable, and the decrypt command; `docs/pending.md`'s owner steps
+updated to match. `tests/unit/backup.test.js` gained round-trip/refusal/tamper tests for
+`encrypt`/`decrypt`/`planEncryption`.

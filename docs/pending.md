@@ -182,7 +182,7 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 ### Owner-only (Phase 7, recorded per the audit's §3)
 
 - App Check key, real photos/logo, trust deed + audit PDFs, registration number/80G status, custom domain, Google Search Console verification, phone-OTP test on a real number, uptime-monitor account, MFA on the admin account, budget for any paid service, security headers via a CDN in front of GitHub Pages.
-- **`FIREBASE_SA` repo secret** (Task 6/item 43 built the backup workflow itself; the storage decision — a GitHub Actions artifact, 90-day retention — is made) — once a real Firebase project exists, create a Cloud Datastore Viewer (read-only) service account and add its JSON key as the `FIREBASE_SA` GitHub secret (`docs/user-guide/deploy.md` Step 6) so the weekly cron actually exports something instead of skipping.
+- **`FIREBASE_SA`/`BACKUP_PASSPHRASE` repo secrets** (Task 6/item 43 built the backup workflow itself; the storage decision — a GitHub Actions artifact, 90-day retention, AES-256-GCM encrypted since the final-review fix wave — is made) — once a real Firebase project exists, create a Cloud Datastore Viewer (read-only) service account and add its JSON key as the `FIREBASE_SA` GitHub secret, plus a strong random passphrase as `BACKUP_PASSPHRASE` (`docs/user-guide/deploy.md` Step 6) so the weekly cron actually exports (and can decrypt) something instead of skipping. While this repo stays public, the `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` repository variable must also be set to `true` or the workflow refuses to run at all — see Step 6's own warning on why (artifacts inherit repo visibility, encrypted or not).
 
 ### Not needed (Phase 7, recorded per the audit's §4)
 
@@ -191,7 +191,7 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 ### ⏳ Owner still to do (Phase 7)
 
 - **Read and edit the 8 new পাতা**: /admin/ → 📄 পাতা → privacy/refund/trust/contact/faq/news/downloads all ship with drafted bilingual defaults (`js/page-defaults.js`), not real trust-specific text — read এগুলো and rewrite in your own words (especially trust.html's purpose/what-donations-fund and privacy.html's actual policy) before pointing anyone at them.
-- **Add the `FIREBASE_SA` repo secret** once a real Firebase project/service account exists (see Owner-only above and `docs/user-guide/deploy.md` Step 6) — the backup workflow runs green every week either way, but only exports data after this is added.
+- **Add the `FIREBASE_SA`/`BACKUP_PASSPHRASE` repo secrets** (and, while this repo stays public, the `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` repo variable) once a real Firebase project/service account exists (see Owner-only above and `docs/user-guide/deploy.md` Step 6) — the backup workflow runs green every week either way, but only exports (encrypted) data after these are added.
 - **Live Lighthouse (2026-09-13, mobile) — Performance 62** (audit baseline 39; target ≥70, not yet
   met — does not block go-live per this task's own brief). Accessibility 100 (baseline 95, target ≥98
   ✅), Best Practices 100 (baseline 96, target ≥96 ✅), SEO 100 (target 100 ✅), CLS 0.04 (baseline

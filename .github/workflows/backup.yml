@@ -2,13 +2,22 @@ name: Scheduled backup
 
 # Phase 7 Task 7 (site-basics audit item 43): a dated Firestore export exists without anyone
 # pressing a button. Runs scripts/backup.mjs, which is secret-gated (see that script's own header
-# comment) — BACKUP_OPTIONAL=1 means a repo that hasn't added the FIREBASE_SA secret yet gets a
-# clean, green "skipped" run instead of a red X; a local run without BACKUP_OPTIONAL still fails
-# loudly on a missing secret. docs/user-guide/deploy.md documents creating the read-only service
-# account and adding it as this repo's FIREBASE_SA secret.
+# comment) — BACKUP_OPTIONAL=1 means a repo that hasn't added the FIREBASE_SA/BACKUP_PASSPHRASE
+# secrets yet gets a clean, green "skipped" run instead of a red X; a local run without
+# BACKUP_OPTIONAL still fails loudly on a missing secret. docs/user-guide/deploy.md documents
+# creating the read-only service account, choosing a passphrase, and adding both as this repo's
+# FIREBASE_SA/BACKUP_PASSPHRASE secrets.
 #
-# No secret other than FIREBASE_SA and the default GITHUB_TOKEN (implicit, used only by
-# actions/upload-artifact) is ever referenced here.
+# Final-review fix wave C1: this repo is PUBLIC — a GitHub Actions artifact inherits the
+# repository's own visibility (there is no separate ACL), so ANYONE could otherwise download a
+# backup containing members' phone-linked ids, hidden donations, notices/roster, non-public
+# committee rows and client error reports. scripts/backup.mjs now encrypts the export
+# (AES-256-GCM) before it ever touches disk, and this workflow additionally refuses to even reach
+# that script on a public repo unless the owner has explicitly opted in via the
+# ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS repository variable — two independent layers, not one.
+#
+# No secret other than FIREBASE_SA, BACKUP_PASSPHRASE, and the default GITHUB_TOKEN (implicit,
+# used only by actions/upload-artifact) is ever referenced here.
 on:
   schedule:
     # 30 20 * * 6 UTC = Sunday 02:00 IST (UTC+5:30) — weekly.
@@ -22,6 +31,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Job-level guard: a public repo's workflow artifacts are downloadable by anyone with read
+      # access to the repo — which, on a public repo, is anyone on the internet. Encryption
+      # (below) is the primary defence, but this step means the owner has to make a deliberate,
+      # visible choice (setting the repo variable) before any artifact — encrypted or not — is
+      # ever produced on a public repo, rather than that decision being made implicitly by nobody.
+      - name: Refuse to run on a public repo without explicit opt-in
+        if: github.event.repository.private == false && vars.ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS != 'true'
+        run: |
+          echo "::error::This repository is public. GitHub Actions artifacts inherit the repository's own visibility — an encrypted backup-*.json.enc file would still be downloadable by anyone, even though its contents are AES-256-GCM encrypted. Set the repository variable ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS=true (Settings -> Secrets and variables -> Actions -> Variables) only after deliberately accepting that risk (you trust a strong BACKUP_PASSPHRASE enough to publish the ciphertext), or make this repository private instead."
+          exit 1
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -29,16 +49,17 @@ jobs:
 
       - run: npm ci
 
-      - name: Export Firestore to backup-<date>.json
+      - name: Export Firestore to an encrypted backup-<date>.json.enc
         env:
           FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
           BACKUP_OPTIONAL: '1'
         run: node scripts/backup.mjs
 
-      - name: Upload backup artifact
-        if: hashFiles('backup-*.json') != ''
+      - name: Upload backup artifact (encrypted)
+        if: hashFiles('backup-*.json.enc') != ''
         uses: actions/upload-artifact@v4
         with:
           name: firestore-backup
-          path: backup-*.json
+          path: backup-*.json.enc
           retention-days: 90

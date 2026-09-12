@@ -146,10 +146,29 @@ Enforce।
 ## Step 6: Scheduled backup ⏳ owner-এর Firebase project হলে (একবারই)
 
 `.github/workflows/backup.yml` প্রতি রবিবার রাত ২টায় (IST)
-`scripts/backup.mjs` চালিয়ে সব collection/doc একটা dated JSON ফাইলে
-export করে GitHub Actions artifact হিসেবে রাখে (৯০ দিন retention)।
-`FIREBASE_SA` secret না থাকলে workflow ব্যর্থ না হয়ে শুধু স্কিপ করে
-(green থাকে) — যতক্ষণ না নিচের সেটআপ একবার করা হয়।
+`scripts/backup.mjs` চালিয়ে সব collection/doc একটা dated, **এনক্রিপ্টেড**
+(`backup-YYYY-MM-DD.json.enc`) ফাইলে export করে GitHub Actions artifact
+হিসেবে রাখে (৯০ দিন retention)। `FIREBASE_SA`/`BACKUP_PASSPHRASE` secret
+না থাকলে workflow ব্যর্থ না হয়ে শুধু স্কিপ করে (green থাকে) — যতক্ষণ না
+নিচের সেটআপ একবার করা হয়।
+
+**⚠️ এই repo পাবলিক — এটা মাথায় রাখুন।** GitHub Actions-এর artifact
+repo-র visibility-ই পায়, আলাদা কোনো access-control নেই — মানে **repo
+পাবলিক থাকলে যে কেউ ইন্টারনেট থেকে ওই backup artifact ডাউনলোড করতে
+পারবে**, encrypted হোক বা না হোক। তাই `scripts/backup.mjs` ফাইলটা ডিস্কে
+লেখার আগেই এনক্রিপ্ট করে (AES-256-GCM, `BACKUP_PASSPHRASE` থেকে বানানো
+key দিয়ে) — plaintext JSON কখনো ডিস্কে লেখা হয় না। আর workflow-টা নিজেই
+একটা guard step-এ আটকে যাবে, যতক্ষণ না owner ইচ্ছাকৃতভাবে নিচের repo
+variable-টা সেট করছেন — দুটো আলাদা সুরক্ষার স্তর, একটা না।
+
+**দুটো secret লাগবে:**
+
+- `FIREBASE_SA` — Firestore পড়ার জন্য read-only service account-এর JSON
+  key (ধাপ ১–৩ নিচে)।
+- `BACKUP_PASSPHRASE` — একটা শক্তিশালী, লম্বা, র‍্যান্ডম পাসফ্রেজ (যেমন
+  `openssl rand -base64 32` দিয়ে বানানো) — এটাই encryption key-র উৎস; এটা
+  হারিয়ে গেলে পুরনো backup ফাইল আর কখনো decrypt করা যাবে না, তাই এই
+  পাসফ্রেজ নিজের password manager-এও আলাদা করে রেখে দিন।
 
 **একবারই দরকার — Firebase console-এ (owner action):**
 
@@ -162,28 +181,49 @@ export করে GitHub Actions artifact হিসেবে রাখে (৯০
 3. ওই service account-এর **Keys** ট্যাব → **Add Key → Create new key →
    JSON** → ডাউনলোড হবে একটা `.json` ফাইল।
 4. GitHub repo → **Settings → Secrets and variables → Actions → New
-   repository secret** → নাম `FIREBASE_SA`, value-তে ওই পুরো JSON
-   ফাইলের content paste করুন (পুরো ফাইল, শুধু একটা field না)।
+   repository secret** → দুটো secret যোগ করুন: `FIREBASE_SA` (ওই পুরো
+   JSON ফাইলের content, পুরো ফাইল — শুধু একটা field না) এবং
+   `BACKUP_PASSPHRASE` (ওপরের পাসফ্রেজ)।
 
 ```bash
 gh secret set FIREBASE_SA < path/to/service-account.json
+gh secret set BACKUP_PASSPHRASE   # prompt-এ পাসফ্রেজ পেস্ট করুন
 ```
 
 (অথবা GitHub UI দিয়ে একই কাজ করুন)। JSON key ফাইলটা এরপর নিজের
 কম্পিউটার থেকে মুছে ফেলুন — GitHub secret-এই যথেষ্ট, দুই জায়গায় রাখার
 দরকার নেই।
 
+**repo পাবলিক থাকলে একটা repository variable-ও লাগবে**, নয়তো workflow-টা
+ইচ্ছাকৃতভাবে আটকে যাবে ("Refuse to run on a public repo without explicit
+opt-in" স্টেপ): **Settings → Secrets and variables → Actions → Variables
+→ New repository variable** → নাম `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS`,
+value `true` — শুধু তখনই সেট করুন যখন আপনি সজ্ঞানে মেনে নিচ্ছেন যে একটা
+এনক্রিপ্টেড artifact-ও পাবলিক repo-তে যে কেউ ডাউনলোড করতে পারবে (ভেতরের
+ডেটা তবু পড়তে পারবে না, `BACKUP_PASSPHRASE` ছাড়া)। repo private করে
+দিলে এই variable-এর দরকার নেই।
+
 Verify: repo → **Actions → Scheduled backup → Run workflow** (manual
 trigger, `workflow_dispatch`) → সবুজ হলে, ওই run-এর **Artifacts** section-এ
-`firestore-backup` (একটা `backup-YYYY-MM-DD.json`) দেখা যাবে। secret
-এখনও যোগ না করা থাকলেও run সবুজ থাকবে, log-এ শুধু "FIREBASE_SA is not
-set — skipping" লেখা দেখাবে।
+`firestore-backup` (একটা `backup-YYYY-MM-DD.json.enc`) দেখা যাবে। secret
+এখনও যোগ না করা থাকলেও run সবুজ থাকবে, log-এ শুধু "... not set — skipping"
+লেখা দেখাবে।
+
+**Decrypt করতে হলে** (artifact ডাউনলোড করার পর):
+
+```bash
+BACKUP_PASSPHRASE=<আপনার পাসফ্রেজ> node scripts/backup-decrypt.mjs backup-2026-09-13.json.enc
+```
+
+এতে পাশে একটা plaintext `backup-2026-09-13.json` ফাইল তৈরি হবে — এই
+কমান্ডটা নিজের কম্পিউটারে চালান, কখনো কারো সাথে শেয়ার করা কোনো
+টার্মিনাল/স্ক্রিপ্টে না (পাসফ্রেজ আর ভেতরের ডেটা দুটোই sensitive)।
 
 **routine কাজ:** কিছু করার দরকার নেই — cron নিজে থেকেই প্রতি রবিবার
-চলবে। Restore করতে হলে (কখনও দরকার পড়লে) — artifact download করে JSON
-ফাইলটা দেখে ম্যানুয়ালি Firestore console/`firebase firestore:delete`
-+ import script দিয়ে ফেরত আনতে হবে; এই workflow শুধু export করে,
-কোনো automatic restore path নেই।
+চলবে। Restore করতে হলে (কখনও দরকার পড়লে) — artifact download করে ওপরের
+কমান্ডে decrypt করে, JSON ফাইলটা দেখে ম্যানুয়ালি Firestore
+console/`firebase firestore:delete` + import script দিয়ে ফেরত আনতে হবে;
+এই workflow শুধু export করে, কোনো automatic restore path নেই।
 
 ---
 
@@ -195,4 +235,4 @@ set — skipping" লেখা দেখাবে।
 | Firestore/Storage rules বদল | `scripts/deploy-rules.sh` |
 | Custom domain সেটআপ/বদল | CNAME file + DNS + `scripts/auth-config.mjs --domain <domain>` + referrer list (Step 4) |
 | App Check enforce | শুধু Task 21 live-verify পাশ হওয়ার পরে (Step 5) |
-| Scheduled backup সেটআপ (একবারই) | Service account তৈরি + `FIREBASE_SA` GitHub secret (Step 6) |
+| Scheduled backup সেটআপ (একবারই) | Service account তৈরি + `FIREBASE_SA`/`BACKUP_PASSPHRASE` GitHub secret + (repo পাবলিক হলে) `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` repo variable (Step 6) |
