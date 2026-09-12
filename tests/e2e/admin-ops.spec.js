@@ -136,6 +136,55 @@ test('মুছে ফেলা দেখাও + পুনরুদ্ধার
   await expect(page.locator('.person', { hasText: 'সভাপতি' })).toBeVisible();
 });
 
+// Fix round 1 (finding 1): donations/members/notices/roster's own custom list panes (not
+// forms.js's listView()) gained the same "মুছে ফেলা দেখাও" + "পুনরুদ্ধার" round trip committee/c1
+// already proved above — this exercises it on a notice and a member, the two collections whose
+// admin list has no public anonymous page to cross-check against, so the round trip is asserted
+// entirely against the admin list itself (disappears on delete, shows under "মুছে ফেলা দেখাও",
+// reappears in the normal list after Restore).
+test('মুছে ফেলা দেখাও + পুনরুদ্ধার — delete→restore round trip on a notice and a member (fix round 1, finding 1)', async ({ page }) => {
+  await login(page);
+
+  // notices/n1
+  await page.goto('/admin/#notices');
+  await page.locator('.list-item', { hasText: 'পুজোর মিটিং' }).locator('a').click();
+  await expect(page).toHaveURL(/#notices\/n1$/);
+  page.on('dialog', d => d.accept()); // confirm() only — reauth is the in-page <dialog> below
+  await page.click('button.danger');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
+  await expect(page).toHaveURL(/#notices$/);
+  await expect(page.locator('.list-item', { hasText: 'পুজোর মিটিং' })).toHaveCount(0);
+
+  await page.check('#adm-main input[type=checkbox]'); // "মুছে ফেলা দেখাও"
+  const deletedNotice = page.locator('.list-item', { hasText: 'পুজোর মিটিং' });
+  await expect(deletedNotice).toBeVisible();
+  await deletedNotice.locator('button.btn-sm').click(); // "পুনরুদ্ধার"
+  await expect(page.locator('.toast').last()).toBeVisible();
+  await expect(deletedNotice).toHaveCount(0); // gone from the deleted list — restored means deleted:false again
+  await page.uncheck('#adm-main input[type=checkbox]');
+  await expect(page.locator('.list-item', { hasText: 'পুজোর মিটিং' })).toBeVisible();
+
+  // members/+918888888888
+  await page.goto('/admin/#members');
+  await page.locator('.list-item', { hasText: 'সদস্য দুই' }).locator('a').click();
+  await expect(page).toHaveURL(/#members\/\+918888888888$/);
+  await page.click('button.danger');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
+  await expect(page).toHaveURL(/#members$/);
+  await expect(page.locator('.list-item', { hasText: 'সদস্য দুই' })).toHaveCount(0);
+
+  await page.check('#adm-main input[type=checkbox]');
+  const deletedMember = page.locator('.list-item', { hasText: 'সদস্য দুই' });
+  await expect(deletedMember).toBeVisible();
+  await deletedMember.locator('button.btn-sm').click();
+  await expect(page.locator('.toast').last()).toBeVisible();
+  await expect(deletedMember).toHaveCount(0);
+  await page.uncheck('#adm-main input[type=checkbox]');
+  await expect(page.locator('.list-item', { hasText: 'সদস্য দুই' })).toBeVisible();
+});
+
 test('forgot-password link is visible on the login form and sends a reset mail (item 36)', async ({ page }) => {
   await page.goto('/admin/');
   await expect(page.locator('#adm-forgot')).toBeVisible();
@@ -183,3 +232,4 @@ test('donations and members lists also get a search box (item 40)', async ({ pag
   await expect(page.locator('.list-item', { hasText: 'সদস্য দুই' })).toBeHidden();
   await expect(page.locator('.list-item', { hasText: 'সদস্য এক' })).toBeVisible();
 });
+

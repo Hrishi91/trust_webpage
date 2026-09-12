@@ -4,7 +4,7 @@ import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { sum, inr, balance } from '../../../js/money.js';
 import { normalizePhone } from '../../../js/phone.js';
-import { biField, textField, boolField, saveDoc, softDelete, searchInput } from '../forms.js';
+import { biField, textField, boolField, saveDoc, softDelete, searchInput, restoreDoc } from '../forms.js';
 
 const COLL = 'members';
 // Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
@@ -30,31 +30,51 @@ registerSection(COLL, {
   },
 });
 
+// Fix round 1 (finding 1): "মুছে ফেলা দেখাও" + "পুনরুদ্ধার", same shape as forms.js's listView() —
+// the query flips deleted==false <-> deleted==true (same composite index) and a deleted row gets
+// a Restore button instead of the edit link/inactive badge (not editable until it's back).
 async function listPane(ctx) {
-  const q = query(collection(ctx.db, COLL), where('deleted', '==', false), orderBy('order'));
-  const snap = await getDocs(q);
-  const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
   const box = el('div');
+  const showDeletedCb = el('input', { type: 'checkbox' });
+  const listBox = el('div');
   box.append(el('div', { class: 'row' },
     el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) }),
     // Item 38: member data is private (own-doc-only + OTP login) — no anonymous public listing to
     // preview, so this links to the entry page a member signs in from instead of a filtered view.
-    el('a', { class: 'btn secondary', href: '../members.html', target: '_blank', text: t('admin.preview') })));
+    el('a', { class: 'btn secondary', href: '../members.html', target: '_blank', text: t('admin.preview') }),
+    el('label', { class: 'row' }, showDeletedCb, el('span', { text: t('admin.showDeleted') }))));
   // Item 40: search narrows the rendered rows client-side, no refetch.
-  box.append(searchInput(box));
-  if (!rows.length) box.append(el('p', { text: t('common.empty') }));
-  rows.forEach(d => {
-    const due = balance(d.pledge || 0, d.payments ?? []);
-    box.append(el('div', { class: 'list-item' },
-      el('a', {
-        href: '#', class: 'grow',
-        text: `${pick(d.name)} · ${d.id} · ${t('mem.due')} ${inr(due, ctx.lang)}`,
-        onclick: e => { e.preventDefault(); ctx.navigate(`#${COLL}/${d.id}`); },
-      }),
-      !d.active ? el('span', { class: 'badge', text: t(L.inactive) }) : null,
-    ));
-  });
+  box.append(searchInput(box), listBox);
+
+  async function render() {
+    const showDeleted = showDeletedCb.checked;
+    const q = query(collection(ctx.db, COLL), where('deleted', '==', showDeleted), orderBy('order'));
+    const snap = await getDocs(q);
+    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const list = el('div');
+    if (!rows.length) list.append(el('p', { text: t('common.empty') }));
+    rows.forEach(d => {
+      const due = balance(d.pledge || 0, d.payments ?? []);
+      const row = el('div', { class: 'list-item' },
+        el('a', {
+          href: '#', class: 'grow',
+          text: `${pick(d.name)} · ${d.id} · ${t('mem.due')} ${inr(due, ctx.lang)}`,
+          onclick: e => { e.preventDefault(); if (!showDeleted) ctx.navigate(`#${COLL}/${d.id}`); },
+        }),
+        !showDeleted && !d.active ? el('span', { class: 'badge', text: t(L.inactive) }) : null,
+      );
+      if (showDeleted) {
+        row.append(el('button', {
+          class: 'btn-sm', type: 'button', text: t('admin.restore'),
+          onclick: async () => { await restoreDoc(ctx, COLL, d.id); await render(); },
+        }));
+      }
+      list.append(row);
+    });
+    listBox.replaceChildren(list);
+  }
+  showDeletedCb.onchange = render;
+  await render();
   return box;
 }
 

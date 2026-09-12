@@ -59,6 +59,17 @@ export async function saveDoc(ctx, coll, id, data, { publish } = {}) {
   }
 }
 
+// Fix round 1 (finding 1): shared restore action — listView()'s own "পুনরুদ্ধার" button used to
+// inline this updateDoc+logAudit+toast sequence; donations/members/notices/roster's custom list
+// panes need the identical restore action for their own showDeleted toggles, so it moved here
+// once and every call site (listView included) shares it.
+export async function restoreDoc(ctx, coll, id) {
+  const ref = doc(ctx.db, coll, id);
+  await updateDoc(ref, { deleted: false, updatedAt: serverTimestamp() });
+  await logAudit(ctx, 'restore', `${coll}/${id}`, { deleted: true }, { deleted: false });
+  toast(t('admin.saved'));
+}
+
 export async function softDelete(ctx, coll, id) {
   if (!confirm(t('admin.confirmDelete'))) return false;
   if (!(await ctx.reauth())) return false;
@@ -113,13 +124,7 @@ export async function listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reo
       if (showDeleted) {
         row.append(el('button', {
           class: 'btn-sm', type: 'button', text: t('admin.restore'),
-          onclick: async () => {
-            const ref = doc(ctx.db, coll, d.id);
-            await updateDoc(ref, { deleted: false, updatedAt: serverTimestamp() });
-            await logAudit(ctx, 'restore', `${coll}/${d.id}`, { deleted: true }, { deleted: false });
-            toast(t('admin.saved'));
-            await renderRows();
-          },
+          onclick: async () => { await restoreDoc(ctx, coll, d.id); await renderRows(); },
         }));
       } else if (reorder) {
         const swap = async (j) => {

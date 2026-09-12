@@ -3,7 +3,7 @@ import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../.
 import { t } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { sum, inr } from '../../../js/money.js';
-import { textField, boolField, saveDoc, softDelete, searchInput } from '../forms.js';
+import { textField, boolField, saveDoc, softDelete, searchInput, restoreDoc } from '../forms.js';
 
 const COLL = 'donations';
 const MODES = ['cash', 'upi', 'bank'];
@@ -38,55 +38,89 @@ registerSection(COLL, {
   },
 });
 
+// Fix round 1 (finding 1): "মুছে ফেলা দেখাও" toggles the query the same way listView()'s does
+// (deleted==false <-> deleted==true, same composite index, opposite literal). While showing
+// deleted rows the year picker/summary card don't apply (a deleted row isn't "this year's total"
+// material) — that mode renders a flat, unfiltered restore list instead, same shape as
+// members/notices/roster's own restore lists below.
 async function listPane(ctx) {
-  const q = query(collection(ctx.db, COLL), where('deleted', '==', false), orderBy('date', 'desc'));
-  const snap = await getDocs(q);
-  const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-  const currentYear = new Date().getFullYear();
-  const dataYears = [...new Set(rows.map(r => r.year))];
-  const options = [...new Set([...dataYears, currentYear])].sort((a, b) => b - a);
-  const defaultYear = dataYears.includes(currentYear) ? currentYear : (dataYears.length ? Math.max(...dataYears) : currentYear);
-
+  const yearSlot = el('span');
   const body = el('div');
-  const renderYear = year => {
-    const yearRows = rows.filter(r => r.year === year);
-    const total = sum(yearRows);
-    const byMode = Object.fromEntries(MODES.map(m => [m, sum(yearRows.filter(r => r.mode === m))]));
-    const wallCount = yearRows.filter(r => r.showOnWall).length;
+  const showDeletedCb = el('input', { type: 'checkbox' });
 
-    const summary = el('div', { class: 'card' },
-      el('p', { text: `${t(L.count)}: ${yearRows.length} · ${t(L.total)}: ${inr(total, ctx.lang)}` }),
-      el('p', { text: MODES.map(m => `${t(MODE_KEY[m])} ${inr(byMode[m], ctx.lang)}`).join(' · ') }),
-      el('p', { text: `${t(L.wall)}: ${wallCount}` }),
-    );
-    const list = el('div');
-    if (!yearRows.length) list.append(el('p', { text: t('common.empty') }));
-    yearRows.forEach(d => {
-      list.append(el('div', { class: 'list-item' },
-        el('a', {
-          href: '#', class: 'grow',
-          text: `${fmtDate(d.date, ctx.lang)} · ${d.isAnonymous ? t('donate.anonymous') : d.donorName} · ${inr(d.amount, ctx.lang)} · ${t(MODE_KEY[d.mode] ?? MODE_KEY.cash)}`,
-          onclick: e => { e.preventDefault(); ctx.navigate(`#${COLL}/${d.id}`); },
-        }),
-        d.showOnWall ? el('span', { class: 'badge pub', text: t(L.wall) }) : null,
-      ));
-    });
-    body.replaceChildren(summary, list);
-  };
-  renderYear(defaultYear);
+  async function render() {
+    const showDeleted = showDeletedCb.checked;
+    const q = query(collection(ctx.db, COLL), where('deleted', '==', showDeleted), orderBy('date', 'desc'));
+    const snap = await getDocs(q);
+    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  const yearSelect = el('select', { onchange: e => renderYear(Number(e.target.value)) },
-    ...options.map(y => el('option', { value: y, selected: y === defaultYear, text: String(y) })));
+    if (showDeleted) {
+      yearSlot.replaceChildren();
+      const list = el('div');
+      if (!rows.length) list.append(el('p', { text: t('common.empty') }));
+      rows.forEach(d => {
+        list.append(el('div', { class: 'list-item' },
+          el('span', {
+            class: 'grow',
+            text: `${fmtDate(d.date, ctx.lang)} · ${d.isAnonymous ? t('donate.anonymous') : d.donorName} · ${inr(d.amount, ctx.lang)}`,
+          }),
+          el('button', {
+            class: 'btn-sm', type: 'button', text: t('admin.restore'),
+            onclick: async () => { await restoreDoc(ctx, COLL, d.id); await render(); },
+          }),
+        ));
+      });
+      body.replaceChildren(list);
+      return;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const dataYears = [...new Set(rows.map(r => r.year))];
+    const options = [...new Set([...dataYears, currentYear])].sort((a, b) => b - a);
+    const defaultYear = dataYears.includes(currentYear) ? currentYear : (dataYears.length ? Math.max(...dataYears) : currentYear);
+
+    const renderYear = year => {
+      const yearRows = rows.filter(r => r.year === year);
+      const total = sum(yearRows);
+      const byMode = Object.fromEntries(MODES.map(m => [m, sum(yearRows.filter(r => r.mode === m))]));
+      const wallCount = yearRows.filter(r => r.showOnWall).length;
+
+      const summary = el('div', { class: 'card' },
+        el('p', { text: `${t(L.count)}: ${yearRows.length} · ${t(L.total)}: ${inr(total, ctx.lang)}` }),
+        el('p', { text: MODES.map(m => `${t(MODE_KEY[m])} ${inr(byMode[m], ctx.lang)}`).join(' · ') }),
+        el('p', { text: `${t(L.wall)}: ${wallCount}` }),
+      );
+      const list = el('div');
+      if (!yearRows.length) list.append(el('p', { text: t('common.empty') }));
+      yearRows.forEach(d => {
+        list.append(el('div', { class: 'list-item' },
+          el('a', {
+            href: '#', class: 'grow',
+            text: `${fmtDate(d.date, ctx.lang)} · ${d.isAnonymous ? t('donate.anonymous') : d.donorName} · ${inr(d.amount, ctx.lang)} · ${t(MODE_KEY[d.mode] ?? MODE_KEY.cash)}`,
+            onclick: e => { e.preventDefault(); ctx.navigate(`#${COLL}/${d.id}`); },
+          }),
+          d.showOnWall ? el('span', { class: 'badge pub', text: t(L.wall) }) : null,
+        ));
+      });
+      body.replaceChildren(summary, list);
+    };
+    const yearSelect = el('select', { onchange: e => renderYear(Number(e.target.value)) },
+      ...options.map(y => el('option', { value: y, selected: y === defaultYear, text: String(y) })));
+    yearSlot.replaceChildren(el('label', {}, el('span', { text: t(L.year) }), yearSelect));
+    renderYear(defaultYear);
+  }
+  showDeletedCb.onchange = render;
+  await render();
 
   const outer = el('div');
   outer.append(
     el('div', { class: 'row' },
       el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) }),
-      el('label', {}, el('span', { text: t(L.year) }), yearSelect),
+      yearSlot,
       // Item 38: donations always publish immediately (no draft state) — plain link to the live
       // donor wall, no ?preview=1 branch needed.
       el('a', { class: 'btn secondary', href: '../donate.html', target: '_blank', text: t('admin.preview') }),
+      el('label', { class: 'row' }, showDeletedCb, el('span', { text: t('admin.showDeleted') })),
     ),
     // Item 40: search narrows the rendered rows client-side, no refetch.
     searchInput(body),
