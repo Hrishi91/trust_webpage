@@ -107,7 +107,7 @@ Plan: `docs/superpowers/plans/2026-09-10-phase-5-design-system.md`. Spec: `docs/
 
 ### Deferred minors from Phase 5 reviews
 
-- dhokra theme: `.pulse`, `.tabs button.active`, `.chips i.on`, `.days button[aria-pressed="true"]` still hardcode `#fff6e8` on `--sindoor` (3.2:1 after the final-review token change); switch them to `var(--ticker-ink)` and add the pair to `tests/unit/contrast.test.js` (found by the final-review re-review, 2026-09-11).
+- [x] dhokra theme: `.pulse`, `.tabs button.active`, `.chips i.on`, `.days button[aria-pressed="true"]` hardcoded `#fff6e8` on `--sindoor` (3.2:1 after the final-review token change) — switched to `var(--ticker-ink)` (the `.days button[aria-pressed]` selector itself was retired along with it — events.js's day tabs now use real `role="tab"`/`.active`, not `aria-pressed`); the ticker-ink/sindoor pair was already gated in `tests/unit/contrast.test.js` (found by the final-review re-review, 2026-09-11; fixed Phase 7 Task 3, 2026-09-12).
 
 ## Phase 6 — "Nothing static": every visible thing is admin-editable
 
@@ -171,7 +171,7 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 
 - [x] Task 1 pages & legal (404, privacy/terms+refund, trust, contact, downloads, news, faq) + admin 📄 পাতা (2026-09-12)
 - [x] Task 2 SEO & share (titles/canonical/OG/JSON-LD, favicon/manifest, robots/sitemap, share row, .ics, print stylesheet) (2026-09-12)
-- [ ] Task 3 accessibility (skip link, 16px inputs, accessible lightbox, tab ARIA, aria-live, contrast fixes, alt text, form labels, banner role)
+- [x] Task 3 accessibility (skip link, 16px inputs, accessible lightbox, tab ARIA, aria-live, contrast fixes, alt text, form labels, banner role) (2026-09-12)
 - [ ] Task 4 performance & PWA shell (static above-the-fold shell, service worker, image dimensions, script loading)
 - [ ] Task 5 admin usability (export coverage, 📜 লগ audit viewer, restore toggle, forgot-password, help links, ?preview=1 everywhere, masked re-auth, list search)
 - [ ] Task 6 ops (CI, client error reporting, scheduled backup workflow, "শেষ আপডেট" stamps)
@@ -189,3 +189,7 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 ### Task 1 notes
 
 `pages/{id}` (fixed ids: privacy, refund, trust, contact, faq, news, downloads, notfound) follows the same code-default pattern as `js/culture.js` — `js/page-defaults.js` supplies bilingual rich-HTML defaults so every page shows real copy before the admin ever edits it. `settings.trustees` (named trustees for trust.html) is wired end-to-end (default, rules validation, trust.html read) but has no admin editor yet — until the owner or a later task adds one, trust.html shows the committee's `officer:true` rows instead, which is the documented fallback, not a gap.
+
+### Task 3 notes
+
+The real cause of Lighthouse's brand `.t` 2.56:1 / `.s` 1.83:1 (audit §4) turned out not to be an opacity issue at all: `.brand` is an `<a>` tag, and the sitewide `a{color:var(--sindoor)}` rule (top of `css/site.css`) targets it directly — an explicit same-specificity declaration on an element always wins over what it would otherwise inherit from `.nav{color:var(--hero-ink)}`, so the brand name/tagline were rendering in sindoor-on-dark-bg (a middling 3.5:1 on its own, worse still against the old translucent nav) the whole time, never in hero-ink. `.brand{color:inherit}` is the actual fix; `.nav`'s background going from a translucent `color-mix()` blend to a flat `var(--bg)` and dropping `.brand .s`'s `opacity:.7` both still stand as real, separate contrast improvements. Two axe-detected issues turned up outside the audit's own list and got fixed alongside it: the transparency donut chart's `role="img"` `<svg>` (`js/ledger-view.js`) had no accessible name (`svg-img-alt`), and `.upi code`/`.donate .eyebrow` used `--pitambar` for text sitting directly on `--bg` (mukha: `--pitambar` equals `--bg`, i.e. invisible text) — both moved to the already-token-tested `--hero-accent`. Alt-text policy applied: a photo the admin actually chose (committee portraits, album covers/photos, header/hero/donate-band/members-teaser slots, culture cards) always gets a real `alt`; the brand-mark logo (redundant with the adjacent trust-name text) and the hero's decorative garland flourish keep `alt=""` on purpose. Album photos gained an optional per-photo `alt` field in admin (🖼️ গ্যালারি → an album's photo list), independent of `caption` — the public gallery falls back `alt || caption || album title` so nothing ships with an empty `alt` even before an admin fills it in.

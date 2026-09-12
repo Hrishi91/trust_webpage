@@ -22,7 +22,7 @@ if (s) {
     }
     const purposes = parsePurposes(s.donatePurposes);
     // The three inputs are created per render() (placeholders follow the language) but held in these block-level bindings so the purpose chips — built in the same render — can fill the amount.
-    let nameField, amountField, refField;
+    let nameField, amountField, refField, amountErr;
     // Phase 7 Task 1 item 5: the donate page never learns whether the WhatsApp message was
     // actually sent (window.open is fire-and-forget), so "thank you" just means "you told us" —
     // re-render swaps the form out for a bilingual acknowledgement; "আবার" (again) brings it back.
@@ -70,24 +70,40 @@ if (s) {
           onsubmit: e => {
             e.preventDefault();
             const name = nameField.value.trim(), amount = Number(amountField.value), ref = refField.value.trim();
-            if (!(amount > 0)) { toast(t('common.error'), 'err'); return; }
+            // Item 25: an invalid amount now gets its own message under the field (linked to the
+            // input via aria-describedby, so a screen reader announces it as part of the field),
+            // not only a generic toast the field itself never referenced.
+            if (!(amount > 0)) {
+              amountErr.textContent = t('donate.errAmount');
+              amountErr.hidden = false;
+              amountField.setAttribute('aria-invalid', 'true');
+              amountField.focus();
+              return;
+            }
+            amountErr.hidden = true;
+            amountField.removeAttribute('aria-invalid');
             const vals = { amount: String(amount), ref: ref || '—', name: name || '—' };
             const msg = t('donate.confirmMsg').replace(/\{(amount|ref|name)\}/g, (_, k) => vals[k]);
             window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
             thanked = true; render();
           },
         },
-          el('div', { class: 'row' }, nameField),
-          el('div', { class: 'row' }, amountField),
-          el('div', { class: 'row' }, refField),
+          el('div', { class: 'field' }, el('label', { for: nameField.id, text: t('donate.name') }), nameField),
+          el('div', { class: 'field' }, el('label', { for: amountField.id, text: t('donate.amount') }), amountField, amountErr),
+          el('div', { class: 'field' }, el('label', { for: refField.id, text: t('donate.ref') }), refField),
           el('button', { class: 'btn', type: 'submit', text: t('donate.confirm') })));
     };
 
     const render = () => {
       const lang = getLang();
-      nameField = el('input', { type: 'text', placeholder: t('donate.name'), 'aria-label': t('donate.name') });
-      amountField = el('input', { type: 'number', min: '0', placeholder: t('donate.amount'), 'aria-label': t('donate.amount') });
-      refField = el('input', { type: 'text', placeholder: t('donate.ref'), 'aria-label': t('donate.ref') });
+      // Item 25: real <label for> elements (below, in confirmCard()) replace aria-label — a click
+      // on the label now focuses the field, and the label text survives once the visitor starts
+      // typing (a placeholder alone disappears).
+      nameField = el('input', { id: 'donate-name', type: 'text', placeholder: t('donate.name') });
+      amountField = el('input', { id: 'donate-amount', type: 'number', min: '0', placeholder: t('donate.amount'), 'aria-describedby': 'donate-amount-err' });
+      refField = el('input', { id: 'donate-ref', type: 'text', placeholder: t('donate.ref') });
+      amountErr = el('p', { id: 'donate-amount-err', class: 'err', 'aria-live': 'polite' });
+      amountErr.hidden = true;
       const purposeCards = purposes.length ? el('div', { class: 'purpose' }, ...purposes.map(p => el('div', { class: 'pcard' }, el('b', { text: pick(p.title) }),
         el('div', { class: 'chips' }, ...p.amounts.map(a => el('i', { text: inr(a, lang), onclick: () => { amountField.value = String(a); amountField.focus(); } })))))) : null;
       main.replaceChildren(pageHeader({ crumb: t('nav.donate'), title: t('donate.title'), lead: s.has80G ? t('donate.tax80g') : '', image: mediaUrl(s.media, 'header.donate') }),

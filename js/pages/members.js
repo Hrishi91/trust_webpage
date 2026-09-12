@@ -50,11 +50,16 @@ if (s) {
     }
 
     function renderLoggedOut() {
-      const phoneInput = el('input', { type: 'tel', placeholder: '+91', 'aria-label': t('mem.phone') });
-      const phoneErr = el('p', { class: 'err' });
+      // Item 25: real <label for> elements replace aria-label; phoneErr/otpErr are inline,
+      // aria-live error messages linked to their field via aria-describedby (phoneErr already
+      // existed as a bare paragraph — it's now wired up properly instead of just toggled).
+      const phoneInput = el('input', { id: 'mem-phone', type: 'tel', placeholder: '+91', 'aria-describedby': 'mem-phone-err' });
+      const phoneErr = el('p', { id: 'mem-phone-err', class: 'err', 'aria-live': 'polite' });
       phoneErr.hidden = true;
       const sendBtn = el('button', { class: 'btn', type: 'button', text: t('mem.sendOtp') });
-      const otpInput = el('input', { type: 'text', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: t('mem.otp'), 'aria-label': t('mem.otp') });
+      const otpInput = el('input', { id: 'mem-otp', type: 'text', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: t('mem.otp'), 'aria-describedby': 'mem-otp-err' });
+      const otpErr = el('p', { id: 'mem-otp-err', class: 'err', 'aria-live': 'polite' });
+      otpErr.hidden = true;
       const verifyBtn = el('button', { class: 'btn', type: 'button', text: t('mem.verify') });
       const resendBtn = el('button', { class: 'btn', type: 'button', text: t('mem.resend') });
       const changeBtn = el('a', { href: '#', text: t('mem.changeNumber') });
@@ -63,17 +68,21 @@ if (s) {
       // let that author rule beat the UA's `[hidden] { display:none }` at equal specificity — the
       // element would stay visually flexed even while hidden.
       const otpRow = el('div', {},
+        el('label', { for: 'mem-otp', text: t('mem.otp') }),
         el('div', { class: 'row otp' }, otpInput, verifyBtn),
+        otpErr,
         el('div', { class: 'row' }, resendBtn, changeBtn));
       otpRow.hidden = !awaitingOtp;
       if (awaitingOtp) { phoneInput.disabled = true; sendBtn.disabled = true; }
 
-      function showPhoneErr(msg) { phoneErr.textContent = msg; phoneErr.hidden = false; }
-      function clearPhoneErr() { phoneErr.hidden = true; }
+      function showPhoneErr(msg) { phoneErr.textContent = msg; phoneErr.hidden = false; phoneInput.setAttribute('aria-invalid', 'true'); }
+      function clearPhoneErr() { phoneErr.hidden = true; phoneInput.removeAttribute('aria-invalid'); }
+      function showOtpErr(msg) { otpErr.textContent = msg; otpErr.hidden = false; otpInput.setAttribute('aria-invalid', 'true'); }
+      function clearOtpErr() { otpErr.hidden = true; otpInput.removeAttribute('aria-invalid'); }
 
       async function sendOtp() {
         const phone = normalizePhone(phoneInput.value);
-        if (!phone) { showPhoneErr(t('common.error')); toast(t('common.error'), 'err'); phoneInput.focus(); return; }
+        if (!phone) { showPhoneErr(t('mem.errPhone')); toast(t('common.error'), 'err'); phoneInput.focus(); return; }
         clearPhoneErr();
         sendBtn.disabled = true;
         resendBtn.disabled = true;
@@ -84,11 +93,12 @@ if (s) {
           phoneInput.disabled = true;
           otpRow.hidden = false;
           otpInput.value = '';
+          clearOtpErr();
           otpInput.focus();
         } catch (err) {
           console.warn('[members] sendOtp', err);
           if (err && err.code === 'auth/invalid-phone-number') {
-            showPhoneErr(t('common.error'));
+            showPhoneErr(t('mem.errPhone'));
             toast(t('common.error'), 'err');
             phoneInput.focus();
           } else if (err && err.code === 'auth/too-many-requests') {
@@ -132,19 +142,24 @@ if (s) {
         phoneInput.disabled = false;
         sendBtn.disabled = false;
         clearPhoneErr();
+        clearOtpErr();
         phoneInput.focus();
       };
 
       verifyBtn.onclick = async () => {
         if (!confirmationResult) return;
         const code = otpInput.value.trim();
-        if (!/^\d{6}$/.test(code)) { toast(t('common.error'), 'err'); otpInput.focus(); return; }
+        // Item 25: an invalid/incomplete OTP now gets its own message under the field (aria-live,
+        // linked via aria-describedby) instead of only a toast the field itself never referenced.
+        if (!/^\d{6}$/.test(code)) { showOtpErr(t('mem.errOtp')); toast(t('common.error'), 'err'); otpInput.focus(); return; }
+        clearOtpErr();
         verifyBtn.disabled = true;
         try {
           await confirmationResult.confirm(code);
           // onAuthStateChanged fires next and switches to the logged-in view.
         } catch (err) {
           console.warn('[members] verify', err);
+          showOtpErr(t('mem.errOtp'));
           toast(t('common.error'), 'err');
           verifyBtn.disabled = false;
         }
@@ -153,6 +168,7 @@ if (s) {
       main.replaceChildren(
         pageHeader({ crumb: pick(s.name), title: t('mem.phone'), image: mediaUrl(s.media, 'header.members') }),
         section(el('div', { class: 'mem' }, el('div', { class: 'otp card' },
+          el('label', { for: 'mem-phone', text: t('mem.phone') }),
           el('div', { class: 'row' }, phoneInput, sendBtn),
           phoneErr,
           otpRow))));

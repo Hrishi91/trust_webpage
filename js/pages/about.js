@@ -27,8 +27,10 @@ if (s) {
       main.replaceChildren(pageHeader({ crumb: pick(s.name), title: t('nav.about'), lead: pick(s.tagline), image: mediaUrl(s.media, 'header.about') }),
         section(items.length ? el('div', { class: 'tl' }, ...sorted.flatMap(h => [
           el('div', { class: 'yr' }, num(h.year), el('small', { text: pick(h.title) })),
-          el('article', { class: 'card' }, el('h3', { text: pick(h.title) }), el('div', { class: 'rich' }, renderRich(pick(h.body))),
-            (h.images ?? []).length ? el('div', { class: 'pics' }, ...h.images.map(src => el('figure', {}, el('img', { src, alt: '', loading: 'lazy' })))) : null)]))
+          // Item 26: h1 (page title) -> h2 here, not h3 — nothing on this page sits between the two,
+          // so h3 skipped a level. Item 24: a history photo is content, not decoration.
+          el('article', { class: 'card' }, el('h2', { text: pick(h.title) }), el('div', { class: 'rich' }, renderRich(pick(h.body))),
+            (h.images ?? []).length ? el('div', { class: 'pics' }, ...h.images.map(src => el('figure', {}, el('img', { src, alt: pick(h.title), loading: 'lazy' })))) : null)]))
         : el('p', { class: 'muted', text: t('common.empty') })));
     };
     render();

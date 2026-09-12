@@ -10,6 +10,10 @@ h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
 .serif{font-family:var(--serif)}
 :focus-visible{outline:3px solid var(--pitambar);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* item 18: visually hidden off-screen until focused (standard skip-link pattern) — the FIRST child
+   of #site-header, so it's the first thing a keyboard user's initial Tab press reaches on every page. */
+.skip{position:absolute;left:8px;top:-56px;z-index:100;background:var(--cta);color:var(--cta-ink);padding:.7rem 1.1rem;border-radius:8px;font-weight:800;text-decoration:none;transition:top .15s}
+.skip:focus{top:8px}
 
 /* ================= ticker ================= */
 .ticker{background:var(--sindoor);color:var(--ticker-ink);font-size:13.5px;overflow:hidden;position:relative}
@@ -19,13 +23,27 @@ h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 /* ================= nav ================= */
-.nav{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);color:var(--hero-ink);border-bottom:1px solid rgba(255,255,255,.08)}
+/* item 23: was a translucent (88%) blurred backdrop over the hero's painted canvas — Lighthouse
+   measured the brand text sitting over a bright painted highlight at .t 2.56:1 / .s 1.83:1, well
+   under 4.5. An opaque background guarantees the text always sits on plain --bg, which is already
+   contrast-floor-tested against --hero-ink (see tests/unit/contrast.test.js). */
+.nav{position:sticky;top:0;z-index:30;background:var(--bg);color:var(--hero-ink);border-bottom:1px solid rgba(255,255,255,.08)}
 [data-theme="atreyee"] .nav,[data-theme="mukha"] .nav{border-bottom-color:var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:.9rem;height:66px}
-.brand{display:flex;align-items:center;gap:.7rem;flex:1;min-width:0}
+/* item 23 root cause: the global `a{color:var(--sindoor)}` link rule (top of this file) targets
+   the .brand <a> tag directly, so — despite .nav's own color:var(--hero-ink) — .brand and its .t/.s
+   children were actually rendering in --sindoor, not --hero-ink (an explicit same-specificity rule
+   on the element itself always beats an inherited value, regardless of which came first). That's
+   the real explanation for Lighthouse's brand .t 2.56:1 / .s 1.83:1 — sindoor-on-dark-bg is already
+   a middling 3.5:1 on its own (worse still against the old translucent nav's blended backdrop), not
+   the 4.5+ hero-ink/bg pair the design intended. color:inherit restores it. */
+.brand{display:flex;align-items:center;gap:.7rem;flex:1;min-width:0;color:inherit}
 .mark{width:42px;height:42px;flex:none}
 .brand .t{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.05}
-.brand .s{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+/* item 23: opacity:.7 on inherited --hero-ink text was the other half of the brand-text contrast
+   failure (.s measured 1.83:1) — dropping it keeps the same --hero-ink colour used by .t, which is
+   contrast-floor-tested against --bg. */
+.brand .s{font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .links{display:flex;gap:1.35rem;font-size:14.5px;font-weight:600;opacity:.92}
 .links a{color:inherit;position:relative;padding:.3rem 0}
 .links a.on::after,.links a:hover::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--pitambar);border-radius:2px}
@@ -121,7 +139,9 @@ section{padding:clamp(2.4rem,6vw,4.5rem) 0}
 /* schedule */
 .days{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .days button{font:700 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:.45rem 1rem;cursor:pointer}
-.days button[aria-pressed="true"]{background:var(--sindoor);color:#fff6e8;border-color:var(--sindoor)}
+/* item 21 dropped aria-pressed from the day tabs (real role="tab"/aria-selected now — see
+   js/pages/events.js) in favour of the same .active class .tabs button.active already styles
+   below, so this selector no longer needs its own rule. */
 .timeline{display:grid;gap:.6rem}
 .ev{display:grid;grid-template-columns:90px 1fr;gap:1rem;padding:.9rem 1rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);align-items:baseline}
 .ev time{font-family:var(--display);font-size:20px;color:var(--sindoor);font-variant-numeric:tabular-nums}
@@ -149,8 +169,13 @@ section{padding:clamp(2.4rem,6vw,4.5rem) 0}
 .upi{display:flex;gap:1rem;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:var(--r);padding:1rem 1.2rem}
 [data-theme="atreyee"] .upi,[data-theme="mukha"] .upi{background:rgba(0,0,0,.05);border-color:var(--line)}
 .upi svg{width:112px;height:112px;flex:none}
-.upi code{font-size:15px;display:block;color:var(--pitambar)}
+.upi code{font-size:15px;display:block;color:var(--hero-accent)}
 .upi small{color:var(--hero-muted);font-size:12.5px}
+/* item 23: bare .eyebrow is color:var(--sindoor), floor-tested only against --ivory/--card — inside
+   this band (background:var(--bg), the same dark ground the hero uses) that measured 3.5:1 on the
+   live home page. --hero-accent is the token already used for exactly this text-on-hero-ground case
+   (.crumb, .hero .eyebrow, .countdown b) and is contrast-floor-tested against --bg. */
+.donate .eyebrow{color:var(--hero-accent)}
 @media (max-width:760px){.donate .wrap{grid-template-columns:1fr}}
 
 /* committee + members */
@@ -195,7 +220,8 @@ footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
 .tl .yr{font-family:var(--display);font-size:38px;color:var(--sindoor);line-height:1;position:sticky;top:84px;align-self:start;padding-top:.4rem}
 .tl .yr small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:.3rem}
 .tl .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.3rem;display:grid;gap:.8rem;margin-bottom:1.6rem}
-.tl .card h3{font-size:24px}
+/* item 26: about.js now emits h2 here (was h3, skipping a level after the page's own h1) */
+.tl .card h2{font-size:24px}
 .tl .card p{margin:0;color:var(--muted);font-size:15.5px}
 .tl .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
 .tl .pics figure{margin:0;aspect-ratio:4/3;border-radius:calc(var(--r) - 6px);overflow:hidden;border:1px solid var(--line)}
@@ -244,7 +270,7 @@ footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
 .pcard span{font-size:13.5px;color:var(--muted)}
 .chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
 .chips i{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:.2rem .7rem;font-size:13px;font-variant-numeric:tabular-nums}
-.chips i.on{background:var(--sindoor);color:#fff6e8;border-color:var(--sindoor)}
+.chips i.on{background:var(--sindoor);color:var(--ticker-ink);border-color:var(--sindoor)}
 .form{display:grid;gap:.6rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem}
 .form input,.form textarea{font:16px var(--body);padding:.7rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory)}
 .form textarea{resize:vertical;font-family:inherit}
@@ -297,9 +323,19 @@ body{background:var(--ivory)}
 .nav .lang{background:transparent;border:1px solid var(--hero-muted);color:var(--hero-ink);border-radius:999px;padding:.35rem .8rem;font:600 13px var(--body);cursor:pointer;min-height:44px}
 .live-strip{/* alias for the ticker so live.spec selectors hold */}
 .ticker .ann{display:inline-block;padding:0 1.6rem;white-space:nowrap}
-.ticker .ann small{opacity:.7;margin-left:.4rem}
-.pulse{display:inline-block;background:var(--sindoor);color:#fff6e8;border-radius:999px;padding:.05rem .55rem;font-weight:700;animation:pulse 1.2s infinite;margin-right:.4rem}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+/* item 23: opacity:.7 on inherited --ticker-ink text measured 3.09:1 against --sindoor (that pair
+   alone is contrast-floor-tested >=4.5) — dropping the opacity is the whole fix. */
+.ticker .ann small{margin-left:.4rem}
+/* item 23: color was hardcoded #fff6e8 (dhokra: 3.69:1 against --sindoor once its own fade-animation
+   dipped, pending.md:110) — --ticker-ink is the per-theme, contrast-floor-tested token. The pulse
+   keyframe used to animate `opacity` on the whole badge (background+text together); against a light
+   --card ground (the schedule/events "live" rows use this same badge, not just the ticker) that let
+   the badge fade toward the ground colour at different rates for its bg vs its text, transiently
+   dropping contrast — a ring pulse (box-shadow) gives the same "live" motion without ever touching
+   either colour.
+   */
+.pulse{display:inline-block;background:var(--sindoor);color:var(--ticker-ink);border-radius:999px;padding:.05rem .55rem;font-weight:700;animation:pulse 1.2s infinite;margin-right:.4rem}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--glow2)}50%{box-shadow:0 0 0 4px transparent}}
 .countdown{display:flex;gap:.6rem;margin-top:1.2rem}
 .countdown div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:.5rem .8rem;min-width:64px;text-align:center}
 .countdown b{display:block;font:800 26px/1 var(--display);color:var(--pitambar)}
@@ -307,15 +343,31 @@ body{background:var(--ivory)}
 .btn:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .rich img{max-width:100%;border-radius:calc(var(--r) - 6px)}
 .rich p{margin:.4rem 0}
-.lightbox{position:fixed;inset:0;background:rgba(10,8,20,.94);display:flex;align-items:center;justify-content:center;z-index:60}
-.lightbox img{max-width:96vw;max-height:90vh;border-radius:8px}
+/* item 20: <dialog class="lightbox"> — showModal() puts it in the top layer and traps focus
+   natively; the UA default dialog box (border/padding/centring) is reset so it can fill the
+   viewport and centre its content the same way the old plain <div> did. ::backdrop replaces the
+   old background-on-the-element-itself trick now that the element is a real <dialog>. */
+.lightbox{position:fixed;inset:0;margin:0;padding:0;border:0;width:100%;height:100%;max-width:100vw;max-height:100vh;background:transparent;z-index:60}
+.lightbox[open]{display:flex;align-items:center;justify-content:center}
+.lightbox::backdrop{background:rgba(10,8,20,.94)}
+.lightbox img{max-width:90vw;max-height:85vh;border-radius:8px}
+.lb-btn{position:absolute;background:rgba(255,255,255,.14);color:#fff6e8;border:1px solid rgba(255,255,255,.35);border-radius:999px;width:44px;height:44px;font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.lb-btn:hover{background:rgba(255,255,255,.26)}
+.lb-close{top:16px;right:16px}
+.lb-prev{left:16px;top:50%;transform:translateY(-50%)}
+.lb-next{right:16px;top:50%;transform:translateY(-50%)}
+/* item 20: the gallery-album thumbnail trigger is a real <button> now (was a bare <img onclick>,
+   unreachable by keyboard) — this just strips default button chrome so it still looks like the
+   plain image grid it replaces. */
+.thumb-btn{all:unset;cursor:pointer;display:block}
+.thumb-btn img{display:block}
 .table-wrap{overflow-x:auto}
 table.ledger{width:100%;border-collapse:collapse}
 table.ledger td{padding:.45rem .3rem;border-bottom:1px solid var(--line)}
 table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1rem}
 .tabs button{font:700 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:.55rem 1rem;cursor:pointer;min-height:44px}
-.tabs button.active{background:var(--sindoor);color:#fff6e8;border-color:var(--sindoor)}
+.tabs button.active{background:var(--sindoor);color:var(--ticker-ink);border-color:var(--sindoor)}
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0}
 .summary>div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem}
 .summary small{color:var(--muted);display:block}
@@ -326,7 +378,18 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 .err{color:var(--sindoor);min-height:1.2em}
 .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* bridge rules only ADD properties the concept block lacks — never re-declare a value the concept sets (amended after Task 3 review) */
+/* item 19: a global floor instead of scoping to `.form`/`.card` one at a time — donate.js's confirm
+   form lives in a plain `.card`, which `.form input{font:16px}` never matched, so those three
+   inputs fell back to the browser's ~13.3px UA default and iOS Safari zoomed the page on focus.
+   More specific selectors below (`.otp input[inputmode=numeric]` etc.) still win on font-size. */
+input,textarea,select{font-size:16px}
 .otp input,.form input,.form textarea{width:100%;min-height:44px;color:var(--ink)}
+/* item 25: label + input, stacked, for donate/members fields that used to rely on aria-label alone
+   (nothing to click-to-focus, and the placeholder disappears once typing starts). */
+.field{display:grid;gap:.3rem}
+.field label,.otp>label{font-size:13px;font-weight:700;color:var(--muted);display:block}
+.field .err{margin:0}
+[aria-invalid="true"]{border-color:var(--sindoor)!important}
 .otp input[inputmode=numeric]{letter-spacing:.4em;text-align:center;font-size:22px;font-weight:700}
 .brand .om{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--bg2);color:var(--pitambar);font:700 24px serif}
 .burger .bars{display:block;width:24px;height:2px;background:currentColor;box-shadow:0 -7px 0 currentColor,0 7px 0 currentColor}

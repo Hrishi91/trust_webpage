@@ -78,6 +78,16 @@ registerSection(COLL, {
           await updateDoc(doc(photosColl, p.id), { caption: { bn: val, en: val } });
           toast(t('admin.saved'));
         };
+        // Item 24: an optional per-photo alt text, independent of the caption (a caption is
+        // visible copy under the photo in the album view; alt is what a screen reader hears for
+        // the photo itself, and the two don't have to say the same thing). Public gallery.js falls
+        // back to the caption, then the album title, when this is left blank.
+        const altInput = el('input', { value: pick(p.alt), placeholder: t('admin.albums.altPlaceholder') });
+        altInput.onchange = async () => {
+          const val = altInput.value.trim();
+          await updateDoc(doc(photosColl, p.id), { alt: { bn: val, en: val } });
+          toast(t('admin.saved'));
+        };
         const swap = async j => {
           if (j < 0 || j >= photos.length) return;
           const other = photos[j];
@@ -88,7 +98,7 @@ registerSection(COLL, {
           await logAudit(ctx, 'reorder', `${COLL}/${id}/photos/${p.id}`, { order: p.order }, { order: other.order });
           await renderPhotos();
         };
-        return el('div', { class: 'list-item' }, el('img', { class: 'thumb', src: p.url, alt: '' }), cap,
+        return el('div', { class: 'list-item' }, el('img', { class: 'thumb', src: p.url, alt: pick(p.alt) || pick(p.caption) || '' }), cap, altInput,
           el('button', { class: 'btn-sm', type: 'button', text: '↑', onclick: () => swap(i - 1) }),
           el('button', { class: 'btn-sm', type: 'button', text: '↓', onclick: () => swap(i + 1) }),
           el('button', { class: 'btn-sm', type: 'button', text: '🗑', onclick: async () => {

@@ -18,7 +18,8 @@ if (s) {
   if (people !== null) {
     const render = () => {
       const officers = people.filter(p => p.officer), rest = people.filter(p => !p.officer);
-      const ring = p => el('div', { class: 'ring' }, httpsUrl(p.photoUrl) ? el('img', { src: httpsUrl(p.photoUrl), alt: '', loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) }));
+      // Item 24: a committee photo is content, not decoration — alt = the person's name.
+      const ring = p => el('div', { class: 'ring' }, httpsUrl(p.photoUrl) ? el('img', { src: httpsUrl(p.photoUrl), alt: pick(p.name), loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) }));
       main.replaceChildren(pageHeader({ crumb: t('nav.committee'), title: t('committee.title'), image: mediaUrl(s.media, 'header.committee') }),
         section(...[
           officers.length ? el('div', { class: 'officers' }, ...officers.map(p => el('div', { class: 'officer person' }, ring(p), el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) })))) : null,

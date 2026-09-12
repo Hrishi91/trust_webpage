@@ -47,7 +47,9 @@ export function sectionHead(title, aside) { return el('div', { class: 'sh' }, el
 export function pageHeader({ crumb, title, lead, image }) {
   const copy = el('div', { class: 'wrap' },
     crumb ? el('span', { class: 'crumb', text: crumb }) : null, el('h1', { text: title }), lead ? el('p', { text: lead }) : null);
-  if (image) return el('div', { class: 'ph photo' }, el('img', { class: 'ph-img', src: image, alt: '' }), copy);
+  // Item 24: a page-header photo is content (it's the admin's own chosen image for this page), not
+  // decoration — alt = the page title text already shown next to it.
+  if (image) return el('div', { class: 'ph photo' }, el('img', { class: 'ph-img', src: image, alt: title }), copy);
   const c = el('canvas', { class: 'ph-bg', 'aria-hidden': 'true' });
   const ph = el('div', { class: 'ph' }, c, copy);
   requestAnimationFrame(() => paintHeader(c)); unsubHeader?.(); unsubHeader = onResize(() => paintHeader(c));   // pages re-render on langchange — never stack listeners
@@ -62,6 +64,15 @@ export function pageHeader({ crumb, title, lead, image }) {
 export async function mountShell(active, pageTitleKey) {
   const [s, c] = await Promise.all([getSettings(), getContent()]);
   setOverrides(c.strings);
+  // Item 18/26: #site-header is the page's <header role="banner"> landmark; the skip link is its
+  // FIRST child (ahead of the ticker/nav) so it's the very first thing a keyboard user tabs to on
+  // every page. #main gets tabindex="-1" so the skip link's href="#main" can actually move focus
+  // there (an element needs a tabindex to be focus()-able via fragment navigation in most browsers).
+  const headerEl = document.getElementById('site-header');
+  headerEl.setAttribute('role', 'banner');
+  const skip = el('a', { class: 'skip', href: '#main' });
+  headerEl.prepend(skip);
+  document.getElementById('main')?.setAttribute('tabindex', '-1');
   s.media = c.media;
   applyTheme(resolveTheme(s.design, location.search), { persist: !isPreview(location.search) });
   applyOverrides(s.designOverrides, s.fonts, { persist: !isPreview(location.search) });
@@ -73,7 +84,10 @@ export async function mountShell(active, pageTitleKey) {
   }
   document.documentElement.lang = getLang();
   let ann = [], live = false;
-  const buildTicker = () => ann.length ? el('div', { class: 'ticker live-strip', 'aria-label': t('live.announcements') },
+  // Item 22: aria-live="polite" — a screen reader announces a new/changed announcement without
+  // the visitor having to reload or refocus anything; aria-atomic="false" (the default) means only
+  // the changed announcement text is spoken, not the whole strip, on every snapshot update.
+  const buildTicker = () => ann.length ? el('div', { class: 'ticker live-strip', 'aria-label': t('live.announcements'), 'aria-live': 'polite' },
     // Duplicated once (pass 0 and 1) for the seamless CSS marquee (width:max-content + -50%
     // translate loop needs two identical copies of the content). The live `.pulse` badge is
     // rendered only in pass 0 — otherwise e2e assertions like `.live-strip .pulse` (a single-
@@ -92,13 +106,17 @@ export async function mountShell(active, pageTitleKey) {
     const header = document.getElementById('site-header');
     const existing = header.querySelector('.ticker');
     const node = buildTicker();
-    if (node) { if (existing) existing.replaceWith(node); else header.prepend(node); }
+    // skip.after(node), not header.prepend(node): the skip link must stay the header's first
+    // child on every re-render (an announcements snapshot can fire long after mount), or a
+    // keyboard user's very first Tab would land on the ticker instead of the skip link.
+    if (node) { if (existing) existing.replaceWith(node); else skip.after(node); }
     else if (existing) existing.remove();
   };
   // Nav is rebuilt only by the initial mount and on langchange (labels/lang toggle differ) —
   // never by an announcements update, so an open burger menu survives ticker refreshes.
   const renderNav = () => {
     document.documentElement.lang = getLang();
+    skip.textContent = t('a11y.skip');
     const pageTitle = pageTitleKey ? (Object.prototype.hasOwnProperty.call(STRINGS, pageTitleKey) ? t(pageTitleKey) : pageTitleKey) : '';
     document.title = pageTitle ? `${pageTitle} · ${pick(s.name)}` : pick(s.name);
     // GitHub Pages has no server render, so this is the only place document.title/description

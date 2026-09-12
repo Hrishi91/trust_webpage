@@ -1,6 +1,6 @@
 // js/ledger-view.js — transparency chart views for the home page.
 import { el } from './ui.js';
-import { pick } from './i18n.js';
+import { pick, t } from './i18n.js';
 import { inr } from './money.js';
 import { barWidths, donutArcs } from './ledger.js';
 const SVG = 'http://www.w3.org/2000/svg';
@@ -13,7 +13,11 @@ export function barsView(rows, lang, { kind = 'income' } = {}) {
     el('span', { text: pick(r.category, lang) }), el('i', { class: kind === 'expense' ? 'g' : '', style: `width:${w[i]}%` }), el('em', { text: inr(r.amount, lang) }))));
 }
 export function donutView(rows, lang, centre) {
-  const svg = sv('svg', { viewBox: '0 0 200 200', role: 'img' });
+  // Item 24 (axe svg-img-alt): role="img" without an accessible name is a "content image with no
+  // alt" for a screen reader — the same defect as an <img alt="">. The centre text already shown
+  // inside the ring (a percentage + the largest category) doubles as the label.
+  const label = [t('tr.expense'), centre.small, centre.big].filter(Boolean).join(' · ');
+  const svg = sv('svg', { viewBox: '0 0 200 200', role: 'img', 'aria-label': label });
   svg.append(sv('circle', { cx: 100, cy: 100, r: 70, fill: 'none', stroke: 'var(--line)', 'stroke-width': 22 }));
   donutArcs(rows).forEach((a, i) => svg.append(sv('circle', { cx: 100, cy: 100, r: 70, fill: 'none', stroke: PALETTE[i % PALETTE.length], 'stroke-width': 22,
     'stroke-dasharray': a.dasharray, 'stroke-dashoffset': a.dashoffset, transform: 'rotate(-90 100 100)' })));

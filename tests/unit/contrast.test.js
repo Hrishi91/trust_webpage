@@ -62,3 +62,20 @@ test('accent-on-ground contrast floors per theme', () => {
     assert.ok(ratio(t['ticker-ink'], t.sindoor) >= 4.5, `${name} ticker-ink/sindoor ${ratio(t['ticker-ink'], t.sindoor).toFixed(2)}`);
   }
 });
+// Phase 7 Task 3 item 23 — the 6 real Lighthouse failures on the live home page and their fixes:
+//  - ticker `small` (3.09:1): css/site.css `.ticker .ann small` no longer dims --ticker-ink with
+//    opacity:.7 — the bare ticker-ink/sindoor pair above already gates this.
+//  - `.pulse` (3.69:1): color was hardcoded #fff6e8 (dhokra's pending.md:110 gap) — now
+//    var(--ticker-ink), same gated pair.
+//  - brand `.t`/`.s` (2.56:1 / 1.83:1): `.nav`'s translucent backdrop is now opaque var(--bg), and
+//    `.brand .s` no longer dims --hero-ink with opacity:.7 — both now sit on plain --bg, gated by
+//    hero-ink/bg below.
+//  - `.eyebrow` (3.5:1): `.donate .eyebrow` (the only bare .eyebrow on a --bg ground) now uses
+//    var(--hero-accent) instead of var(--sindoor) — gated by the hero-accent/bg floor test above.
+test('brand text (.t/.s) and dhokra chip pairs (.tabs/.chips/.days .active) hold their contrast floor', () => {
+  for (const [name, t] of Object.entries(blocks)) {
+    assert.ok(ratio(t['hero-ink'], t.bg) >= 4.5, `${name} hero-ink/bg (brand .t/.s) ${ratio(t['hero-ink'], t.bg).toFixed(2)}`);
+    assert.ok(ratio(t['ticker-ink'], t.sindoor) >= 4.5, `${name} ticker-ink/sindoor (.tabs/.chips/.days .active) ${ratio(t['ticker-ink'], t.sindoor).toFixed(2)}`);
+    assert.ok(ratio(t['hero-accent'], t.bg) >= 4.5, `${name} hero-accent/bg (.donate .eyebrow, .upi code) ${ratio(t['hero-accent'], t.bg).toFixed(2)}`);
+  }
+});

@@ -20,6 +20,16 @@ if (s) {
     main.replaceChildren(el('p', { class: 'muted', text: t('common.error') }));
   } else {
     let selectedDay = null;
+    // Item 21: real tab semantics — role="tab"/aria-selected/aria-controls on each day button,
+    // role="tabpanel"/aria-labelledby on the timeline they control, and a roving tabindex (only the
+    // selected tab is in the Tab order; arrow keys move both focus and selection between the rest).
+    const moveTab = (days, fromIndex, dir) => {
+      if (!days.length) return;
+      const next = dir === 'home' ? 0 : dir === 'end' ? days.length - 1 : (fromIndex + dir + days.length) % days.length;
+      selectedDay = days[next];
+      render();
+      document.getElementById(`day-tab-${next}`)?.focus();
+    };
     const render = () => {
       const now = new Date(), lang = getLang();
       // Sorted chronologically (listPublished orders by the admin's free-form 'order' field, not
@@ -30,6 +40,7 @@ if (s) {
       const dayKey = e => new Date(e.start).toDateString();
       const days = [...new Set(up.map(dayKey))];
       if (!days.includes(selectedDay)) selectedDay = days[0] ?? null;
+      const selectedIndex = Math.max(0, days.indexOf(selectedDay));
       const time = iso => new Date(iso).toLocaleTimeString(lang === 'bn' ? 'bn-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
       // Item 16: a per-event .ics download built client-side (js/ics.js, pure) — no backend, so a
       // data: URL is the only way to hand the browser a downloadable file from a static site.
@@ -44,9 +55,22 @@ if (s) {
             el('a', { class: 'ics muted', href: icsHref(e), download: `${icsSlug(e)}.ics`, text: t('events.addToCalendar') }))); };
       main.replaceChildren(pageHeader({ crumb: t('nav.events'), title: t('events.upcoming'), image: mediaUrl(s.media, 'header.events') }),
         section(...[
-          days.length ? el('div', { class: 'days tabs', role: 'tablist' }, ...days.map(d => el('button', { type: 'button', class: d === selectedDay ? 'active' : '', 'aria-pressed': String(d === selectedDay),
-            text: fmtDate(up.find(e => dayKey(e) === d).start, lang), onclick: () => { selectedDay = d; render(); } }))) : null,
-          up.length ? el('div', { class: 'timeline' }, ...up.filter(e => dayKey(e) === selectedDay).map(row)) : el('p', { class: 'muted', text: t('common.empty') }),
+          days.length ? el('div', { class: 'days tabs', role: 'tablist', 'aria-label': t('events.upcoming') }, ...days.map((d, i) => {
+            const selected = d === selectedDay;
+            return el('button', {
+              type: 'button', id: `day-tab-${i}`, role: 'tab', 'aria-selected': String(selected), 'aria-controls': `day-panel-${i}`,
+              tabindex: selected ? '0' : '-1', class: selected ? 'active' : '',
+              text: fmtDate(up.find(e => dayKey(e) === d).start, lang),
+              onclick: () => { selectedDay = d; render(); },
+              onkeydown: e => {
+                if (e.key === 'ArrowRight') { e.preventDefault(); moveTab(days, i, 1); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); moveTab(days, i, -1); }
+                else if (e.key === 'Home') { e.preventDefault(); moveTab(days, i, 'home'); }
+                else if (e.key === 'End') { e.preventDefault(); moveTab(days, i, 'end'); }
+              },
+            });
+          })) : null,
+          up.length ? el('div', { id: `day-panel-${selectedIndex}`, role: 'tabpanel', 'aria-labelledby': `day-tab-${selectedIndex}`, class: 'timeline' }, ...up.filter(e => dayKey(e) === selectedDay).map(row)) : el('p', { class: 'muted', text: t('common.empty') }),
           past.length ? el('div', { class: 'acc' }, el('details', {}, el('summary', { text: t('events.past') }), ...past.map(row))) : null,
           shareRow({ url: location.href, title: t('events.upcoming') }),
         ].filter(Boolean)));

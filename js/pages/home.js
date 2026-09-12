@@ -28,7 +28,10 @@ if (s) {
       const garlandImg = mediaUrl(s.media, 'garland');
       const bg = el('canvas', { class: 'bg', id: 'heroBg', 'aria-hidden': 'true' });
       const garland = garlandImg ? el('img', { class: 'garland', src: garlandImg, alt: '' }) : el('canvas', { class: 'garland', id: 'garland', 'aria-hidden': 'true' });
-      const art = heroImg ? el('div', { class: 'art' }, el('img', { src: heroImg, alt: '' }))
+      // Item 24: the admin's own hero photo is content, not decoration — alt = the trust name
+      // (the garland flourish right below stays alt="" — it's a purely ornamental strip, and the
+      // brand mark in the nav is redundant with the adjacent trust-name text).
+      const art = heroImg ? el('div', { class: 'art' }, el('img', { src: heroImg, alt: pick(s.name) }))
         : el('div', { class: 'art' }, ganeshSvg(), el('div', { class: 'diyas' }, ...[0, 1, 2, 3, 4].map(() => diyaSvg())));
       const h = el('header', { class: heroImg ? 'hero photo' : 'hero' }, bg, el('div', { class: 'wrap' },
         el('div', { class: 'copy' },
@@ -81,7 +84,7 @@ if (s) {
       const wa = digits(s.contacts.whatsapp);
       const bandImg = mediaUrl(s.media, 'donateBand');
       return el('section', { class: 'donate' }, el('div', { class: 'wrap' },
-        el('div', {}, bandImg ? el('img', { class: 'band-img', src: bandImg, alt: '' }) : null,
+        el('div', {}, bandImg ? el('img', { class: 'band-img', src: bandImg, alt: t('nav.donate') }) : null,
           el('span', { class: 'eyebrow', text: t('nav.donate') }), el('h2', {}, t('home.donateHeading'), el('em', { text: t('home.donateHeadingEm') })),
           el('p', { text: t('home.donateLead') }),
           el('div', { class: 'ctas' }, el('a', { class: 'btn', href: 'donate.html', text: t('donate.upi') }), wa ? el('a', { class: 'btn ghost', href: `https://wa.me/${wa}`, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null)),
@@ -92,7 +95,7 @@ if (s) {
       if (s.sectionVisibility.members === false) return null;
       const teaserImg = mediaUrl(s.media, 'membersTeaser');
       return el('section', {}, el('div', { class: 'wrap members' },
-        el('div', {}, teaserImg ? el('img', { class: 'members-img', src: teaserImg, alt: '' }) : null,
+        el('div', {}, teaserImg ? el('img', { class: 'members-img', src: teaserImg, alt: t('mem.title') }) : null,
           el('span', { class: 'eyebrow', text: t('mem.title') }), el('h2', { text: t('home.membersHeading') }),
           el('p', { class: 'muted', text: t('home.membersLead') })),
         el('form', { class: 'form', action: 'members.html', method: 'get' }, el('input', { type: 'tel', name: 'phone', placeholder: '+91', 'aria-label': t('mem.phone') }), el('button', { class: 'btn', type: 'submit', text: t('mem.sendOtp') }))));
@@ -115,7 +118,7 @@ if (s) {
       return el('section', { class: 'culture' }, el('div', { class: 'wrap' },
         sectionHead(t('home.cultureHeading'), el('span', { class: 'pill', text: t('home.culturePill') })),
         el('div', { class: 'cgrid' }, ...rows.map(c => { const img = httpsUrl(c.imageUrl); return el('article', { class: 'ccard' },
-          img ? el('img', { src: img, alt: '', loading: 'lazy' }) : (c.icon ? cultureIcon(c.icon) : null),
+          img ? el('img', { src: img, alt: pick(c.title), loading: 'lazy' }) : (c.icon ? cultureIcon(c.icon) : null),
           el('small', { text: pick(c.tag) }), el('h3', { text: pick(c.title) }), el('p', { text: pick(c.text) })); }))));
     };
     let gallery = () => {
@@ -149,7 +152,7 @@ if (s) {
       const officers = people.filter(p => p.officer).slice(0, 4); const row = officers.length ? officers : people.slice(0, 4);
       return section(sectionHead(t('nav.committee'), el('a', { href: 'committee.html', text: t('home.allMembers') })),
         el('div', { class: 'people' }, ...row.map(p => el('a', { class: 'person', href: 'committee.html' },
-          el('div', { class: 'ring' }, httpsUrl(p.photoUrl) ? el('img', { src: httpsUrl(p.photoUrl), alt: '', loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) })),
+          el('div', { class: 'ring' }, httpsUrl(p.photoUrl) ? el('img', { src: httpsUrl(p.photoUrl), alt: pick(p.name), loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) })),
           el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) })))));
     };
     // settings.homeSections (Phase 6 "nothing static", js/sections.js) reorders/toggles these

@@ -158,7 +158,7 @@ export const STRINGS = {
   'mem.changeNumber': { bn: 'নম্বর বদলান', en: 'Change number' },
   'mem.resend': { bn: 'আবার OTP পাঠান', en: 'Resend OTP' },
   // credibility strip (home hero)
-  'cred.registered': { bn: 'Registered Trust', en: 'Registered Trust' },
+  'cred.registered': { bn: 'নিবন্ধিত ট্রাস্ট', en: 'Registered Trust' },
   'cred.80g': { bn: '80G', en: '80G' },
   'cred.est': { bn: 'প্রতিষ্ঠিত', en: 'Est.' },
   // home page (inline literals moved in during Phase 6 Task 1)
@@ -403,6 +403,15 @@ export const STRINGS = {
     bn: 'লেখা (অনুমোদিত HTML: p, br, b, strong, i, em, ul, ol, li, h3, h4, a, img, blockquote)',
     en: 'Body (allowed HTML: p, br, b, strong, i, em, ul, ol, li, h3, h4, a, img, blockquote)',
   },
+  // Phase 7 Task 3 — accessibility: skip link, lightbox dialog, form errors
+  'a11y.skip': { bn: 'মূল অংশে যান', en: 'Skip to main content' },
+  'gallery.close': { bn: 'বন্ধ করুন', en: 'Close' },
+  'gallery.prev': { bn: 'আগের ছবি', en: 'Previous photo' },
+  'gallery.next': { bn: 'পরের ছবি', en: 'Next photo' },
+  'donate.errAmount': { bn: 'সঠিক পরিমাণ লিখুন', en: 'Enter a valid amount' },
+  'mem.errPhone': { bn: 'সঠিক মোবাইল নম্বর লিখুন', en: 'Enter a valid mobile number' },
+  'mem.errOtp': { bn: '৬ সংখ্যার OTP লিখুন', en: 'Enter the 6-digit OTP' },
+  'admin.albums.altPlaceholder': { bn: 'অল্ট টেক্সট (স্ক্রিন রিডারের জন্য)', en: 'Alt text (for screen readers)' },
 };
 
 // --- overrides layer (Phase 6: admin can override any default above) ---
@@ -451,6 +460,8 @@ const GROUP_NAMES = [
   'page', 'refund', 'contact', 'faq', 'news', 'downloads', 'notfound',
   // Phase 7 Task 2: SEO & share
   'share',
+  // Phase 7 Task 3: accessibility (skip link, gallery dialog controls, form-error copy)
+  'a11y',
 ];
 export const STRING_GROUPS = (() => {
   const groups = Object.fromEntries(GROUP_NAMES.map(g => [g, []]));

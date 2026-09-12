@@ -32,7 +32,9 @@ if (s) {
             featured.length ? el('div', { class: 'best' }, ...featured.map(a => el('a', { href: `gallery.html?album=${a.id}` }, el('img', { src: httpsUrl(a.coverUrl), alt: pick(a.title), loading: 'lazy' })))) : null,
             sectionHead(t('gallery.albums')),
             albums.length ? el('div', { class: 'albums' }, ...albums.map(a => el('a', { class: 'album', href: `gallery.html?album=${a.id}` },
-              httpsUrl(a.coverUrl) ? el('img', { src: httpsUrl(a.coverUrl), alt: '', loading: 'lazy' }) : el('div', { class: 'nocover' }),
+              // Item 24: an album cover is content — alt = the album title (already shown as text
+              // in `.cap` right below, but a screen-reader user tabbing the image itself still needs it).
+              httpsUrl(a.coverUrl) ? el('img', { src: httpsUrl(a.coverUrl), alt: pick(a.title), loading: 'lazy' }) : el('div', { class: 'nocover' }),
               el('div', { class: 'cap' }, el('b', { text: num(a.year) }), el('span', { text: pick(a.title) }))))) : el('p', { class: 'muted', text: t('common.empty') }),
             shareRow({ url: location.href, title: t('gallery.albums') }),
           ].filter(Boolean)));
@@ -62,15 +64,47 @@ if (s) {
       if (photosErrored) {
         main.replaceChildren(el('p', { class: 'muted', text: t('common.error') }));
       } else {
-        const open = i => {
-          const box = el('div', { class: 'lightbox', onclick: () => box.remove() }, el('img', { src: httpsUrl(photos[i].url), alt: pick(photos[i].caption) }));
-          document.body.append(box);
+        // Item 20: a real <dialog> instead of a plain <div> — showModal() gives a native focus
+        // trap and top-layer stacking for free, and Escape closes it via the browser's own
+        // 'cancel' event (no keydown listener needed here); we only listen for 'close' (fired
+        // after 'cancel' or our own .close() calls) to put focus back on whichever thumbnail
+        // button opened it. Built once, outside render(), so repeat langchange re-renders never
+        // stack duplicate dialogs onto <body>.
+        let idx = 0, lastTrigger = null;
+        const altFor = p => pick(p.alt) || pick(p.caption) || pick(album.title);
+        const imgEl = el('img', {});
+        const closeBtn = el('button', { class: 'lb-btn lb-close', type: 'button', text: '×' });
+        const prevBtn = el('button', { class: 'lb-btn lb-prev', type: 'button', text: '‹' });
+        const nextBtn = el('button', { class: 'lb-btn lb-next', type: 'button', text: '›' });
+        const dialog = el('dialog', { class: 'lightbox' }, closeBtn, prevBtn, imgEl, nextBtn);
+        document.body.append(dialog);
+        const showPhoto = i => {
+          idx = (i + photos.length) % photos.length;
+          imgEl.src = httpsUrl(photos[idx].url);
+          imgEl.alt = altFor(photos[idx]);
+        };
+        closeBtn.onclick = () => dialog.close();
+        prevBtn.onclick = () => showPhoto(idx - 1);
+        nextBtn.onclick = () => showPhoto(idx + 1);
+        dialog.addEventListener('close', () => lastTrigger?.focus());
+        const open = i => { lastTrigger = document.activeElement; showPhoto(i); dialog.showModal(); };
+        const relabel = () => {
+          dialog.setAttribute('aria-label', `${pick(album.title)}`);
+          closeBtn.setAttribute('aria-label', t('gallery.close'));
+          prevBtn.setAttribute('aria-label', t('gallery.prev'));
+          nextBtn.setAttribute('aria-label', t('gallery.next'));
+          if (!dialog.open) return;
+          imgEl.alt = altFor(photos[idx]); // re-run the caption/album-title fallback in the new language
         };
         const render = () => {
           const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
+          relabel();
           main.replaceChildren(pageHeader({ crumb: t('gallery.albums'), title: `${num(album.year)} · ${pick(album.title)}`, image: mediaUrl(s.media, 'header.gallery') }),
+            // Item 20: each trigger is a real, focusable <button> (was a bare <img onclick>, never
+            // reachable by keyboard) wrapping the thumbnail image.
             section(el('a', { href: 'gallery.html', text: '‹ ' + t('gallery.albums') }),
-              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('img', { class: 'cover', src: httpsUrl(p.url), alt: pick(p.caption), loading: 'lazy', onclick: () => open(i) }))),
+              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('button', { type: 'button', class: 'thumb-btn', onclick: () => open(i) },
+                el('img', { class: 'cover', src: httpsUrl(p.url), alt: altFor(p), loading: 'lazy' })))),
               shareRow({ url: location.href, title: `${num(album.year)} · ${pick(album.title)}` })));
         };
         render(); document.addEventListener('langchange', render);

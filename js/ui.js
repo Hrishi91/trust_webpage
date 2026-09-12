@@ -50,8 +50,10 @@ export function el(tag, attrs = {}, ...children) {
   for (const c of children.flat()) if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c)));
   return n;
 }
+// Item 22: role="status" is an implicit aria-live="polite" region — a screen reader announces the
+// message the moment it's inserted, without the caller wiring up its own live region each time.
 export function toast(msg, kind = 'ok') {
-  const t = el('div', { class: `toast toast-${kind}`, text: msg });
+  const t = el('div', { class: `toast toast-${kind}`, role: 'status', text: msg });
   document.body.append(t);
   setTimeout(() => t.remove(), 3000);
 }
