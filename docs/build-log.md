@@ -1030,3 +1030,15 @@ parses `admin/js/admin.js`'s `#adm-help` anchor scheme against `admin/js/section
 asserts every one of the 18 section keys — plus the `dashboard` fallback — has a matching
 `<a id="...">` in `docs/user-guide/admin-guide.md`, so a future renamed/added section with no
 matching anchor fails a test instead of 404ing a help click.
+
+`fix(a11y): lightbox focus restore + reauth password cleared` — M6, M7 (M8 folded in: a
+`docs/pending.md`-only deferral note, no code). `js/pages/gallery.js`'s lightbox read the trigger
+element from `document.activeElement` at open time — Safari does not focus a `<button>` on a plain
+mouse click, so `document.activeElement` there is often still `<body>`, and closing the lightbox
+would restore focus nowhere. The trigger is now the click event's own `currentTarget`, passed to
+`open()` explicitly. `render()` also now closes the dialog before rebuilding the thumbnail grid on
+`langchange`, since a rebuild replaces the very button `lastTrigger` would have pointed at.
+`admin/js/admin.js`'s masked re-auth `<dialog>` now clears its password `<input>` on every close
+(cancel, wrong password, or success), not just leaving it sitting in the DOM until the next
+`reauth()` call. M8: `docs/pending.md` notes `admin/js/sections/log.js`'s অডিট/ত্রুটি tabs are plain
+buttons, not real ARIA tabs — deferred, out of this wave's file list.

@@ -121,8 +121,13 @@ function reauth() {
   return new Promise(resolve => {
     const onClose = async () => {
       dialog.removeEventListener('close', onClose);
-      if (dialog.returnValue !== 'confirm' || !input.value) { resolve(false); return; }
-      try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, input.value)); resolve(true); }
+      // Final-review fix wave M7: read the password out, then clear the input immediately — on
+      // every outcome (cancel, wrong password, success), not just success — so it never sits in
+      // the DOM/memory after the dialog closes, waiting for whoever opens devtools next.
+      const password = input.value;
+      input.value = '';
+      if (dialog.returnValue !== 'confirm' || !password) { resolve(false); return; }
+      try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password)); resolve(true); }
       catch { toast(t('admin.wrongPassword'), 'err'); resolve(false); }
     };
     dialog.addEventListener('close', onClose);

@@ -95,23 +95,32 @@ if (s) {
         // Clicks on ::backdrop target the dialog element itself; clicks on the image/buttons do not.
         dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
         dialog.addEventListener('close', () => lastTrigger?.focus());
-        const open = i => { lastTrigger = document.activeElement; showPhoto(i); dialog.showModal(); };
+        // Final-review fix wave M6: `trigger` is passed in explicitly from the click event's own
+        // `currentTarget` (below), not read back from `document.activeElement` — Safari does not
+        // move focus to a <button> on a plain mouse click (only on keyboard activation), so
+        // `document.activeElement` right after a mouse click there is still whatever was focused
+        // before (often <body>), and focus restoration on close would silently go nowhere.
+        const open = (i, trigger) => { lastTrigger = trigger; showPhoto(i); dialog.showModal(); };
         const relabel = () => {
           dialog.setAttribute('aria-label', `${pick(album.title)}`);
           closeBtn.setAttribute('aria-label', t('gallery.close'));
           prevBtn.setAttribute('aria-label', t('gallery.prev'));
           nextBtn.setAttribute('aria-label', t('gallery.next'));
-          if (!dialog.open) return;
-          imgEl.alt = altFor(photos[idx]); // re-run the caption/album-title fallback in the new language
         };
         const render = () => {
+          // Final-review fix wave M6: close the lightbox before rebuilding the thumbnail grid on
+          // a langchange. `main.replaceChildren()` below throws away the very `<button>` that
+          // `lastTrigger` points at (a fresh render() builds new button elements each time), so
+          // a dialog left open across a langchange would restore focus to a now-detached element
+          // on close — closing first means there is nothing stale left to restore focus to.
+          if (dialog.open) dialog.close();
           const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
           relabel();
           main.replaceChildren(pageHeader({ crumb: t('gallery.albums'), title: `${num(album.year)} · ${pick(album.title)}`, image: mediaUrl(s.media, 'header.gallery') }),
             // Item 20: each trigger is a real, focusable <button> (was a bare <img onclick>, never
             // reachable by keyboard) wrapping the thumbnail image.
             section(el('a', { href: 'gallery.html', text: '‹ ' + t('gallery.albums') }),
-              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('button', { type: 'button', class: 'thumb-btn', onclick: () => open(i) },
+              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('button', { type: 'button', class: 'thumb-btn', onclick: e => open(i, e.currentTarget) },
                 el('img', { class: 'cover', src: httpsUrl(p.url), alt: altFor(p), loading: 'lazy' })))),
               shareRow({ url: location.href, title: `${num(album.year)} · ${pick(album.title)}` })));
         };
