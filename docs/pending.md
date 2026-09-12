@@ -181,13 +181,15 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 
 ### Owner-only (Phase 7, recorded per the audit's §3)
 
-- App Check key, real photos/logo, trust deed + audit PDFs, registration number/80G status, custom domain, Google Search Console verification, phone-OTP test on a real number, uptime-monitor account, MFA on the admin account, budget for any paid service, security headers via a CDN in front of GitHub Pages.
+- App Check key, real photos/logo, trust deed + audit PDFs, registration number/80G status, custom domain, Google Search Console verification, phone-OTP test on a real number, uptime-monitor account, **admin MFA and email verification** — enrol in the Firebase console (audit §3 item 11, both halves — a carry-over edit had dropped "and email verification"), budget for any paid service, security headers via a CDN in front of GitHub Pages.
+- **Keep the ₹100 Blaze budget alert current** as traffic grows (audit §3 item 12; restored here after a carry-over edit dropped it — the alert itself is already set, per `docs/PROJECT_CONTEXT.md` §3).
 - **`FIREBASE_SA`/`BACKUP_PASSPHRASE` repo secrets** (Task 6/item 43 built the backup workflow itself; the storage decision — a GitHub Actions artifact, 90-day retention, AES-256-GCM encrypted since the final-review fix wave — is made) — once a real Firebase project exists, create a Cloud Datastore Viewer (read-only) service account and add its JSON key as the `FIREBASE_SA` GitHub secret, plus a strong random passphrase as `BACKUP_PASSPHRASE` (`docs/user-guide/deploy.md` Step 6) so the weekly cron actually exports (and can decrypt) something instead of skipping. While this repo stays public, the `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` repository variable must also be set to `true` or the workflow refuses to run at all — see Step 6's own warning on why (artifacts inherit repo visibility, encrypted or not).
 - robots.txt lives at `/trust_webpage/admin/`'s sibling path under the Pages sub-path — most crawlers don't fetch `robots.txt` from a sub-path at all (they expect it at the domain root), so the final-review fix wave's path fix (`Disallow: /trust_webpage/admin/`, matching where `/admin/` actually is) is necessary but not sufficient on its own. Submit `sitemap.xml` directly in Google Search Console, or move to a custom domain (root-served), to actually get crawled the way `robots.txt` intends.
 
 ### Not needed (Phase 7, recorded per the audit's §4)
 
 - hreflang (single URL per page, language is a client-side toggle — no per-language URLs to declare), RTL support, a cookie/consent banner (no tracking cookies are set), a Google Maps iframe embed (a plain link avoids ~200 KB + a third-party cookie; the link opens the visitor's own maps app), a payment gateway (UPI deep link + WhatsApp confirmation is the trust's chosen flow), and a minify/bundle build step (the project is deliberately no-build, per `CLAUDE.md`).
+- **Fixing GitHub Pages' `cache-control: max-age=600` on HTML and CSS** (audit §4 item 5; restored here after a carry-over edit dropped it) — the platform sets this and offers no override. It's a real Lighthouse deduction (~45 KiB) but not actionable without changing host; the service worker (build item 29) already addresses the same symptom (repeat-visit caching) from the client side.
 
 ### ⏳ Owner still to do (Phase 7)
 
@@ -202,14 +204,20 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
   by nothing on the public home page today, so this is mostly measurement noise from Lighthouse's
   static analysis, not a real fix target); (2) minify CSS (~150ms, ~3 KiB — the project is
   deliberately no-build/no-minify per `CLAUDE.md`, so this is a known, accepted tradeoff, not a bug);
-  (3) initial server response time (~50ms — GitHub Pages' own latency, nothing to optimize here). The
-  real driver of both the low Performance score and the high LCP is `mainthread-work-breakdown`
-  scoring 0 (20.4s of simulated main-thread time) — consistent with Task 4's own build-log note that
-  Lighthouse's simulated-CPU-throttling multiplier reacts badly to this measurement environment (a
-  shared/virtualized headless-Chrome run, not a real phone); the render-blocking `tokens.css`/
-  `site.css`/`themes.css`/Google-Fonts stylesheet chain flagged back in Task 4 is still the most
-  credible real lever if the owner wants to chase this further (an async-CSS-loading pattern, not
-  attempted here — see Task 4's notes above for the FOUC/theme-flash risk that needs its own pass).
+  (3) initial server response time (~50ms — GitHub Pages' own latency, nothing to optimize here).
+  **Corrected by the final-review fix wave (I5) — this line previously blamed
+  `mainthread-work-breakdown` scoring 0 (20.4s simulated) as the real driver; that was wrong.** The
+  live run's own TBT is 30ms and bootup time 0.5s — both trivially small, so the main thread was
+  never actually busy; the "20.4s" figure is Lighthouse's simulated-throttling multiplier inflating
+  an idle thread, not a real 20-second freeze. **The main thread is not the driver.** The actual
+  critical path is render-blocking CSS: the Google Fonts stylesheet (4 families / 10 faces) plus the
+  three same-origin `tokens.css`/`site.css`/`themes.css` stylesheets flagged back in Task 4, all
+  blocking `<link>` tags in `<head>` — still the most credible real lever if the owner wants to chase
+  this further (an async-CSS-loading pattern, not attempted here — see Task 4's notes above for the
+  FOUC/theme-flash risk that needs its own pass). Also worth noting: Task 4's font `preload` links
+  are hardcoded, version-pinned `fonts.gstatic.com` URLs copied from one fetched Google Fonts
+  response — Google can rotate these paths, silently turning a preload into a no-op with no error,
+  so they may need a periodic manual re-check.
 
 ### Deferred minors from Phase 7 reviews
 

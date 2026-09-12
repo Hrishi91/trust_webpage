@@ -714,9 +714,7 @@ Deviation from the brief worth recording: `tests/unit/export-colls.test.js` impo
 
 Latent pre-existing bug found, not fixed (out of scope — `js/pages/about.js` wasn't touched by this task): `about.js`'s own `?preview=1` branch (`history` collection, unfiltered `deleted==false` query) has the exact same auth-restoration race this commit fixed in the new branches, and its only e2e coverage (`public.spec.js`'s "anonymous preview request shows the error state") tests the anonymous-rejection path, never a signed-in admin's success path — so the race has never actually been exercised by a passing test. Flagged for a follow-up task rather than fixed here, since about.js is outside this task's file list.
 
-### Fix round 1
-
-Review of the three commits above (post-Task-7, HEAD `cd13517` at the time of this round) found five gaps. `docs/site-basics-audit-2026-09-12.md`'s item 35/38/39/40 intent wasn't actually complete: restore only reached the sections that use `forms.js`'s shared `listView()`, not the four with their own custom list panes; the masked re-auth dialog's Enter-key behaviour was untested and (once checked) wrong; and none of item 38's four `?preview=1` branches, or item 37's help link, had any e2e coverage at all — task-6-report.md's own evidence for those was a manual screenshot, not a passing test.
+**Fix round 1.** Review of the three commits above (post-Task-7, HEAD `cd13517` at the time of this round) found five gaps. `docs/site-basics-audit-2026-09-12.md`'s item 35/38/39/40 intent wasn't actually complete: restore only reached the sections that use `forms.js`'s shared `listView()`, not the four with their own custom list panes; the masked re-auth dialog's Enter-key behaviour was untested and (once checked) wrong; and none of item 38's four `?preview=1` branches, or item 37's help link, had any e2e coverage at all — task-6-report.md's own evidence for those was a manual screenshot, not a passing test.
 
 **Commit 1 — restore on donations/members/notices/roster lists (finding 1).** `admin/js/forms.js` gained `restoreDoc(ctx, coll, id)` — the exact `updateDoc({deleted:false, updatedAt})` + `logAudit(ctx,'restore',…)` + `toast` sequence `listView()`'s own restore button used to inline — and `listView()` now calls it too, so there is exactly one implementation. `admin/js/sections/{donations,members,notices,roster}.js` (the four sections with a custom `listPane()`, not `listView()`, so item 35 never reached them originally) each gained the same "মুছে ফেলা দেখাও" checkbox + "পুনরুদ্ধার" button, reusing `restoreDoc`. `donations.js` needed the most restructuring: its per-year summary/list only makes sense for live rows, so the showDeleted branch renders a flat undecorated restore list instead and the year `<select>` is hidden while it's active. Checked `firestore.indexes.json` for the exact `(deleted, <orderBy field>)` composite each of the four lists' queries needs (donations `date desc`, members `order`, notices `order desc`, roster `date`) against a small Node script comparing the query shapes to the committed index list — all four already existed (added generically in earlier phases), so no index changes were needed this round; recorded here rather than assumed, per the brief's own instruction to check. `tests/e2e/admin-ops.spec.js` gained a delete→"মুছে ফেলা দেখাও"→restore round trip on `notices/n1` and `members/+918888888888`, asserting the row disappears from the normal list, appears once "মুছে ফেলা দেখাও" is checked, and disappears from *that* list too (not just a toast) once restored — proving the write actually round-tripped, not merely that a toast rendered.
 
@@ -893,13 +891,26 @@ both still miss their targets; LCP is slightly worse than the pre-Phase-7 baseli
 this does not block: the top three Lighthouse "Opportunities" on the live run were (1) reduce unused
 JavaScript (~640ms, ~118 KiB — largely public-page-doesn't-import-admin-code static analysis noise,
 not a real fix target), (2) minify CSS (~150ms, ~3 KiB — the project is deliberately no-build/
-no-minify per `CLAUDE.md`), (3) server response time (~50ms — GitHub Pages' own latency). The real
-driver of both the low score and the high LCP is `mainthread-work-breakdown` scoring 0 (20.4s
-simulated) — this matches Task 4's own build-log note that Lighthouse's simulated-throttling
-multiplier reacts badly to this measurement environment (a shared/virtualized headless-Chrome host,
-not a real phone) rather than indicating a 20-second real freeze; the render-blocking
-`tokens.css`/`site.css`/`themes.css`/Google-Fonts chain identified back in Task 4 remains the most
-credible real lever (an async-CSS-loading pattern, not attempted here — FOUC/theme-flash risk needs
+no-minify per `CLAUDE.md`), (3) server response time (~50ms — GitHub Pages' own latency).
+
+**Final-review fix wave I5 — this entry's original "real driver" claim was wrong, corrected here.**
+It blamed `mainthread-work-breakdown` scoring 0 (20.4s simulated) as the real driver of the low
+score/high LCP. The live run's own **TBT is 30ms and bootup time 0.5s** — both trivially small,
+meaning the main thread was never actually busy; "20.4s of simulated main-thread time" is Lighthouse's
+throttling multiplier inflating a near-idle thread, not evidence of one. The main thread is not the
+driver. The actual critical path is render-blocking CSS: the Google Fonts stylesheet (4 families / 10
+faces) plus three same-origin stylesheets (`tokens.css`, `site.css`, `themes.css`) all sit in `<head>`
+as plain blocking `<link>` tags, so first paint (and the LCP element, the nav brand text) waits for
+all four to download and parse before anything renders — exactly what Task 4's own render-blocking-
+insight numbers already showed (3.0–3.4s of estimated savings), this entry just mis-attributed the
+live run's headline metric to the wrong audit instead of that one. The font `preload` links added in
+Task 4 (`scripts/sync-head.mjs`'s `FONT_PRELOADS`) are also worth flagging on their own: they are
+hardcoded, version-pinned `fonts.gstatic.com` URLs (e.g. `.../v26/...woff2`) copied from a fetched
+Google Fonts CSS response at one point in time — Google can and does rotate these versioned paths,
+so a preload can silently stop matching the URL the render-blocking stylesheet actually requests
+(no error, just a wasted/ignored preload) without anyone noticing until the next manual re-check.
+An async-CSS-loading pattern (`media=print` swap or `rel=preload as=style`) for the three same-origin
+stylesheets remains the most credible real lever (not attempted here — FOUC/theme-flash risk needs
 its own pass, out of this task's scope). Recorded in `docs/pending.md`'s Phase 7 owner-still-to-do
 list, not treated as a blocker.
 
@@ -996,3 +1007,19 @@ exactly the auth-restoration race Task 7's own build-log entry flagged as a know
 `about.js` and fixed everywhere else: `browserLocalPersistence`'s session restore is asynchronous,
 so a query fired right after the import can reach Firestore with no ID token attached yet. All three
 now `.then(m => m.authReady())` after the import, matching `js/shell.js`'s own ticker preview branch.
+
+`docs: perf cause corrected, pending carry-over, guide help text, stray heading` — I5, M3, M4, M5.
+`docs/build-log.md`'s Task 8 entry and `docs/pending.md` both blamed `mainthread-work-breakdown`
+scoring 0 (20.4s simulated) as the real driver of the live Lighthouse run's low Performance/high LCP
+— wrong: the same run's own TBT is 30ms and bootup time 0.5s, both trivially small, so the main
+thread was never actually busy; "20.4s" is Lighthouse's throttling multiplier inflating an idle
+thread. Corrected in both files: the actual critical path is render-blocking CSS (the Google Fonts
+stylesheet, 4 families/10 faces, plus `tokens.css`/`site.css`/`themes.css`), with a note that Task
+4's font-preload links are hardcoded, version-pinned `fonts.gstatic.com` URLs that can silently rot
+if Google rotates them. `docs/pending.md`'s "Not needed" list restored the GitHub Pages
+`max-age=600` ruling and the owner-only list restored "and email verification" (was just "MFA") and
+the "keep the ₹100 Blaze budget alert current" ruling — both lost in an earlier carry-over edit.
+`docs/user-guide/admin-guide.md`'s dashboard section corrected "প্রতিটা কার্ডের পাশে ... একটা বোতাম"
+(implying one help button per card) to describe the actual single shared `#adm-help` link in the top
+bar that follows the current route. `docs/build-log.md`'s standalone `### Fix round 1` heading (a
+sub-heading the brief for this very wave forbids) folded into inline prose as `**Fix round 1.**`.
