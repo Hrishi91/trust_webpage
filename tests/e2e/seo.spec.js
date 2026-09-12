@@ -51,7 +51,11 @@ test('robots.txt, sitemap.xml, manifest.webmanifest and the favicon all serve 20
     expect(res.status(), p).toBe(200);
   }
   const robots = await (await request.get('/robots.txt')).text();
-  expect(robots).toContain('Disallow: /admin/');
+  // Final-review fix wave I3: the live site is served under the /trust_webpage/ Pages sub-path,
+  // so the disallowed admin path must include it — a bare '/admin/' never matches a real request
+  // path here (docs/pending.md also records that robots.txt itself isn't fetched by crawlers at
+  // this sub-path at all; Search-Console submission or a custom domain is the real fix for that).
+  expect(robots).toContain('Disallow: /trust_webpage/admin/');
   expect(robots).toContain('Sitemap: https://hrishi91.github.io/trust_webpage/sitemap.xml');
 });
 

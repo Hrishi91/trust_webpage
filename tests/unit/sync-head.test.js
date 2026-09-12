@@ -49,9 +49,13 @@ test('generatedFiles(): every HTML file gets exactly one head:start/head:end blo
   }
 });
 
-test('generatedFiles(): robots.txt disallows /admin/ and points at the sitemap; sitemap.xml has one <url> per non-noindex page; manifest.webmanifest has both icon sizes', () => {
+test('generatedFiles(): robots.txt disallows the admin path under the Pages sub-path and points at the sitemap; sitemap.xml has one <url> per non-noindex page; manifest.webmanifest has both icon sizes', () => {
   const files = generatedFiles();
-  assert.match(files['robots.txt'], /Disallow: \/admin\//);
+  // Final-review fix wave I3: this site is served under a repo sub-path
+  // (https://hrishi91.github.io/trust_webpage/), so the disallowed path must be
+  // '/trust_webpage/admin/', not a bare '/admin/' that never matches any real request path here.
+  assert.match(files['robots.txt'], /Disallow: \/trust_webpage\/admin\/\n/);
+  assert.doesNotMatch(files['robots.txt'], /Disallow: \/admin\/\n/);
   assert.match(files['robots.txt'], /Sitemap: https:\/\/hrishi91\.github\.io\/trust_webpage\/sitemap\.xml/);
   const urlCount = (files['sitemap.xml'].match(/<url>/g) || []).length;
   const expected = Object.values(HEAD_META).filter(m => !m.noindex).length;

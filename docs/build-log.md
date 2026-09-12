@@ -958,3 +958,12 @@ a distinct "couldn't send" toast, which is exactly the signal that lets someone 
 email has an admin account (the surrounding comment already said this was the intent; the code
 didn't match it). A failure is now `console.warn`'d (never the email itself) but never changes what
 the admin sees.
+
+`fix(seo): robots disallow path under the Pages sub-path` — I3. This site is served from GitHub
+Pages under a repo sub-path (`https://hrishi91.github.io/trust_webpage/`), so `robots.txt`'s
+`Disallow: /admin/` never matched any real request path here (the admin panel is always at
+`/trust_webpage/admin/`). `scripts/sync-head.mjs`'s `robotsTxt()` now derives the disallowed path
+from `ORIGIN`'s own pathname, so a future root-served custom domain regenerates the right rule
+automatically. `docs/pending.md` gained an owner-only note that `robots.txt` itself typically isn't
+fetched by crawlers at a sub-path at all — Search Console submission or a custom domain is the real
+fix for discoverability, this commit only fixes what the file itself says.

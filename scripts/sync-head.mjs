@@ -228,8 +228,15 @@ function injectHead(html, block) {
   return html.replace(LEGACY_RE, wrapped + '\n');
 }
 
+// Final-review fix wave I3: this site is served from GitHub Pages under a repo sub-path
+// (https://hrishi91.github.io/trust_webpage/), not the domain root — `Disallow: /admin/` only
+// ever matched a request path starting with literally "/admin/", which this site never has (its
+// admin panel is always at "/trust_webpage/admin/"). Derived from ORIGIN's own pathname rather
+// than hardcoded, so a future custom-domain move (root-served, no sub-path) regenerates the
+// right rule automatically instead of needing a second manual edit.
 function robotsTxt() {
-  return `User-agent: *\nDisallow: /admin/\nSitemap: ${ORIGIN}sitemap.xml\n`;
+  const adminPath = `${new URL(ORIGIN).pathname}admin/`; // '/trust_webpage/admin/' today; '/admin/' if ORIGIN ever becomes root-served
+  return `User-agent: *\nDisallow: ${adminPath}\nSitemap: ${ORIGIN}sitemap.xml\n`;
 }
 
 // Derive each page's lastmod from its git history (git log -1 --format=%cs) rather than the wall
