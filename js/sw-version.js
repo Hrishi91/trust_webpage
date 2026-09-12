@@ -2,5 +2,5 @@
 // SW_VERSION/SW_HASH are duplicated (byte-identical) into the classic-script constants at the top
 // of sw.js, because a service worker cannot import an ES module the way a page can; bump-sw.mjs
 // is the one place that writes both copies from this single source.
-export const SW_VERSION = '20260912-12';
-export const SW_HASH = 'a403cfd9d8583a0bafd200f1666b947ace741eac46dbdee656cc5b5ca3c73494';
+export const SW_VERSION = '20260912-14';
+export const SW_HASH = 'f1fbaa44cbf3522b61d2c29bec31c70afab8ba24eb849d1dcfe247a5fadd40fb';

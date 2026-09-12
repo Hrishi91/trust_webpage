@@ -9,11 +9,20 @@
 // firebasestorage/cdnjs), never non-GET, never a request carrying Authorization, never sw.js
 // itself. Firestore keeps its own persistent local cache (js/firebase.js) — this worker never
 // touches Firestore/Storage/Auth requests, online or offline.
+//
+// Final-review fix wave M1: navigation responses (any HTML page actually visited) are cached in
+// their OWN cache (`trust-nav-<version>`), not `trust-shell-<version>`. Before this fix they went
+// into the same cache PRECACHE_URLS lives in, which silently made the "only PRECACHE_URLS entries
+// are ever in this cache" comment on cacheFirstOrNetwork() below false — a visited page's cached
+// copy (and any query-string variant of it) was in there too. Two caches means that comment is
+// actually true again, and activate() below has to sweep stale versions of both.
 'use strict';
 
-const SW_VERSION = '20260912-12';
+const SW_VERSION = '20260912-14';
 const CACHE_NAME = 'trust-shell-' + SW_VERSION;
 const CACHE_PREFIX = 'trust-shell-';
+const NAV_CACHE_NAME = 'trust-nav-' + SW_VERSION;
+const NAV_CACHE_PREFIX = 'trust-nav-';
 
 // Explicit precache allowlist (scripts/lib/shell-assets.mjs SHELL_ASSETS) — relative to this
 // script's own location, so it resolves correctly both at the site root (local dev) and under
@@ -92,7 +101,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(
-      names.filter((n) => n.startsWith(CACHE_PREFIX) && n !== CACHE_NAME).map((n) => caches.delete(n))
+      names
+        .filter((n) => (n.startsWith(CACHE_PREFIX) && n !== CACHE_NAME) || (n.startsWith(NAV_CACHE_PREFIX) && n !== NAV_CACHE_NAME))
+        .map((n) => caches.delete(n))
     );
     await self.clients.claim();
   })());
@@ -105,7 +116,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // never cross-origin
-  if (url.pathname.includes('/admin/')) return; // never /admin/*
+  if (url.pathname.includes('/admin')) return; // never /admin (with or without a trailing slash)
   if (url.pathname.endsWith('/sw.js')) return; // never sw.js itself
 
   if (req.mode === 'navigate') {
@@ -118,8 +129,9 @@ self.addEventListener('fetch', (event) => {
 
 // HTML navigations: network-first so a visitor with a connection always gets the latest page;
 // fall back to whatever's cached for that URL, then 404.html, then index.html, when offline.
+// Cached into NAV_CACHE_NAME (not CACHE_NAME) — see this file's own top comment on why.
 async function networkFirstNavigate(req) {
-  const cache = await caches.open(CACHE_NAME);
+  const navCache = await caches.open(NAV_CACHE_NAME);
   try {
     const fresh = await fetch(req);
     // Awaited (not fire-and-forget): respondWith() only keeps the fetch event alive until the
@@ -128,18 +140,27 @@ async function networkFirstNavigate(req) {
     // offline reload of a URL that was never in the original precache list (a query string like
     // ?sw=1 makes a different cache key) fall through to the 404 fallback below instead of
     // serving what looks like a perfectly fresh same-page cache entry.
-    if (fresh && fresh.ok) await cache.put(req, fresh.clone());
+    if (fresh && fresh.ok) await navCache.put(req, fresh.clone());
     return fresh;
   } catch (err) {
     // ignoreSearch: a navigation URL's query string (e.g. `?sw=1`, the opt-in flag this very
-    // worker was registered under) must not stop it matching its own precached/cached page —
-    // otherwise every request "the visitor is looking at index.html" that isn't byte-identical
-    // to the exact precached URL falls all the way through to the 404 fallback below.
-    const cached = await cache.match(req, { ignoreSearch: true });
+    // worker was registered under) must not stop it matching its own cached page — otherwise
+    // every request "the visitor is looking at index.html" that isn't byte-identical to the
+    // exact cached URL falls all the way through to the 404 fallback below.
+    const cached = await navCache.match(req, { ignoreSearch: true });
     if (cached) return cached;
-    const notFound = await cache.match('./404.html');
+    // Not in NAV_CACHE_NAME (e.g. this exact page was never successfully fetched while the
+    // service worker was already controlling it — the very first navigation after registration,
+    // like this test's own first `?sw=1` visit, is never intercepted at all). Every public HTML
+    // page is still precached at install time in CACHE_NAME regardless — ignoreSearch here lets
+    // e.g. './about.html?sw=1' still match the plain './about.html' precache entry, the same way
+    // the single combined cache used to before NAV_CACHE_NAME split off (this fix wave's own M1).
+    const precache = await caches.open(CACHE_NAME);
+    const precached = await precache.match(req, { ignoreSearch: true });
+    if (precached) return precached;
+    const notFound = await precache.match('./404.html');
     if (notFound) return notFound;
-    const home = await cache.match('./index.html');
+    const home = await precache.match('./index.html');
     if (home) return home;
     throw err;
   }

@@ -1042,3 +1042,25 @@ would restore focus nowhere. The trigger is now the click event's own `currentTa
 (cancel, wrong password, or success), not just leaving it sitting in the DOM until the next
 `reauth()` call. M8: `docs/pending.md` notes `admin/js/sections/log.js`'s অডিট/ত্রুটি tabs are plain
 buttons, not real ARIA tabs — deferred, out of this wave's file list.
+
+`fix(sw): separate navigation cache; admin guard` — M1. `scripts/bump-sw.mjs`'s generated `sw.js`
+cached navigation responses into the SAME cache as the precache allowlist, which silently made
+`cacheFirstOrNetwork()`'s own comment ("only PRECACHE_URLS entries are ever in this cache") false.
+Navigations now go into a separate `trust-nav-<version>` cache; `activate()` sweeps stale versions of
+both. The offline-navigation fallback still checks the precache (with `ignoreSearch`) before falling
+to `404.html`/`index.html`, so an offline reload of any precached page still resolves correctly even
+when nothing was ever written to the nav cache (e.g. the very first `?sw=1` visit, never intercepted
+since the worker wasn't controlling yet — caught by `tests/e2e/pwa.spec.js`'s own offline test going
+red on the first attempt at this fix, not by inspection). Admin guard tightened from
+`pathname.includes('/admin/')` to `pathname.includes('/admin')` (also matches a path with no
+trailing slash). `node scripts/bump-sw.mjs` run, capturing the cumulative hash of every shell asset
+this whole wave touched (`js/shell.js`, `js/page-defaults.js`, `js/i18n.js`,
+`js/pages/{about,gallery,transparency}.js`, `css/tokens.css`, `css/themes.css`) into one final
+`SW_VERSION` bump (`20260912-14`).
+
+Gate: `npm run test:unit` 148/148, `npm run e2e` 105/105 (all three projects), `node scripts/
+shots.mjs` exit 0, `npm run test:rules` 38/38 (dev emulator stopped first; `errors` delete is the
+one new case), `node scripts/sync-head.mjs --check` and `node scripts/bump-sw.mjs --check` both exit
+0. `scripts/deploy-rules.sh` ran the full suite again internally (green) then deployed
+`firestore:rules,firestore:indexes,storage` to `ganesh-puja-trust` — 2026-09-13 02:43 (the `errors`
+delete permission is the one live rules change this wave makes).
