@@ -979,3 +979,13 @@ previously checked `--glow2` against anything. Fixed in `css/tokens.css` (siddhi
 `css/themes.css` (dhokra, atreyee) to match their `--sindoor` (siddhi/dhokra; also already true for
 mukha/bangarh) or `--durva` (atreyee) hex; `tokensOf()` extended to parse `rgba()` tokens, and a new
 test asserts every theme's `--glow2` rgb triple against an explicit per-theme expected source token.
+
+`feat(admin): errors can be cleared; ua shown` — I6. `firestore.rules`' `errors` collection gained
+`allow delete: if isAdmin()` — the one deliberate asymmetry from `audit` (permanent, never
+deletable): `errors` is an ephemeral bug-report inbox, not a record of who-did-what, and
+privacy.html now promises reports are kept "at most 90 days". `tests/rules/errors.test.js` gained an
+anon-fails/admin-succeeds delete test. `admin/js/sections/log.js`'s ত্রুটি tab gained a "সব মুছুন"
+button (`admin.log.clearErrors`) that confirms, re-auths, then deletes every currently loaded report
+(≤ 100, matching the tab's own `limit(100)` query) in one `writeBatch`, logging one `audit` row for
+the whole clear. Each row now also renders `ua` (written since Task 7, never shown until now),
+labelled the same way as `message`/`url` — putting those two previously-unused i18n keys to use.

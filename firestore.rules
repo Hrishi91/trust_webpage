@@ -209,7 +209,15 @@ service cloud.firestore {
     // required — any visitor's browser can throw. Bounded field sizes limit abuse from a hostile
     // client (App Check, owner-only, will gate this further); `at` must equal `request.time`, the
     // server-resolved value of the client's `serverTimestamp()` sentinel, so it can't be forged.
-    // Read is admin-only (📜 লগ → ত্রুটি tab); never editable or hard-deletable, same as `audit`.
+    // Read is admin-only (📜 লগ → ত্রুটি tab); never editable.
+    //
+    // Final-review fix wave I6: unlike `audit` (a permanent append-only record of who changed
+    // what — never deletable, by design), `errors` is an ephemeral bug-report inbox with no
+    // record-keeping purpose once triaged, and privacy.html now promises error diagnostics are
+    // "kept for at most 90 days" — an admin needs a way to actually clear it, not just an
+    // unenforced retention promise. `allow delete: if isAdmin()` is the one deliberate asymmetry
+    // from `audit`'s shape; `update` stays `false` either way (a report is either kept as
+    // originally filed or removed, never edited).
     match /errors/{id} {
       allow create: if request.resource.data.keys().hasOnly(['message', 'url', 'ua', 'stack', 'at'])
         && request.resource.data.message is string && request.resource.data.message.size() <= 500
@@ -218,7 +226,8 @@ service cloud.firestore {
         && request.resource.data.stack is string && request.resource.data.stack.size() <= 2000
         && request.resource.data.at == request.time;
       allow read: if isAdmin();
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isAdmin();
     }
 
     // Everything else is denied until its phase adds explicit rules + tests.

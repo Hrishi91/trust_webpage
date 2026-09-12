@@ -1,7 +1,8 @@
 import { registerSection } from '../admin.js';
-import { collection, getDocs, query, orderBy, limit } from '../../../js/firebase.js';
+import { collection, doc, getDocs, query, orderBy, limit, writeBatch } from '../../../js/firebase.js';
 import { t, STRINGS } from '../../../js/i18n.js';
-import { el, fmtDate } from '../../../js/ui.js';
+import { el, fmtDate, toast } from '../../../js/ui.js';
+import { logAudit } from '../audit.js';
 
 // Fix round 1 (finding 4): translate the action word via `admin.log.action.<action>` (js/i18n.js)
 // when that key exists, falling back to the raw action string otherwise — a future logAudit()
@@ -54,14 +55,48 @@ function buildAuditPane(ctx, rows) {
   return el('div', {}, el('label', {}, el('span', { text: t('admin.log.filter') }), select), list);
 }
 
+// Final-review fix wave I6: `rows` is a live array (the errors tab's own state, not a fresh fetch
+// each render) so "সব মুছুন" can remove the just-deleted rows from view without a re-fetch —
+// `ua` (the reported browser user-agent, written by js/errors.js since Task 7 but never rendered
+// anywhere until now) is shown labelled per row, same as message/url — those two i18n keys sat
+// unused since Task 7 shipped (docs/pending.md's own deferred-minors note); this is what puts
+// them to use.
 function buildErrorsPane(ctx, rows) {
+  const list = el('div');
+  const clearBtn = el('button', { class: 'btn-sm', type: 'button', text: t('admin.log.clearErrors') });
   const row = d => el('div', { class: 'log-row' },
-    el('div', { class: 'log-head' },
-      el('span', { text: fmtAt(d, ctx.lang) }),
-      el('b', { text: d.message }),
-      el('span', { text: d.url })),
+    el('div', { class: 'log-head' }, el('span', { text: fmtAt(d, ctx.lang) })),
+    el('p', {}, el('b', { text: `${t('admin.log.message')}: ` }), el('span', { text: d.message })),
+    el('p', { class: 'muted' }, el('b', { text: `${t('admin.log.url')}: ` }), el('span', { text: d.url })),
+    el('p', { class: 'muted' }, el('b', { text: `${t('admin.log.ua')}: ` }), el('span', { text: d.ua })),
     d.stack ? el('details', {}, el('summary', { text: t('admin.log.details') }), el('pre', { text: d.stack })) : null);
-  return el('div', {}, ...(rows.length ? rows.map(row) : [el('p', { text: t('common.empty') })]));
+  const renderRows = () => {
+    list.replaceChildren(...(rows.length ? rows.map(row) : [el('p', { text: t('common.empty') })]));
+    clearBtn.hidden = rows.length === 0;
+  };
+  // firestore.rules' errors match now allows `allow delete: if isAdmin()` (the one asymmetry from
+  // `audit`, which stays append-only forever — see that rule's own comment). Deletes only the
+  // currently loaded page (limit 100 below), matching "≤ 100 per click" — a second click after
+  // reloading the tab clears the next page, same shape as any other admin bulk action here.
+  clearBtn.onclick = async () => {
+    if (!rows.length) return;
+    if (!confirm(t('admin.confirmDelete'))) return;
+    if (!(await ctx.reauth())) return;
+    try {
+      const batch = writeBatch(ctx.db);
+      for (const d of rows) batch.delete(doc(ctx.db, 'errors', d.id));
+      await batch.commit();
+      await logAudit(ctx, 'delete', 'errors', { count: rows.length }, null);
+      rows.length = 0;
+      renderRows();
+      toast(t('admin.saved'));
+    } catch (err) {
+      console.error(err);
+      toast(t('common.error'), 'err');
+    }
+  };
+  renderRows();
+  return el('div', {}, el('div', { class: 'log-tabs' }, clearBtn), list);
 }
 
 registerSection('log', {

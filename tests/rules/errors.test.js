@@ -1,7 +1,9 @@
 // Phase 7 Task 7 (site-basics audit item 42): `errors/{id}` — client-side error reports written by
 // js/errors.js. Create-only, bounded fields, no auth required (public site — every visitor,
-// signed in or not, can throw an error); read/update/delete are admin-only/append-only, same
-// "no hard delete, no edit" shape audit already uses (tests/rules/firestore.test.js's audit test).
+// signed in or not, can throw an error); read is admin-only, update always fails. Final-review fix
+// wave I6: unlike `audit` (permanent, never deletable — tests/rules/firestore.test.js's audit
+// test), `errors` is now admin-deletable too — an ephemeral bug-report inbox, not a record of
+// who-did-what, and privacy.html promises these are kept "at most 90 days".
 //
 // `at` must equal `request.time` — js/errors.js writes `serverTimestamp()`, which Firestore
 // resolves to the server's own request time before rules evaluate, so this is the standard way to
@@ -12,6 +14,7 @@
 // public_types/index.d.ts), so tests reach for the compat FieldValue instead of importing the
 // modular 'firebase/firestore' package a second time under a different SDK surface.
 import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
 import { assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import firebaseCompat from 'firebase/compat/app';
 import 'firebase/compat/firestore';
@@ -52,12 +55,23 @@ test('errors: a client-supplied literal `at` (not request.time) fails', async ()
   await assertFails(E.anon.firestore().collection('errors').add({ ...validReport(), at: new Date() }));
 });
 
-test('errors: anon read fails; admin read succeeds; update/delete always fail', async () => {
+test('errors: anon read fails; admin read succeeds; update always fails', async () => {
   const ref = await E.admin.firestore().collection('errors').add(validReport());
   await assertFails(E.anon.firestore().doc(`errors/${ref.id}`).get());
   await assertFails(E.anon.firestore().collection('errors').get());
   await assertSucceeds(E.admin.firestore().doc(`errors/${ref.id}`).get());
   await assertSucceeds(E.admin.firestore().collection('errors').get());
   await assertFails(E.admin.firestore().doc(`errors/${ref.id}`).update({ message: 'edited' }));
-  await assertFails(E.admin.firestore().doc(`errors/${ref.id}`).delete());
+});
+
+// Final-review fix wave I6: unlike `audit` (append-only forever), `errors` is now admin-deletable
+// — the one deliberate asymmetry firestore.rules' own comment on this collection explains.
+test('errors: anon delete fails; admin delete succeeds (item 42/I6 asymmetry from `audit`)', async () => {
+  const anonRef = await E.admin.firestore().collection('errors').add(validReport());
+  await assertFails(E.anon.firestore().doc(`errors/${anonRef.id}`).delete());
+
+  const adminRef = await E.admin.firestore().collection('errors').add(validReport());
+  await assertSucceeds(E.admin.firestore().doc(`errors/${adminRef.id}`).delete());
+  const gone = await E.admin.firestore().doc(`errors/${adminRef.id}`).get();
+  assert.equal(gone.exists, false);
 });

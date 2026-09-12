@@ -268,6 +268,12 @@ export const STRINGS = {
   'admin.log.tabErrors': { bn: 'ত্রুটি', en: 'Errors' },
   'admin.log.message': { bn: 'বার্তা', en: 'Message' },
   'admin.log.url': { bn: 'ঠিকানা', en: 'URL' },
+  // Final-review fix wave I6: --ua is the reported browser user-agent (previously written but
+  // never rendered anywhere); admin.log.message/admin.log.url were unused since Task 7 shipped —
+  // all three are now used as row labels in the ত্রুটি tab. clearErrors is the "সব মুছুন" button
+  // that deletes every currently-loaded error report (a writeBatch, ≤ 100 per click, re-auth-gated).
+  'admin.log.ua': { bn: 'ব্রাউজার', en: 'Browser' },
+  'admin.log.clearErrors': { bn: 'সব মুছুন', en: 'Clear all' },
   // Fix round 1 (finding 4): per-action labels for the 📜 লগ row's bold action word — every
   // `logAudit(ctx, '<action>', ...)` call site's action string across admin/js (grep confirms
   // create/update/delete/restore/reorder/publish/unpublish/export are the only ones used).
