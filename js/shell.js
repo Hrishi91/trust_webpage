@@ -93,8 +93,6 @@ export function pageHeader({ crumb, title, lead, image }) {
 // string that isn't a STRINGS key (defensive fallback only; every current call site passes a key)
 // gets that string back as-is, so nothing that predates this behaves differently.
 export async function mountShell(active, pageTitleKey) {
-  const [s, c] = await Promise.all([getSettings(), getContent()]);
-  setOverrides(c.strings);
   // Item 18/26: #site-header is the page's <header role="banner"> landmark; the skip link is its
   // FIRST child (ahead of the ticker/nav) so it's the very first thing a keyboard user tabs to on
   // every page. #main gets tabindex="-1" so the skip link's href="#main" can actually move focus
@@ -107,6 +105,30 @@ export async function mountShell(active, pageTitleKey) {
   // "never blank the page" — and the skip link below is the one ALREADY in that static markup,
   // never a second one prepended on top of it.
   const shellMode = headerEl.hasAttribute('data-shell');
+  // Final-review fix wave I1: `.lang` and `.burger` live in the static shell markup and are
+  // painted before this module's own <script type=module> even starts running, let alone before
+  // the settings/content fetch below resolves — a visitor who taps either one during that window
+  // (a real, if usually narrow, network round trip) got nothing, because their onclick handlers
+  // used to be wired only inside renderNav(), after the `await` below. Both are wired HERE,
+  // synchronously, before any await: setLang() is pure (no settings/content dependency) and the
+  // burger only toggles a CSS class + aria-expanded (no data dependency either), so neither needs
+  // to wait for anything. renderNav() below must never reassign these two onclick handlers again
+  // (it only patches their text/aria-label) — this is their one and only owner.
+  if (shellMode) {
+    // Plain descendant selectors, not `:scope > .foo` — scripts/sync-shell.mjs's navHtml() nests
+    // .links/.lang/.burger one level deeper, inside nav.nav > div.wrap, not as nav.nav's direct
+    // children (matching how renderNav() below already queries the very same elements).
+    const staticNav = headerEl.querySelector(':scope > nav.nav');
+    const staticLinks = staticNav?.querySelector('.links');
+    const staticLangBtn = staticNav?.querySelector('.lang');
+    const staticBurger = staticNav?.querySelector('.burger');
+    if (staticLangBtn) staticLangBtn.onclick = () => setLang(getLang() === 'bn' ? 'en' : 'bn');
+    if (staticBurger && staticLinks) {
+      staticBurger.onclick = e => { const open = staticLinks.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); };
+    }
+  }
+  const [s, c] = await Promise.all([getSettings(), getContent()]);
+  setOverrides(c.strings);
   let skip = shellMode ? headerEl.querySelector(':scope > a.skip') : null;
   if (!skip) { skip = el('a', { class: 'skip', href: '#main' }); headerEl.prepend(skip); }
   document.getElementById('main')?.setAttribute('tabindex', '-1');
@@ -224,12 +246,13 @@ export async function mountShell(active, pageTitleKey) {
         if (prev) prev.after(a); else linksWrap.prepend(a);
         prev = a;
       }
+      // Final-review fix wave I1: `.lang`/`.burger`'s onclick handlers are wired once, early,
+      // above (before mountShell()'s own settings/content await) — patch text/aria-label only
+      // here, never reassign onclick, so there is exactly one owner of that behaviour.
       const langBtn = nav.querySelector('.lang');
       langBtn.textContent = getLang() === 'bn' ? 'EN' : 'বাং';
-      langBtn.onclick = () => setLang(getLang() === 'bn' ? 'en' : 'bn');
       const burger = nav.querySelector('.burger');
       burger.setAttribute('aria-label', t('nav.menu'));
-      burger.onclick = e => { const open = linksWrap.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); };
       return;
     }
     // Fallback: no static shell present — build fresh (pre-Task-4 behaviour).

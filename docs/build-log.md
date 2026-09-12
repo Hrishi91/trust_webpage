@@ -938,3 +938,15 @@ protection), linking Google's own privacy policy; an on-device-storage section (
 localStorage, offline page cache in the service worker, Firestore's own offline cache; no tracking
 or advertising cookies). `node scripts/sync-head.mjs` run (no head/description text changed, so only
 `js/sw-version.js`/`sw.js` needed a bump for this file).
+
+`fix(shell): language and menu buttons work before hydration` — I1. `.lang`/`.burger` live in the
+static above-the-fold shell (item 28) and are painted before `js/shell.js`'s `mountShell()` even
+starts, let alone before its `Promise.all([getSettings(), getContent()])` resolves — a visitor who
+tapped either during that window got nothing, because their `onclick` handlers were wired only
+inside `renderNav()`, after that `await`. Both are now wired synchronously at the top of
+`mountShell()`, before the `await`: `setLang()` is pure and the burger only toggles a class +
+`aria-expanded`, so neither needs fetched data; `renderNav()` now only patches their text/aria-label,
+never reassigns `onclick`. `tests/e2e/public.spec.js`'s language-toggle test reverted to a plain
+click (no more `toPass()` retry wrapper), and a new test blocks every Firestore RPC
+(`page.route('**/google.firestore.v1.Firestore/**', r => r.abort())`) and proves both controls work
+at 390×844 before `getSettings()`/`getContent()`'s fail-soft fallback ever settles.

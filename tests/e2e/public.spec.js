@@ -12,19 +12,29 @@ test('home shows name, countdown, hero art, next event tile, latest album', asyn
 });
 test('language toggle switches to English and persists', async ({ page }) => {
   await page.goto('/index.html');
-  // `.lang` is part of the static above-the-fold shell (Phase 7 item 28) and exists in the DOM
-  // before `mountShell()`'s async Firestore read resolves and wires its onclick — a real, if
-  // usually narrow, hydration race. Playwright's own actionability check has no way to know
-  // whether a JS handler is attached yet, so a single click can land in that window and do
-  // nothing; retrying the click-then-assert as a unit (not just the assert) is what actually
-  // waits out the race, without weakening what's being verified (the final assertions are
-  // unchanged). Caught by a real CI run on a slower shared runner, not reproducible locally.
-  await expect(async () => {
-    await page.click('.lang');
-    await expect(page.locator('.brand')).toContainText('Ganesh Puja Trust');
-  }).toPass({ timeout: 10000 });
+  // `.lang` is part of the static above-the-fold shell (Phase 7 item 28) and used to exist in the
+  // DOM before `mountShell()`'s async Firestore read resolved and wired its onclick — a real
+  // hydration race (final-review fix wave I1 fixed it: js/shell.js now wires `.lang`/`.burger`
+  // synchronously, before that await, since setLang()/the burger toggle need no fetched data). A
+  // single click is enough now; no retry-until-it-lands wrapper needed.
+  await page.click('.lang');
+  await expect(page.locator('.brand')).toContainText('Ganesh Puja Trust');
   await page.goto('/events.html');
   await expect(page.locator('.ph h1')).toHaveText('Upcoming events');
+});
+// Final-review fix wave I1: proves the fix works during the actual hydration window, not just
+// "eventually" — which the previous toPass()-wrapped test above could never distinguish from "the
+// race happened to resolve in our favour before the retry timeout". Firestore is blocked outright
+// (js/content.js's getSettings()/getContent() both fail-soft to defaults on a rejected read, so
+// mountShell() still eventually finishes — it just never gets real settings/content); both clicks
+// below happen well before that fallback settles, proving `.lang`/`.burger` work with zero data.
+test('language toggle and burger menu work before Firestore ever responds', async ({ page }) => {
+  await page.route('**/google.firestore.v1.Firestore/**', r => r.abort());
+  await page.goto('/index.html');
+  await page.click('.burger');
+  await expect(page.locator('.links')).toHaveClass(/open/);
+  await page.click('.lang'); // setLang('en') — pure, no data dependency; takes effect on whatever renders next
+  await expect(page.locator('.brand')).toContainText('Ganesh Puja Trust', { timeout: 15000 });
 });
 test('drafts and hidden rows never render publicly', async ({ page }) => {
   await page.goto('/about.html');  await expect(page.locator('article')).toHaveCount(1);
