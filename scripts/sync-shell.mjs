@@ -133,6 +133,12 @@ function phHtml(crumbKey, h1Key) {
 // on why the .ph/.hero nodes themselves survive that same call).
 const LOADING_NOTE = `<p class="sr-only" aria-live="polite">${esc(S('common.loading'))}</p>`;
 const NOSCRIPT = `<noscript><p>${esc(S('common.noscript'))}</p></noscript>`;
+// Phase 7 Task 5 (item 29): registers the app-shell service worker on every public page (never
+// admin/) — see js/sw-register.js's own comments for the localhost/https/opt-in rules. Placed
+// inside the generated shell block (not each page's own trailing <script> tags) so it stays in
+// sync across all 15 pages automatically via `node scripts/sync-head.mjs[/--check]`, same as the
+// nav/footer markup above.
+const SW_REGISTER_SCRIPT = '<script type="module" src="js/sw-register.js"></script>';
 
 export function buildShellBlock(id) {
   const meta = SHELL_META[id];
@@ -142,7 +148,7 @@ export function buildShellBlock(id) {
   const mainOpen = isHome ? '<main id="main" tabindex="-1">' : '<main id="main" tabindex="-1" style="min-height:70vh">';
   const mainContent = isHome ? `${heroHtml()}\n${HOME_SECTION_SKELETONS}\n${LOADING_NOTE}` : `${phHtml(meta.crumbKey, meta.h1Key)}\n${LOADING_NOTE}`;
   const footer = `<div id="site-footer" data-shell="1">\n${footerHtml()}\n</div>`;
-  return [header, `${mainOpen}\n${mainContent}\n</main>`, footer, NOSCRIPT].join('\n');
+  return [header, `${mainOpen}\n${mainContent}\n</main>`, footer, NOSCRIPT, SW_REGISTER_SCRIPT].join('\n');
 }
 
 const SHELL_START = '<!-- shell:start -->';
