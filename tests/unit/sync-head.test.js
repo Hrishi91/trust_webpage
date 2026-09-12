@@ -77,3 +77,37 @@ test('generatedFiles() is stable: running it twice yields byte-identical sitemap
   const b = generatedFiles();
   assert.equal(a['sitemap.xml'], b['sitemap.xml'], 'sitemap.xml must be identical on consecutive runs');
 });
+
+// Phase 7 performance pass (2026-09-13): the render-blocking Google Fonts stylesheet + its
+// preconnects + the four version-pinned gstatic preloads are gone from every generated public
+// page, replaced by one self-hosted preload and an inlined tokens/themes <style> block — see
+// css/fonts.css and scripts/sync-head.mjs's FONT_PRELOADS / buildAssetsBlock().
+test('generatedFiles(): no generated HTML file references fonts.googleapis.com or fonts.gstatic.com', () => {
+  const files = generatedFiles();
+  for (const [rel, html] of Object.entries(files)) {
+    if (!rel.endsWith('.html')) continue;
+    assert.doesNotMatch(html, /fonts\.googleapis\.com/, `${rel} must not reference fonts.googleapis.com`);
+    assert.doesNotMatch(html, /fonts\.gstatic\.com/, `${rel} must not reference fonts.gstatic.com`);
+  }
+});
+
+test('generatedFiles(): every HTML file has exactly one self-hosted font preload (the Hind Siliguri body face)', () => {
+  const files = generatedFiles();
+  for (const [rel, html] of Object.entries(files)) {
+    if (!rel.endsWith('.html')) continue;
+    const preloads = html.match(/<link rel="preload" as="font"[^>]*>/g) || [];
+    assert.equal(preloads.length, 1, `${rel} must have exactly one font preload`);
+    assert.match(preloads[0], /href="assets\/fonts\/hind-siliguri-400-bengali\.woff2"/, `${rel} preload must target the self-hosted body face`);
+  }
+});
+
+test('generatedFiles(): every HTML file links css/fonts.css, css/tokens.css, css/site.css and css/themes.css (self-hosted, no Google Fonts)', () => {
+  const files = generatedFiles();
+  for (const [rel, html] of Object.entries(files)) {
+    if (!rel.endsWith('.html')) continue;
+    assert.match(html, /<link rel="stylesheet" href="css\/fonts\.css">/, `${rel} must link css/fonts.css`);
+    assert.match(html, /<link rel="stylesheet" href="css\/tokens\.css">/, `${rel} must link css/tokens.css`);
+    assert.match(html, /<link rel="stylesheet" href="css\/site\.css">/, `${rel} must link css/site.css`);
+    assert.match(html, /<link rel="stylesheet" href="css\/themes\.css">/, `${rel} must link css/themes.css`);
+  }
+});

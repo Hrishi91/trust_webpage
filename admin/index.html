@@ -6,9 +6,14 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Admin</title>
 <script>try{var d=localStorage.getItem('design');if(/^(siddhi|mukha|dhokra|atreyee|bangarh)$/.test(d))document.documentElement.setAttribute('data-theme',d);var o=JSON.parse(localStorage.getItem('designOverrides')||'null');if(o){var m={ctaInk:'cta-ink',heroAccent:'hero-accent',tickerInk:'ticker-ink'};var st=document.documentElement.style;var ov=o.overrides||{};for(var k in ov){if(!/^[a-zA-Z][a-zA-Z0-9]*$/.test(k))continue;var v=ov[k];if(typeof v!=='string'||!/^#[0-9a-fA-F]{6}$/.test(v))continue;st.setProperty('--'+(m[k]||k),v)}var F=['Baloo Da 2','Hind Siliguri','Tiro Bangla','Atma'];if(o.fonts&&F.indexOf(o.fonts.display)>-1)st.setProperty('--display','"'+o.fonts.display+'", "Hind Siliguri", sans-serif');if(o.fonts&&F.indexOf(o.fonts.body)>-1)st.setProperty('--body','"'+o.fonts.body+'", "Noto Sans Bengali", system-ui, sans-serif')}}catch(e){}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Tiro+Bangla&family=Atma:wght@500;700&display=swap">
+<!-- Phase 7 performance pass (2026-09-13): self-hosted fonts, same as the public pages (see
+     scripts/sync-head.mjs's "fonts:start" block and css/fonts.css) — this head is hand-written
+     (admin/ is excluded from HEAD_META/sync-head.mjs, already noindex) so it is updated by hand
+     the same way. Unlike public pages, tokens.css/themes.css stay real <link>s here: admin is a
+     single-operator, always-network tool where inlining buys nothing and a normal cached
+     stylesheet is simpler to maintain. -->
+<link rel="preload" as="font" type="font/woff2" href="../assets/fonts/hind-siliguri-400-bengali.woff2" crossorigin>
+<link rel="stylesheet" href="../css/fonts.css">
 <link rel="stylesheet" href="../css/tokens.css">
 <link rel="stylesheet" href="../css/themes.css">
 <link rel="stylesheet" href="../css/admin.css">

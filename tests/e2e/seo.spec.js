@@ -85,6 +85,39 @@ test('css/site.css has an @media print rule hiding chrome (nav/ticker/footer/sha
   expect(css).toMatch(/@media print\{[^}]*\.nav[^}]*\.ticker[^}]*footer[^}]*\.share[^}]*\.tabs[^}]*\.btn/);
 });
 
+// Phase 7 performance pass (2026-09-13): the live home's render-blocking Google Fonts stylesheet
+// (4 families / 10 faces on fonts.googleapis.com) was the final reviewer's diagnosed Lighthouse
+// bottleneck (docs/build-log.md "2026-09-13 — Phase 7 performance pass"). Fonts are now
+// self-hosted from css/fonts.css / assets/fonts/*.woff2 — this asserts the fix actually lands in
+// a real browser (not just in generatedFiles()'s string output, which tests/unit/sync-head.test.js
+// already covers) and that Baloo Da 2 (the h1 display face) actually loads.
+test('home makes no request to fonts.googleapis.com or fonts.gstatic.com, and the self-hosted body-font preload resolves 200', async ({ page, request }) => {
+  const requested = [];
+  page.on('request', req => requested.push(req.url()));
+  const res = await page.goto('/index.html');
+  expect(res.status()).toBe(200);
+  // Home keeps a live Firestore onSnapshot listener open (the ticker/live strip), so
+  // waitForLoadState('networkidle') never resolves here — same reason pwa.spec.js's
+  // firebase-auth.js checks assert on the `requested` array right after a visible element shows
+  // up, rather than waiting for the network to go fully idle.
+  await expect(page.locator('.brand')).toContainText('গণেশ পুজো ট্রাস্ট');
+  expect(requested.some(u => u.includes('fonts.googleapis.com'))).toBe(false);
+  expect(requested.some(u => u.includes('fonts.gstatic.com'))).toBe(false);
+  const preloadRes = await request.get('/assets/fonts/hind-siliguri-400-bengali.woff2');
+  expect(preloadRes.status()).toBe(200);
+});
+
+test('home: h1 renders in the self-hosted Baloo Da 2 face, and Hind Siliguri 700 actually loads', async ({ page }) => {
+  await page.goto('/index.html');
+  const family = await page.locator('h1').evaluate(el => getComputedStyle(el).fontFamily);
+  expect(family).toContain('Baloo Da 2');
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check('700 20px "Baloo Da 2"');
+  });
+  expect(loaded).toBe(true);
+});
+
 test('node scripts/sync-head.mjs --check exits 0 (generated heads/robots/sitemap/manifest are committed and in sync)', () => {
   expect(() => execFileSync('node', ['scripts/sync-head.mjs', '--check'], { cwd: new URL('../..', import.meta.url), stdio: 'pipe' })).not.toThrow();
 });

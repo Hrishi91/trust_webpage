@@ -159,25 +159,24 @@ function ldJson(id, meta, bnTitleFull, canonical) {
 }
 
 // The full generated block, WITHOUT the markers (buildBlock adds those) — title/description/
-// canonical/OG/Twitter/theme-color/icon links/manifest/JSON-LD only. Google Fonts links, the
-// tokens/site/themes stylesheets and the inline theme-cache script live outside this block in
-// every HTML file and are never touched here.
-// Phase 7 Task 4 (item 32, site-basics audit): the four woff2 files the site actually renders
-// with by default — Baloo Da 2 800 (headings/brand/countdown, `.ph h1`/`.brand .t`/`.countdown b`
-// all set font-weight:800) and Hind Siliguri 400/600/700 (body text, .nav .lang, .btn/.tabs
-// buttons) — pinned URLs read from https://fonts.googleapis.com/css2?family=... with a modern
-// Chrome UA (Google Fonts serves woff2 only to UAs that support it) and matched to the `bengali`
-// (U+0980-09FE) unicode-range block, since that's the subset actually used on every page. Baloo
-// Da 2's bengali subset happens to serve the SAME file for weights 500/700/800 (verified against
-// the fetched CSS) — one <link> covers all of them. Preloading skips the "discover the font
-// inside the render-blocking Google Fonts CSS, then fetch it" round trip that
-// render-blocking-insight flagged (item 32's 987ms Google Fonts stylesheet cost).
+// canonical/OG/Twitter/theme-color/icon links/manifest/JSON-LD only. The self-hosted fonts
+// stylesheet, the tokens/themes inline <style> blocks, the site.css link and the inline
+// theme-cache script live outside this block in every HTML file and are never touched here.
+//
+// Phase 7 performance pass (2026-09-13): the render-blocking Google Fonts stylesheet (4
+// families / 10 faces on fonts.googleapis.com, ~987ms on the critical path) plus the four
+// version-pinned gstatic preloads this array used to hold were the final reviewer's diagnosed
+// bottleneck for live Lighthouse Performance 62 / LCP 8.6s (docs/build-log.md "2026-09-13 —
+// Phase 7 performance pass"). Fonts are now self-hosted (css/fonts.css, assets/fonts/*.woff2 —
+// same bytes Google Fonts itself serves, Bengali+Latin subsets only, OFL-licensed, see
+// assets/fonts/OFL.txt). Only ONE font is worth preloading: Hind Siliguri 400 bengali is the
+// body face — the LCP text on every page — so preloading it (not the whole fonts.css stylesheet,
+// which is discovered fast anyway as a same-origin, SW-precached file) removes the one extra
+// round trip that matters. A same-origin relative path also can't rot the way the old
+// version-pinned gstatic URLs could.
 const FONT_PRELOADS = [
-  'https://fonts.gstatic.com/s/balooda2/v26/2-ci9J9j0IaUMQZwAJyJQvvdoKFD.woff2',
-  'https://fonts.gstatic.com/s/hindsiliguri/v14/ijwTs5juQtsyLLR5jN4cxBEoTI7ax9k0.woff2',
-  'https://fonts.gstatic.com/s/hindsiliguri/v14/ijwOs5juQtsyLLR5jN4cxBEoREP-0vQVKxGv.woff2',
-  'https://fonts.gstatic.com/s/hindsiliguri/v14/ijwOs5juQtsyLLR5jN4cxBEoRCf_0vQVKxGv.woff2',
-].map(href => `<link rel="preload" as="font" type="font/woff2" href="${href}" crossorigin>`);
+  '<link rel="preload" as="font" type="font/woff2" href="assets/fonts/hind-siliguri-400-bengali.woff2" crossorigin>',
+];
 
 function buildBlock(id, meta) {
   const title = resolveTitle(meta);
@@ -226,6 +225,40 @@ function injectHead(html, block) {
   if (MARKER_RE.test(html)) return html.replace(MARKER_RE, wrapped);
   if (!LEGACY_RE.test(html)) throw new Error('sync-head: could not find a <title> block to replace');
   return html.replace(LEGACY_RE, wrapped + '\n');
+}
+
+// Phase 7 performance pass (2026-09-13): the CSS delivery block that sits after the inline
+// theme-bootstrap <script> and before </head> on every public page — same reasoning as
+// HEAD_META/FONT_PRELOADS above (this is the other half of the render-blocking-CSS fix). Reads
+// css/tokens.css and css/themes.css off disk and inlines them verbatim so first paint has both
+// the default tokens AND every [data-theme] override (no flash of unstyled/wrong-theme content
+// for a visitor whose localStorage design pick differs from siddhi) — the file on disk stays the
+// single source of truth (tests/unit/contrast.test.js still parses css/tokens.css directly), this
+// just also inlines it, generated so the two can never drift apart. css/site.css stays a normal
+// blocking <link> (it's the real layout, not a handful of custom-property declarations).
+const ASSETS_START = '<!-- fonts:start -->';
+const ASSETS_END = '<!-- fonts:end -->';
+const ASSETS_MARKER_RE = /<!-- fonts:start -->[\s\S]*?<!-- fonts:end -->/;
+// Matches the pre-Phase-7 hand-authored preconnect/Google-Fonts/tokens+site+themes block this
+// replaces the first time it runs on a file that has no fonts:start/fonts:end markers yet. The
+// leading www.gstatic.com preconnect (unrelated to fonts — Firebase Auth's reCAPTCHA assets) is
+// deliberately left alone and NOT captured here.
+const ASSETS_LEGACY_RE = /<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">\n<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin>\n<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/css2\?[^"]*">\n<link rel="stylesheet" href="css\/tokens\.css">\n<link rel="stylesheet" href="css\/site\.css">\n<link rel="stylesheet" href="css\/themes\.css">\n?/;
+
+function buildAssetsBlock() {
+  return [
+    '<link rel="stylesheet" href="css/fonts.css">',
+    '<link rel="stylesheet" href="css/tokens.css">',
+    '<link rel="stylesheet" href="css/site.css">',
+    '<link rel="stylesheet" href="css/themes.css">',
+  ].join('\n');
+}
+
+function injectAssets(html) {
+  const wrapped = `${ASSETS_START}\n${buildAssetsBlock()}\n${ASSETS_END}`;
+  if (ASSETS_MARKER_RE.test(html)) return html.replace(ASSETS_MARKER_RE, wrapped);
+  if (!ASSETS_LEGACY_RE.test(html)) throw new Error('sync-head: could not find the pre-Phase-7 fonts/tokens/site/themes block to replace');
+  return html.replace(ASSETS_LEGACY_RE, wrapped + '\n');
 }
 
 // Final-review fix wave I3: this site is served from GitHub Pages under a repo sub-path
@@ -299,7 +332,7 @@ export function generatedFiles() {
     // (item 28) and the deferred DOMPurify <script> (item 32) are generated by scripts/
     // sync-shell.mjs, applied here so ONE command (`node scripts/sync-head.mjs[/--check]`) keeps
     // both the head and the body in sync — see that file's own top comment.
-    files[meta.file] = applyShell(id, injectHead(current, buildBlock(id, meta)));
+    files[meta.file] = applyShell(id, injectAssets(injectHead(current, buildBlock(id, meta))));
   }
   files['robots.txt'] = robotsTxt();
   files['sitemap.xml'] = sitemapXml();

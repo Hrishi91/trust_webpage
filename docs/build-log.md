@@ -1064,3 +1064,43 @@ one new case), `node scripts/sync-head.mjs --check` and `node scripts/bump-sw.mj
 0. `scripts/deploy-rules.sh` ran the full suite again internally (green) then deployed
 `firestore:rules,firestore:indexes,storage` to `ganesh-puja-trust` — 2026-09-13 02:43 (the `errors`
 delete permission is the one live rules change this wave makes).
+
+## 2026-09-13 — Phase 7 performance pass
+
+Final reviewer diagnosis for live Lighthouse mobile home (Performance 62, FCP 5.1s, LCP 8.6s, CLS
+0.04, TBT 30ms — spec `docs/superpowers/specs/2026-09-12-phase-7-site-basics.md` §5 targets
+Performance ≥ 70 / LCP ≤ 2.5s / CLS ≤ 0.1): the critical path was the render-blocking Google Fonts
+stylesheet (4 families / 10 faces on fonts.googleapis.com) plus 3 blocking same-origin CSS files;
+the four gstatic `<link rel=preload as=font>` were version-pinned URLs that could rot; the main
+thread was not the driver (TBT already fine). Brief and report:
+`.superpowers/sdd/2026-09-12-phase-7-site-basics/perf-pass-report.md`.
+
+`perf(fonts): self-host Bengali subsets; drop Google Fonts stylesheet and preloads` — fetched the
+real Google Fonts `css2` response (Chrome UA, so woff2 is served) for the exact families/weights
+the site already requested (Baloo Da 2 500/700/800, Hind Siliguri 400/500/600/700, Tiro Bangla 400,
+Atma 500/700) and kept only the `bengali` and `latin` `unicode-range` blocks (no latin-ext, no
+vietnamese) — 16 files, same bytes Google Fonts itself serves, in `assets/fonts/*.woff2` +
+`assets/fonts/OFL.txt` (SIL OFL 1.1 text per family, fetched from each family's `google/fonts`
+GitHub directory). Baloo Da 2's bengali AND latin subsets serve the identical file for weights
+500/700/800 (verified against the fetched CSS — matches what the old single gstatic preload already
+relied on), so `css/fonts.css` declares it once with a `font-weight: 500 800` range instead of
+duplicating the same bytes three times; Atma keeps only 500/700 (browser-synthesizes 800 from 700,
+same as the removed Google Fonts request). New `css/fonts.css` holds every `@font-face` rule
+(`font-display: swap`); only Hind Siliguri 400/700 + Baloo Da 2 (bengali+latin, ~289 KB) are needed
+by the default (সিদ্ধি) theme — Hind Siliguri 500/600 and the Tiro Bangla/Atma theme faces are
+declared but cost nothing until a matching `font-family` actually renders (dhokra/bangarh/atreyee/
+mukha themes). `scripts/sync-head.mjs`'s `FONT_PRELOADS` dropped the four version-pinned gstatic
+URLs for ONE same-origin preload (`assets/fonts/hind-siliguri-400-bengali.woff2` — the body face,
+the LCP text on every page); a new `fonts:start`/`fonts:end` generated block replaces the
+hand-authored preconnects/Google-Fonts-stylesheet/tokens+site+themes footer with
+`css/fonts.css` + `css/tokens.css` + `css/site.css` + `css/themes.css` links (the `www.gstatic.com`
+preconnect, unrelated to fonts — Firebase Auth reCAPTCHA — is left alone). `admin/index.html`
+(hand-written, excluded from `HEAD_META`) updated by hand the same way; admin keeps `tokens.css`/
+`themes.css` linked (see the next commit for why that split exists). `tests/unit/sync-head.test.js`
+gained assertions that no generated head references `fonts.googleapis.com`/`fonts.gstatic.com` and
+that every page has exactly one font preload targeting the self-hosted body face;
+`tests/e2e/seo.spec.js` gained a live-browser check that home makes no request to either Google
+Fonts origin and that the preload URL resolves 200, plus a check that `h1`'s computed
+`font-family` includes "Baloo Da 2" and `document.fonts.check('700 20px "Baloo Da 2"')` is true
+after `document.fonts.ready`. README gained a "Fonts" section naming the self-hosted set and its
+OFL licence.

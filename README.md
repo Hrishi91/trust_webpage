@@ -71,6 +71,16 @@ tests/
 package.json                  # Dev dependencies and npm scripts
 ```
 
+## Fonts
+
+Every public page and /admin/ self-host their fonts from `css/fonts.css` + `assets/fonts/*.woff2`
+(Phase 7 performance pass, 2026-09-13) — no request to fonts.googleapis.com or fonts.gstatic.com
+at runtime. Files are the same bytes Google Fonts itself serves, Bengali + Latin subsets only:
+Baloo Da 2 (display), Hind Siliguri (body — 400/700 are on the critical path, preloaded), Tiro
+Bangla (serif / dhokra & bangarh theme display) and Atma (mukha theme display, loaded only when
+that theme is active). All four families are licensed under the SIL Open Font License 1.1 — full
+text per family in `assets/fonts/OFL.txt`.
+
 ## npm scripts
 
 - `npm run test:unit` — Run unit tests (pure logic: i18n, ui, resize)
