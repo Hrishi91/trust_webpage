@@ -82,6 +82,17 @@ test('gallery lightbox: next/prev buttons move between the album\'s photos', asy
   await dialog.locator('.lb-prev').click();
   await expect.poll(() => img.getAttribute('src')).toBe(first);
 });
+test('gallery lightbox: clicking the backdrop closes the dialog', async ({ page }) => {
+  await page.goto('/gallery.html?album=a1');
+  const firstThumb = page.locator('.thumb-btn').first();
+  await firstThumb.click();
+  const dialog = page.locator('dialog.lightbox');
+  await expect(dialog).toBeVisible();
+  // Clicks on the ::backdrop target the dialog element itself; clicking at the top-left corner
+  // (in the padding area, away from the image/buttons) hits the backdrop.
+  await dialog.click({ position: { x: 5, y: 5 } });
+  await expect(dialog).toBeHidden();
+});
 
 // Item 21: real tabs — a temporary second published event (a different calendar day than the
 // seeded events/e1) is added directly through the Admin SDK (bypasses rules, like tests/seed/seed.js)
@@ -113,7 +124,14 @@ test.describe('events day tabs', () => {
     await expect(secondTab).toBeFocused();
     await expect(secondTab).toHaveAttribute('aria-selected', 'true');
     await expect(firstTab).toHaveAttribute('aria-selected', 'false');
-    await expect(page.locator('#day-panel-1')).toHaveAttribute('aria-labelledby', 'day-tab-1');
+    // Panel has stable id 'day-panel' (not per-day); aria-labelledby points to the selected tab
+    await expect(page.locator('#day-panel')).toHaveAttribute('aria-labelledby', 'day-tab-1');
+    // Every tab's aria-controls points at an existing element in the DOM
+    for (let i = 0; i < 2; i++) {
+      const tab = page.locator(`#day-tab-${i}`);
+      const controlsId = await tab.getAttribute('aria-controls');
+      await expect(page.locator(`#${controlsId}`)).toBeVisible();
+    }
   });
 });
 

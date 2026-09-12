@@ -62,20 +62,42 @@ test('accent-on-ground contrast floors per theme', () => {
     assert.ok(ratio(t['ticker-ink'], t.sindoor) >= 4.5, `${name} ticker-ink/sindoor ${ratio(t['ticker-ink'], t.sindoor).toFixed(2)}`);
   }
 });
-// Phase 7 Task 3 item 23 — the 6 real Lighthouse failures on the live home page and their fixes:
-//  - ticker `small` (3.09:1): css/site.css `.ticker .ann small` no longer dims --ticker-ink with
-//    opacity:.7 — the bare ticker-ink/sindoor pair above already gates this.
-//  - `.pulse` (3.69:1): color was hardcoded #fff6e8 (dhokra's pending.md:110 gap) — now
-//    var(--ticker-ink), same gated pair.
-//  - brand `.t`/`.s` (2.56:1 / 1.83:1): `.nav`'s translucent backdrop is now opaque var(--bg), and
-//    `.brand .s` no longer dims --hero-ink with opacity:.7 — both now sit on plain --bg, gated by
-//    hero-ink/bg below.
-//  - `.eyebrow` (3.5:1): `.donate .eyebrow` (the only bare .eyebrow on a --bg ground) now uses
-//    var(--hero-accent) instead of var(--sindoor) — gated by the hero-accent/bg floor test above.
-test('brand text (.t/.s) and dhokra chip pairs (.tabs/.chips/.days .active) hold their contrast floor', () => {
-  for (const [name, t] of Object.entries(blocks)) {
-    assert.ok(ratio(t['hero-ink'], t.bg) >= 4.5, `${name} hero-ink/bg (brand .t/.s) ${ratio(t['hero-ink'], t.bg).toFixed(2)}`);
-    assert.ok(ratio(t['ticker-ink'], t.sindoor) >= 4.5, `${name} ticker-ink/sindoor (.tabs/.chips/.days .active) ${ratio(t['ticker-ink'], t.sindoor).toFixed(2)}`);
-    assert.ok(ratio(t['hero-accent'], t.bg) >= 4.5, `${name} hero-accent/bg (.donate .eyebrow, .upi code) ${ratio(t['hero-accent'], t.bg).toFixed(2)}`);
-  }
+// Phase 7 Task 3 item 23 — css/site.css fixes for the 6 real Lighthouse failures on the live home page:
+// The token pairs are gated by the contrast tests above; this test guards that the actual CSS rules
+// themselves stayed fixed (not reverted/re-introduced with opacity or hardcoded colours).
+//  - ticker `small` (3.09:1 fix): no opacity: inside `.ticker .ann small{…}`
+//  - `.pulse` (3.69:1 fix): color: uses var(--ticker-ink), not a hardcoded #fff6e8
+//  - brand `.t`/`.s` (2.56:1 / 1.83:1 fix): .brand{color:inherit} present, no opacity: in .brand .s{…}
+//  - .chips/.tabs active states: color: uses var(--ticker-ink), not a hardcoded #fff6e8
+const site = readFileSync(new URL('../../css/site.css', import.meta.url), 'utf8');
+test('CSS rules that fixed the 6 Lighthouse contrast failures guard against regression', () => {
+  // Extract rule bodies by name
+  const ruleBody = (selector) => {
+    const match = site.match(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{([^}]*)\\}`, 's'));
+    return match ? match[1] : '';
+  };
+
+  // Item 23: .brand{color:inherit} fixes brand .t/.s sitting on plain --bg (not --sindoor)
+  assert.ok(ruleBody('.brand').includes('color:inherit'), '.brand rule includes color:inherit');
+
+  // Item 23: .brand .s no longer has opacity:.7
+  assert.ok(!ruleBody('.brand .s').includes('opacity:'), '.brand .s rule has no opacity (was .7)');
+
+  // Item 23: .ticker .ann small no longer has opacity:.7
+  assert.ok(!ruleBody('.ticker .ann small').includes('opacity:'), '.ticker .ann small rule has no opacity (was .7)');
+
+  // Item 23: .pulse uses var(--ticker-ink), not hardcoded #fff6e8
+  const pulseBody = ruleBody('.pulse');
+  assert.ok(pulseBody.includes('var(--ticker-ink)'), '.pulse uses var(--ticker-ink)');
+  assert.ok(!pulseBody.includes('#fff6e8'), '.pulse does not use hardcoded #fff6e8');
+
+  // Item 23: .tabs button.active uses var(--ticker-ink), not hardcoded #fff6e8
+  const tabsBody = ruleBody('.tabs button.active');
+  assert.ok(tabsBody.includes('var(--ticker-ink)'), '.tabs button.active uses var(--ticker-ink)');
+  assert.ok(!tabsBody.includes('#fff6e8'), '.tabs button.active does not use hardcoded #fff6e8');
+
+  // Item 23: .chips i.on uses var(--ticker-ink), not hardcoded #fff6e8
+  const chipsBody = ruleBody('.chips i.on');
+  assert.ok(chipsBody.includes('var(--ticker-ink)'), '.chips i.on uses var(--ticker-ink)');
+  assert.ok(!chipsBody.includes('#fff6e8'), '.chips i.on does not use hardcoded #fff6e8');
 });

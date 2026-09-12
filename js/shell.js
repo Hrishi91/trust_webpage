@@ -103,10 +103,11 @@ export async function mountShell(active, pageTitleKey) {
     // translate loop needs two identical copies of the content). The live `.pulse` badge is
     // rendered only in pass 0 — otherwise e2e assertions like `.live-strip .pulse` (a single-
     // element locator) would strict-mode-violate on any page with a live announcement, since
-    // duplicating it verbatim would put two badges in the DOM for one live item.
+    // duplicating it verbatim would put two badges in the DOM for one live item. Pass 1's copy
+    // gets aria-hidden=true so screen readers announce each announcement once, not twice.
     el('div', { class: 'in' }, ...[0, 1].flatMap(pass => ann.slice(0, 5).map(a => {
       const created = a.createdAt?.toDate ? a.createdAt.toDate() : a.createdAt;
-      return el('span', { class: 'ann' }, pass === 0 && live && a.isLive ? el('span', { class: 'pulse', text: t('live.badge') }) : null,
+      return el('span', { class: 'ann', 'aria-hidden': pass === 1 ? 'true' : null }, pass === 0 && live && a.isLive ? el('span', { class: 'pulse', text: t('live.badge') }) : null,
         `${a.pinned ? '📌 ' : ''}${pick(a.text)}`, created ? el('small', { text: fmtDate(created, getLang()) }) : null);
     })))) : null;
   // Announcements arrive on their own Firestore snapshot cadence and must not disturb an

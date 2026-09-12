@@ -23,6 +23,8 @@ if (s) {
     // Item 21: real tab semantics — role="tab"/aria-selected/aria-controls on each day button,
     // role="tabpanel"/aria-labelledby on the timeline they control, and a roving tabindex (only the
     // selected tab is in the Tab order; arrow keys move both focus and selection between the rest).
+    // The tabpanel has a stable id "day-panel" (not per-day), and all tabs point aria-controls at it
+    // (with the tabpanel's aria-labelledby pointing back to the selected tab's id).
     const moveTab = (days, fromIndex, dir) => {
       if (!days.length) return;
       const next = dir === 'home' ? 0 : dir === 'end' ? days.length - 1 : (fromIndex + dir + days.length) % days.length;
@@ -58,7 +60,7 @@ if (s) {
           days.length ? el('div', { class: 'days tabs', role: 'tablist', 'aria-label': t('events.upcoming') }, ...days.map((d, i) => {
             const selected = d === selectedDay;
             return el('button', {
-              type: 'button', id: `day-tab-${i}`, role: 'tab', 'aria-selected': String(selected), 'aria-controls': `day-panel-${i}`,
+              type: 'button', id: `day-tab-${i}`, role: 'tab', 'aria-selected': String(selected), 'aria-controls': 'day-panel',
               tabindex: selected ? '0' : '-1', class: selected ? 'active' : '',
               text: fmtDate(up.find(e => dayKey(e) === d).start, lang),
               onclick: () => { selectedDay = d; render(); },
@@ -70,7 +72,7 @@ if (s) {
               },
             });
           })) : null,
-          up.length ? el('div', { id: `day-panel-${selectedIndex}`, role: 'tabpanel', 'aria-labelledby': `day-tab-${selectedIndex}`, class: 'timeline' }, ...up.filter(e => dayKey(e) === selectedDay).map(row)) : el('p', { class: 'muted', text: t('common.empty') }),
+          up.length ? el('div', { id: 'day-panel', role: 'tabpanel', 'aria-labelledby': `day-tab-${selectedIndex}`, class: 'timeline' }, ...up.filter(e => dayKey(e) === selectedDay).map(row)) : el('p', { class: 'muted', text: t('common.empty') }),
           past.length ? el('div', { class: 'acc' }, el('details', {}, el('summary', { text: t('events.past') }), ...past.map(row))) : null,
           shareRow({ url: location.href, title: t('events.upcoming') }),
         ].filter(Boolean)));

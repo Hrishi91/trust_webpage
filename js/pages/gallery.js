@@ -91,6 +91,9 @@ if (s) {
         closeBtn.onclick = () => dialog.close();
         prevBtn.onclick = () => showPhoto(idx - 1);
         nextBtn.onclick = () => showPhoto(idx + 1);
+        // Item 20: clicking the ::backdrop (the dark area outside the image) closes the dialog.
+        // Clicks on ::backdrop target the dialog element itself; clicks on the image/buttons do not.
+        dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
         dialog.addEventListener('close', () => lastTrigger?.focus());
         const open = i => { lastTrigger = document.activeElement; showPhoto(i); dialog.showModal(); };
         const relabel = () => {
