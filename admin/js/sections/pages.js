@@ -30,7 +30,8 @@ registerSection(COLL, {
       return;
     }
     const entry = PAGE_IDS.find(([pid]) => pid === id);
-    const previewHref = entry ? `../${entry[2]}?preview=1` : null;
+    if (!entry) { box.append(el('p', { class: 'err', text: t('common.error') })); return; }
+    const previewHref = `../${entry[2]}?preview=1`;
     const def = PAGE_DEFAULTS[id] ?? { title: { bn: '', en: '' }, body: { bn: '', en: '' } };
     const cur = (await getDoc(doc(ctx.db, COLL, id))).data() ?? {};
     const f = {

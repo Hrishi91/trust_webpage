@@ -32,11 +32,12 @@ test('settings: design must be one of the five theme names when present', async 
 });
 
 // ---- published-content collections share one shape ----
-// Phase 7 Task 1: pages/{id} has the exact same published+!deleted / admin-write /
-// no-hard-delete shape as history/events/albums — `order` in the shared `pub` fixture is just
-// unused extra data for `pages` (fixed ids, no reordering), harmless to the shape assertions.
+// Phase 7 Task 1 (Fix round 1): pages/{id} has the same published+!deleted / admin-write / no-hard-delete
+// shape as history/events/albums, but write rule restricts to fixed ids only (privacy/refund/trust/contact/
+// faq/news/downloads/notfound). The loop tests all three with arbitrary IDs; pages uses 'faq' (a fixed ID).
 for (const coll of ['history', 'events', 'albums', 'pages']) {
   test(`${coll}: public sees published+not-deleted only; admin sees all; no hard delete`, async () => {
+    const docId = coll === 'pages' ? 'faq' : 'new';  // pages uses fixed IDs only
     await E.seed(async db => {
       await db.doc(`${coll}/p`).set(pub);
       await db.doc(`${coll}/d`).set(draft);
@@ -53,13 +54,13 @@ for (const coll of ['history', 'events', 'albums', 'pages']) {
     await assertFails(a.collection(coll).get());
     await assertSucceeds(E.admin.firestore().doc(`${coll}/d`).get());
     await assertSucceeds(E.admin.firestore().collection(coll).get());
-    await assertFails(a.doc(`${coll}/new`).set(pub));
-    await assertFails(E.other.firestore().doc(`${coll}/new`).set(pub));
-    await assertSucceeds(E.admin.firestore().doc(`${coll}/new`).set(pub));
-    await assertSucceeds(E.admin.firestore().doc(`${coll}/new`).update({ deleted: true }));
-    await assertFails(E.admin.firestore().doc(`${coll}/new`).delete());
+    await assertFails(a.doc(`${coll}/${docId}`).set(pub));
+    await assertFails(E.other.firestore().doc(`${coll}/${docId}`).set(pub));
+    await assertSucceeds(E.admin.firestore().doc(`${coll}/${docId}`).set(pub));
+    await assertSucceeds(E.admin.firestore().doc(`${coll}/${docId}`).update({ deleted: true }));
+    await assertFails(E.admin.firestore().doc(`${coll}/${docId}`).delete());
     await assertFails(E.admin.firestore().doc(`${coll}/nodel`).set({ title: pub.title, published: true, order: 9 }));
-    await assertFails(E.admin.firestore().doc(`${coll}/new`).update({ deleted: 'yes' }));
+    await assertFails(E.admin.firestore().doc(`${coll}/${docId}`).update({ deleted: 'yes' }));
   });
 }
 
@@ -323,4 +324,10 @@ test('settings: trustees must be a list within the size cap', async () => {
   await assertFails(E.admin.firestore().doc('settings/site').set({ trustees: 'nope' }, { merge: true }));
   await assertFails(E.admin.firestore().doc('settings/site').set({ trustees: Array.from({ length: 21 }, () => ({})) }, { merge: true }));
   await assertFails(E.anon.firestore().doc('settings/site').set({ trustees: [] }, { merge: true }));
+});
+
+// Phase 7 Task 1 (Fix round 1): pages — only the eight fixed ids can be written
+test('pages: only fixed ids (privacy, refund, trust, contact, faq, news, downloads, notfound) can be written', async () => {
+  await assertFails(E.admin.firestore().doc('pages/evil').set(pub));
+  await assertSucceeds(E.admin.firestore().doc('pages/faq').set({ title: { bn: 'প্রশ্নোত্তর', en: 'FAQ' }, body: { bn: '', en: '' }, published: false, deleted: false }));
 });

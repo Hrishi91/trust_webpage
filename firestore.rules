@@ -107,7 +107,7 @@ service cloud.firestore {
     // `order` field (not a reorderable list) but the shape check doesn't care.
     match /pages/{id} {
       allow read: if isAdmin() || isLive();
-      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow create, update: if isAdmin() && hasDeletedFlag() && id in ['privacy','refund','trust','contact','faq','news','downloads','notfound'];
       allow delete: if false;
     }
 
