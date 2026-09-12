@@ -967,3 +967,15 @@ from `ORIGIN`'s own pathname, so a future root-served custom domain regenerates 
 automatically. `docs/pending.md` gained an owner-only note that `robots.txt` itself typically isn't
 fetched by crawlers at a sub-path at all — Search Console submission or a custom domain is the real
 fix for discoverability, this commit only fixes what the file itself says.
+
+`test(contrast): positive guards; glow2 follows sindoor/durva` — I4.
+`tests/unit/contrast.test.js`'s regression guard for `.brand .s`/`.ticker .ann small` was
+negative-only ("no `opacity:`"), which passes vacuously if the selector stops matching anything at
+all (`ruleBody()` returns `''`, and `''.includes(...)` is always false) — paired each with a
+"rule exists" assertion first. `--glow2` (the glow/shadow behind CTA buttons, the hero heading, the
+ganesh art, progress bars, the live-pulse badge) is meant to echo each theme's own accent hue at
+reduced opacity, but siddhi's, dhokra's, and atreyee's had drifted to unrelated colours — nothing
+previously checked `--glow2` against anything. Fixed in `css/tokens.css` (siddhi) and
+`css/themes.css` (dhokra, atreyee) to match their `--sindoor` (siddhi/dhokra; also already true for
+mukha/bangarh) or `--durva` (atreyee) hex; `tokensOf()` extended to parse `rgba()` tokens, and a new
+test asserts every theme's `--glow2` rgb triple against an explicit per-theme expected source token.

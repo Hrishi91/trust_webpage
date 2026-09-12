@@ -1,10 +1,14 @@
-/* Default (সিদ্ধি) design tokens — shared by the public site and /admin/. Theme overrides: themes.css */
+/* Default (সিদ্ধি) design tokens — shared by the public site and /admin/. Theme overrides: themes.css.
+   Final-review fix wave I4: --glow2 (glow/shadow behind CTA buttons, hero heading, ganesh art,
+   progress bars, live-pulse badge — css/site.css) had drifted from --sindoor to an unrelated
+   colour; tests/unit/contrast.test.js now asserts --glow2's rgb triple tracks its theme's own
+   accent (--sindoor here, --durva for atreyee) so this can't silently drift again. */
 :root{
   --bg:#0f1230;--bg2:#1c1850;--hero-ink:#fff6e8;--hero-muted:#c9c2e6;
   --ivory:#fff7ea;--ivory2:#fdefd6;--ink:#1d1631;--muted:#6b6280;
   --sindoor:#c9361a;--pitambar:#f7b733;--durva:#2f8f5b;--gold:#ffcc66;
   --cta:#c9361a;--cta-ink:#fff6e8;--line:rgba(29,22,49,.12);--card:#ffffff;
-  --glow:rgba(247,183,51,.55);--glow2:rgba(226,64,28,.35);
+  --glow:rgba(247,183,51,.55);--glow2:rgba(201,54,26,.35);
   --display:"Baloo Da 2","Hind Siliguri",sans-serif;--serif:"Tiro Bangla","Noto Serif Bengali",serif;--body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
   --r:18px;
   --focus:var(--pitambar);

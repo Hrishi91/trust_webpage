@@ -20,13 +20,29 @@ test('luminance() ranks black lowest, white highest', () => {
 const tokens = readFileSync(new URL('../../css/tokens.css', import.meta.url), 'utf8');
 const themes = readFileSync(new URL('../../css/themes.css', import.meta.url), 'utf8');
 
+// Final-review fix wave I4: also captures rgba(r,g,b,a) tokens (e.g. --glow2), not just
+// '#rrggbb' ones, so the hue-drift test below can read them.
 function tokensOf(block) {
   const out = {};
   for (const m of block.matchAll(/--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\b/g)) out[m[1]] = m[2];
+  for (const m of block.matchAll(/--([a-z0-9-]+)\s*:\s*(rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,[^)]*\))/g)) out[m[1]] = m[2];
   return out;
 }
 const blocks = { siddhi: tokensOf(tokens.match(/:root\s*\{[^}]*\}/)[0]) };
 for (const m of themes.matchAll(/\[data-theme="([a-z]+)"\]\s*\{([^}]*)\}/g)) blocks[m[1]] = tokensOf(m[2]);
+
+// Final-review fix wave I4: the 'r,g,b' triple of either a '#rrggbb' hex colour or an
+// 'rgba(r,g,b,a)' token, as a comparable string ('201,54,26') — used to check --glow2 (a glow/
+// shadow colour, always rgba() for its alpha) actually tracks its theme's own accent hue instead
+// of having drifted to an unrelated colour.
+function rgbTriple(value) {
+  if (value.startsWith('#')) {
+    return [1, 3, 5].map(i => parseInt(value.slice(i, i + 2), 16)).join(',');
+  }
+  const m = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,/.exec(value);
+  if (!m) throw new Error(`rgbTriple: not a hex or rgba() colour: ${value}`);
+  return `${m[1]},${m[2]},${m[3]}`;
+}
 
 test('all five token blocks are present with the required colour tokens', () => {
   assert.deepEqual(Object.keys(blocks).sort(), ['atreyee', 'bangarh', 'dhokra', 'mukha', 'siddhi']);
@@ -62,6 +78,23 @@ test('accent-on-ground contrast floors per theme', () => {
     assert.ok(ratio(t['ticker-ink'], t.sindoor) >= 4.5, `${name} ticker-ink/sindoor ${ratio(t['ticker-ink'], t.sindoor).toFixed(2)}`);
   }
 });
+// Final-review fix wave I4: --glow2 (a shadow/glow colour behind CTA buttons, the hero heading,
+// the ganesh art, progress bars, the live-pulse badge — css/site.css) is meant to echo each
+// theme's own accent hue at reduced opacity, but dhokra's and atreyee's had drifted to an
+// unrelated colour (caught by eye during this review, not by any prior test — nothing previously
+// checked --glow2 against anything). Every theme's expected source token is asserted explicitly
+// per theme (not inferred), so this test fails loudly — not vacuously — the moment any theme's
+// --glow2 stops tracking its accent, including a future theme added with no matching assertion.
+test('glow2 tracks its theme\'s own accent hue, not a drifted/unrelated colour', () => {
+  const glowSource = { siddhi: 'sindoor', mukha: 'sindoor', dhokra: 'sindoor', bangarh: 'sindoor', atreyee: 'durva' };
+  assert.deepEqual(Object.keys(glowSource).sort(), Object.keys(blocks).sort(), 'glowSource covers exactly the five themes above');
+  for (const [name, t] of Object.entries(blocks)) {
+    const sourceKey = glowSource[name];
+    assert.ok(t.glow2, `${name} --glow2`);
+    assert.ok(t[sourceKey], `${name} --${sourceKey}`);
+    assert.equal(rgbTriple(t.glow2), rgbTriple(t[sourceKey]), `${name} --glow2 (${t.glow2}) should track --${sourceKey} (${t[sourceKey]})`);
+  }
+});
 // Phase 7 Task 3 item 23 — css/site.css fixes for the 6 real Lighthouse failures on the live home page:
 // The token pairs are gated by the contrast tests above; this test guards that the actual CSS rules
 // themselves stayed fixed (not reverted/re-introduced with opacity or hardcoded colours).
@@ -80,11 +113,19 @@ test('CSS rules that fixed the 6 Lighthouse contrast failures guard against regr
   // Item 23: .brand{color:inherit} fixes brand .t/.s sitting on plain --bg (not --sindoor)
   assert.ok(ruleBody('.brand').includes('color:inherit'), '.brand rule includes color:inherit');
 
-  // Item 23: .brand .s no longer has opacity:.7
-  assert.ok(!ruleBody('.brand .s').includes('opacity:'), '.brand .s rule has no opacity (was .7)');
+  // Final-review fix wave I4: a negative-only assertion here ("no opacity:") passes vacuously if
+  // the selector itself stops matching anything (ruleBody() returns '', and ''.includes(...) is
+  // always false) — e.g. the rule gets renamed, merged into another selector, or deleted outright.
+  // Pairing every such negative with "the rule body is non-empty" makes that a loud failure
+  // instead of a silent pass. Item 23: .brand .s no longer has opacity:.7
+  const brandSBody = ruleBody('.brand .s');
+  assert.notEqual(brandSBody, '', '.brand .s rule exists');
+  assert.ok(!brandSBody.includes('opacity:'), '.brand .s rule has no opacity (was .7)');
 
   // Item 23: .ticker .ann small no longer has opacity:.7
-  assert.ok(!ruleBody('.ticker .ann small').includes('opacity:'), '.ticker .ann small rule has no opacity (was .7)');
+  const tickerSmallBody = ruleBody('.ticker .ann small');
+  assert.notEqual(tickerSmallBody, '', '.ticker .ann small rule exists');
+  assert.ok(!tickerSmallBody.includes('opacity:'), '.ticker .ann small rule has no opacity (was .7)');
 
   // Item 23: .pulse uses var(--ticker-ink), not hardcoded #fff6e8
   const pulseBody = ruleBody('.pulse');
