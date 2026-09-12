@@ -1,7 +1,17 @@
 import { registerSection } from '../admin.js';
 import { collection, getDocs, query, orderBy, limit } from '../../../js/firebase.js';
-import { t } from '../../../js/i18n.js';
+import { t, STRINGS } from '../../../js/i18n.js';
 import { el, fmtDate } from '../../../js/ui.js';
+
+// Fix round 1 (finding 4): translate the action word via `admin.log.action.<action>` (js/i18n.js)
+// when that key exists, falling back to the raw action string otherwise — a future logAudit()
+// call site with a new action string still renders (untranslated) instead of showing a literal
+// "admin.log.action.foo" (t()'s own missing-key fallback returns the key itself, not the raw
+// value, which is why this checks STRINGS directly rather than just calling t()).
+function actionLabel(action) {
+  const key = `admin.log.action.${action}`;
+  return STRINGS[key] ? t(key) : action;
+}
 
 // Item 34: 📜 লগ — audit log viewer. `audit` is admin-read-only (firestore.rules), append-only
 // (no update/delete rule), written by admin/js/audit.js's logAudit() from every mutating action
@@ -29,7 +39,7 @@ function buildAuditPane(ctx, rows) {
   const row = d => el('div', { class: 'log-row' },
     el('div', { class: 'log-head' },
       el('span', { text: fmtAt(d, ctx.lang) }),
-      el('b', { text: d.action }),
+      el('b', { text: actionLabel(d.action) }),
       el('span', { text: d.path }),
       el('span', { class: 'muted', text: `${t('admin.log.uid')}: ${(d.uid || '').slice(0, 8)}` })),
     el('details', {},

@@ -108,6 +108,10 @@ function reauth() {
   const dialog = $('reauth-dialog');
   const input = dialog.querySelector('input[type=password]');
   input.value = '';
+  // Fix round 1 (finding 2): Cancel is a plain button now (see admin/index.html's comment on
+  // #reauth-dialog) — it has no native submit behaviour, so it must close the dialog itself.
+  // Reassigning .onclick each call is idempotent (no listener pile-up across repeated reauth()s).
+  dialog.querySelector('#reauth-cancel').onclick = () => dialog.close('cancel');
   return new Promise(resolve => {
     const onClose = async () => {
       dialog.removeEventListener('close', onClose);

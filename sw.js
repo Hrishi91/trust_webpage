@@ -11,7 +11,7 @@
 // touches Firestore/Storage/Auth requests, online or offline.
 'use strict';
 
-const SW_VERSION = '20260912-11';
+const SW_VERSION = '20260912-12';
 const CACHE_NAME = 'trust-shell-' + SW_VERSION;
 const CACHE_PREFIX = 'trust-shell-';
 

@@ -35,13 +35,19 @@
 
 <!-- Item 39: masked re-auth — a real <input type=password>, not window.prompt() (which shows the
      password in clear text). admin.js's reauth() opens this with showModal() and resolves its
-     Promise from the form's `close` event; returnValue is the clicked button's `value`. -->
+     Promise from the form's `close` event; returnValue is the clicked button's `value`.
+     Fix round 1 (finding 2): Cancel is `type="button"` with its own click handler (admin.js wires
+     it to `dialog.close('cancel')`), not a second `type="submit"`. Two submit buttons in one
+     <form> means the browser's implicit-submission-on-Enter picks whichever comes FIRST in tree
+     order — with Cancel first (as it was), pressing Enter in the password field would have
+     "clicked" Cancel instead of Confirm. Confirm is the only submit button now, so Enter always
+     confirms; Cancel still visually sits to the left via the same DOM order. -->
 <dialog id="reauth-dialog" class="reauth">
   <form method="dialog">
     <h2 data-t="admin.reauth"></h2>
     <label><span data-t="admin.password"></span><input type="password" autocomplete="current-password" required></label>
     <div class="row">
-      <button type="submit" value="cancel" formnovalidate class="btn secondary" data-t="admin.cancel"></button>
+      <button type="button" value="cancel" id="reauth-cancel" class="btn secondary" data-t="admin.cancel"></button>
       <button type="submit" value="confirm" class="btn" data-t="admin.confirm"></button>
     </div>
   </form>

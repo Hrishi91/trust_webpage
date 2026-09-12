@@ -139,6 +139,10 @@ const annBase = Date.now();
 await db.doc('announcements/an1').set({ ...base, text: bi('স্বাগতম! এই বছরের পুজো শুরু হচ্ছে।', 'Welcome! This year\'s puja is starting.'), pinned: true, isLive: false, expiresAt: '', order: annBase, published: true });
 await db.doc('announcements/an2').set({ ...base, text: bi('এখন লাইভ: সন্ধ্যা আরতি', 'Live now: evening aarti'), pinned: false, isLive: true, expiresAt: '', order: annBase + 1, published: true });
 await db.doc('announcements/an3').set({ ...base, text: bi('গতকালের ঘোষণা (মেয়াদ শেষ)', 'Yesterday\'s announcement (expired)'), pinned: false, isLive: false, expiresAt: new Date(Date.now() - 86400000).toISOString(), order: annBase - 1000, published: true });
+// Fix round 1 (finding 3): a draft (published:false) row so the ?preview=1 ticker branch
+// (js/shell.js's previewAnn, js/content.js's onAnnouncements({preview:true})) has something of
+// its own to prove it dropped the `published` filter — none of an1-an3 exercised that.
+await db.doc('announcements/an4').set({ ...base, text: bi('ড্রাফট ঘোষণা', 'Draft announcement'), pinned: false, isLive: false, expiresAt: '', order: annBase + 2, published: false });
 
 console.log('seeded; admin uid', admin.uid, '; member uid', member1.uid);
 process.exit(0);

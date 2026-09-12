@@ -64,7 +64,10 @@ test('📜 লগ — shows the row of the immediately preceding admin edit, new
 
   await page.goto('/admin/#log');
   const first = page.locator('.log-row').first();
-  await expect(first).toContainText('create');
+  // Fix round 1 (finding 4): the action word is translated now (admin.log.action.create) — the
+  // admin UI's default language is bn (js/i18n.js), so this checks the Bengali label, not the raw
+  // 'create' string logAudit() actually writes to Firestore.
+  await expect(first).toContainText('তৈরি');
   await expect(first).toContainText('announcements/');
 
   // Filter by collection: selecting "history" must hide the announcements row we just wrote.
@@ -208,6 +211,37 @@ test('re-auth is a masked <dialog> with type=password, not window.prompt() (item
   await expect(page).toHaveURL(/#history\/h2$/); // cancelled — nothing deleted, still on the edit form
 });
 
+// Fix round 1 (finding 2): Confirm is now the dialog's only `type=submit` button (admin/index.html
+// / admin.js), so the browser's implicit form submission on Enter always confirms — before this
+// fix Cancel (first in DOM) would have "won" instead. Reuses the same committee/c1 delete flow the
+// item-35 test above uses, restoring it at the end so every later test still finds c1 intact.
+test('re-auth Enter key confirms (not cancels) the dialog (fix round 1, finding 2)', async ({ page }) => {
+  await login(page);
+  await page.goto('/admin/#committee/c1');
+  page.on('dialog', d => d.accept()); // confirm() only
+  await page.click('button.danger');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.toast')).toBeVisible();
+  await expect(page).toHaveURL(/#committee$/); // Enter confirmed the delete, same as clicking Confirm would
+
+  // Restore c1 so the rest of the suite (and this file's own earlier committee assertions, on a
+  // re-run) still find it. Asserting the row's own disappearance (not just ".toast" again) matters
+  // here: the delete's toast from a moment ago can still be on screen (toast() auto-removes after
+  // 3s, js/ui.js), so a bare ".toast" check can pass instantly against that stale element without
+  // ever waiting for restoreDoc()'s updateDoc()+re-render to actually land — and a test that ends
+  // right after would let Playwright tear the page down mid-write. Waiting for the deleted-view row
+  // to disappear can only happen after renderRows() re-queries post-restore, which can only happen
+  // after the write actually committed.
+  await page.check('.list-toolbar input[type=checkbox]');
+  const deletedRow = page.locator('.list-item', { hasText: 'সভাপতি' });
+  await expect(deletedRow).toBeVisible();
+  await deletedRow.locator('button.btn-sm').click();
+  await expect(deletedRow).toHaveCount(0);
+  await page.uncheck('.list-toolbar input[type=checkbox]');
+  await expect(page.locator('.list-item', { hasText: 'সভাপতি' })).toBeVisible();
+});
+
 test('committee search narrows the list without a refetch (item 40)', async ({ page }) => {
   await login(page);
   await page.goto('/admin/#committee');
@@ -233,3 +267,44 @@ test('donations and members lists also get a search box (item 40)', async ({ pag
   await expect(page.locator('.list-item', { hasText: 'সদস্য এক' })).toBeVisible();
 });
 
+// Fix round 1 (finding 3): item 38 shipped four `?preview=1` branches (committee.html, events.html,
+// index.html's culture card, and the shell-wide announcements ticker) with no e2e coverage at
+// all — task-6-report.md's own item 38 evidence was a manual screenshot, not a passing test. Login
+// carries the admin's Auth session across the plain page.goto() navigations below (same as the
+// item-35 test above, which already relies on this).
+test('?preview=1 shows admin-only draft/hidden content on committee, events, and the home page+ticker (fix round 1, finding 3)', async ({ page }) => {
+  await login(page);
+
+  await page.goto('/committee.html?preview=1');
+  await expect(page.locator('.person', { hasText: 'গোপন' })).toBeVisible(); // committee/c2, isPublic:false
+
+  await page.goto('/events.html?preview=1');
+  // toHaveCount, not toBeVisible: events/e2 (start=now at seed time) may have drifted into the
+  // "past" <details> accordion by the time this test runs, which collapses it out of view without
+  // removing it from the DOM — this only needs to prove the unfiltered query reached it at all.
+  await expect(page.locator('.ev', { hasText: 'ড্রাফট' })).toHaveCount(1); // events/e2, published:false
+
+  await page.goto('/index.html?preview=1');
+  await expect(page.locator('.ccard', { hasText: 'ড্রাফট' })).toBeVisible(); // culture/cu4, published:false
+  await expect(page.locator('.ticker')).toContainText('ড্রাফট ঘোষণা'); // announcements/an4, published:false
+});
+
+test('anonymous ?preview=1 request on committee.html shows the error state, never the hidden row (fix round 1, finding 3)', async ({ page }) => {
+  // No login(page) here — deliberately anonymous. firestore.rules requires every possibly-matched
+  // document in the unfiltered ?preview=1 query to satisfy the read rule; committee/c2 is
+  // isPublic:false, so an anonymous reader fails the whole query with permission-denied, same
+  // "surfaced as the shared error state, never a hang" contract public.spec.js already proves for
+  // about.html's own ?preview=1 branch.
+  await page.goto('/committee.html?preview=1');
+  await expect(page.locator('#main p.muted')).toHaveText(/কিছু ভুল হয়েছে|Something went wrong/);
+  await expect(page.locator('.person', { hasText: 'গোপন' })).toHaveCount(0);
+});
+
+// Fix round 1 (finding 5): #adm-help is shared chrome (admin/js/admin.js's route()) whose href
+// tracks the current section — asserted here on the dashboard itself (key='' -> '#dashboard').
+test('dashboard help link points at the admin guide and opens in a new tab (fix round 1, finding 5)', async ({ page }) => {
+  await login(page); // login() already asserts the dashboard's 18 tiles, i.e. we're on it now
+  const help = page.locator('#adm-help');
+  await expect(help).toHaveAttribute('href', /^https:\/\/github\.com\/Hrishi91\/trust_webpage\/blob\/main\/docs\/user-guide\/admin-guide\.md#dashboard$/);
+  await expect(help).toHaveAttribute('target', '_blank');
+});

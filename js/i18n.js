@@ -268,6 +268,19 @@ export const STRINGS = {
   'admin.log.tabErrors': { bn: 'ত্রুটি', en: 'Errors' },
   'admin.log.message': { bn: 'বার্তা', en: 'Message' },
   'admin.log.url': { bn: 'ঠিকানা', en: 'URL' },
+  // Fix round 1 (finding 4): per-action labels for the 📜 লগ row's bold action word — every
+  // `logAudit(ctx, '<action>', ...)` call site's action string across admin/js (grep confirms
+  // create/update/delete/restore/reorder/publish/unpublish/export are the only ones used).
+  // Collection names in the same row stay raw (they're data, not UI copy). log.js falls back to
+  // the raw action string for anything not listed here, so a future action never renders blank.
+  'admin.log.action.create': { bn: 'তৈরি', en: 'Create' },
+  'admin.log.action.update': { bn: 'পরিবর্তন', en: 'Update' },
+  'admin.log.action.delete': { bn: 'মোছা', en: 'Delete' },
+  'admin.log.action.restore': { bn: 'পুনরুদ্ধার', en: 'Restore' },
+  'admin.log.action.reorder': { bn: 'ক্রম পরিবর্তন', en: 'Reorder' },
+  'admin.log.action.publish': { bn: 'প্রকাশ', en: 'Publish' },
+  'admin.log.action.unpublish': { bn: 'অপ্রকাশ', en: 'Unpublish' },
+  'admin.log.action.export': { bn: 'রপ্তানি', en: 'Export' },
   'admin.showDeleted': { bn: 'মুছে ফেলা দেখাও', en: 'Show deleted' },
   'admin.restore': { bn: 'পুনরুদ্ধার', en: 'Restore' },
   'admin.forgotPassword': { bn: 'পাসওয়ার্ড ভুলে গেছেন?', en: 'Forgot password?' },
