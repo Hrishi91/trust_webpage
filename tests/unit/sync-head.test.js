@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { HEAD_META, generatedFiles } from '../../scripts/sync-head.mjs';
+import { HEAD_META, generatedFiles, lastmodFor } from '../../scripts/sync-head.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -60,4 +60,16 @@ test('generatedFiles(): robots.txt disallows /admin/ and points at the sitemap; 
   assert.deepEqual(manifest.icons.map(i => i.sizes).sort(), ['192x192', '512x512']);
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.start_url, './index.html');
+});
+
+test('lastmodFor() returns a date in YYYY-MM-DD format from git history or falls back to 2026-09-12', () => {
+  const indexPath = join(ROOT, 'index.html');
+  const lastmod = lastmodFor(indexPath);
+  assert.match(lastmod, /^\d{4}-\d{2}-\d{2}$/, 'lastmod must be in YYYY-MM-DD format');
+});
+
+test('generatedFiles() is stable: running it twice yields byte-identical sitemap.xml (not affected by wall clock)', () => {
+  const a = generatedFiles();
+  const b = generatedFiles();
+  assert.equal(a['sitemap.xml'], b['sitemap.xml'], 'sitemap.xml must be identical on consecutive runs');
 });

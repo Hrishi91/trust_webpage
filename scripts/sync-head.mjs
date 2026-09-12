@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { STRINGS } from '../js/i18n.js';
 import { PAGE_DEFAULTS } from '../js/page-defaults.js';
 
@@ -134,7 +135,7 @@ function escapeAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function ldJson(id, meta, title, canonical) {
+function ldJson(id, meta, bnTitleFull, canonical) {
   const graph = [
     {
       '@type': 'NGO',
@@ -144,7 +145,7 @@ function ldJson(id, meta, title, canonical) {
     },
     {
       '@type': 'WebPage',
-      name: `${title.bn} · ${TRUST_BN}`,
+      name: bnTitleFull,
       url: canonical,
       inLanguage: 'bn',
       description: meta.desc.bn,
@@ -189,7 +190,7 @@ function buildBlock(id, meta) {
     '<link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">',
     '<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">',
     '<link rel="manifest" href="manifest.webmanifest">',
-    `<script type="application/ld+json">${ldJson(id, meta, title, canonical)}</script>`,
+    `<script type="application/ld+json">${ldJson(id, meta, bnTitleFull, canonical)}</script>`,
   );
   return lines.join('\n');
 }
@@ -212,10 +213,33 @@ function robotsTxt() {
   return `User-agent: *\nDisallow: /admin/\nSitemap: ${ORIGIN}sitemap.xml\n`;
 }
 
-function sitemapXml(today) {
-  const urls = Object.values(HEAD_META)
-    .filter(m => !m.noindex)
-    .map(m => `  <url>\n    <loc>${canonicalUrl(m)}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
+// Derive each page's lastmod from its git history (git log -1 --format=%cs) rather than the wall
+// clock. This makes sitemap.xml stable across runs on different days when content is unchanged,
+// so `sync-head --check` does not falsely fail. Falls back to '2026-09-12' if git is unavailable
+// or the file is untracked, with a stderr note.
+export function lastmodFor(filePath) {
+  try {
+    const result = execFileSync('git', ['log', '-1', '--format=%cs', '--', filePath], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    if (result) return result;
+  } catch (e) {
+    // git not available, file is untracked, or .git is missing
+    console.error(`sync-head: git lastmod for ${filePath} unavailable, using fallback '2026-09-12'`);
+  }
+  return '2026-09-12';
+}
+
+function sitemapXml() {
+  const urls = Object.entries(HEAD_META)
+    .filter(([_, m]) => !m.noindex)
+    .map(([_, m]) => {
+      const filePath = join(ROOT, m.file);
+      const lastmod = lastmodFor(filePath);
+      return `  <url>\n    <loc>${canonicalUrl(m)}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`;
+    })
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
@@ -238,12 +262,6 @@ function manifestJson() {
   }, null, 2) + '\n';
 }
 
-// today() takes no arg (not injectable) on purpose: sitemap <lastmod> is meant to track "the day
-// this script last ran", not any particular event date — `--check` re-derives it the same way, so
-// running sync twice on the same UTC day is still a no-op (idempotent) regardless of how the
-// second invocation reached this function.
-function today() { return new Date().toISOString().slice(0, 10); }
-
 // Every generated file, keyed by its path relative to ROOT -> its target content. Exported so
 // tests/unit/sync-head.test.js can check HEAD_META coverage / content shape without touching disk.
 export function generatedFiles() {
@@ -254,7 +272,7 @@ export function generatedFiles() {
     files[meta.file] = injectHead(current, buildBlock(id, meta));
   }
   files['robots.txt'] = robotsTxt();
-  files['sitemap.xml'] = sitemapXml(today());
+  files['sitemap.xml'] = sitemapXml();
   files['manifest.webmanifest'] = manifestJson();
   return files;
 }
