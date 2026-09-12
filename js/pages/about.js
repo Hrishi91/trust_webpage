@@ -17,7 +17,11 @@ if (s) {
     // restoring the admin's persisted Auth session for this elevated read without an ordinary
     // about.html visit ever requesting it (the pwa.spec.js assertion that about.html never
     // requests firebase-auth.js never passes ?preview, so it never triggers this branch).
-    if (preview) await import('../firebase-auth.js');
+    // Final-review fix wave M2: `.then(m => m.authReady())` closes the exact gap Task 7's own
+    // build-log entry flagged as a known latent bug in this branch — a bare dynamic import races
+    // browserLocalPersistence's asynchronous session restore (js/firebase-auth.js's own comment
+    // on authReady() explains why), which could reach Firestore with no ID token attached yet.
+    if (preview) await import('../firebase-auth.js').then(m => m.authReady());
     items = preview
       ? (await getDocs(query(collection(db, 'history'), where('deleted', '==', false), orderBy('order')))).docs.map(d => ({ id: d.id, ...d.data() }))
       : await listPublished('history');

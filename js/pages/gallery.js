@@ -48,7 +48,7 @@ if (s) {
       // pattern — a dynamic import only fetches js/firebase-auth.js when ?preview is actually
       // present, restoring the admin's persisted Auth session for this elevated read without an
       // ordinary gallery.html visit ever requesting it.
-      if (preview) await import('../firebase-auth.js');
+      if (preview) await import('../firebase-auth.js').then(m => m.authReady());
       album = preview ? (await getDoc(doc(db, 'albums', albumId))).data() : await getPublished('albums', albumId);
     } catch (err) {
       console.error(err);

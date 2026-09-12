@@ -38,7 +38,10 @@ if (s) {
         // that gate this read. A dynamic (not static) import of js/firebase-auth.js only runs —
         // and only ever fetches the firebase-auth.js chunk — when an admin actually opens a
         // ?preview=1 link, so an ordinary visit to this page still never requests it.
-        await import('../firebase-auth.js');
+        // Final-review fix wave M2: `.then(m => m.authReady())` — a bare dynamic import races
+        // browserLocalPersistence's asynchronous session restore (see js/firebase-auth.js's own
+        // comment on authReady()), which could reach Firestore with no ID token attached yet.
+        await import('../firebase-auth.js').then(m => m.authReady());
         const snap = await getDoc(doc(db, 'transparency', yearParam));
         if (snap.exists()) previewDoc = { id: snap.id, ...snap.data() };
       } catch (err) {

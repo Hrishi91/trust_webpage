@@ -989,3 +989,10 @@ button (`admin.log.clearErrors`) that confirms, re-auths, then deletes every cur
 (≤ 100, matching the tab's own `limit(100)` query) in one `writeBatch`, logging one `audit` row for
 the whole clear. Each row now also renders `ua` (written since Task 7, never shown until now),
 labelled the same way as `message`/`url` — putting those two previously-unused i18n keys to use.
+
+`fix(preview): authReady on about/gallery/transparency` — M2. `js/pages/{about,gallery,
+transparency}.js`'s `?preview=1` branches did a bare `await import('../firebase-auth.js')` —
+exactly the auth-restoration race Task 7's own build-log entry flagged as a known latent bug in
+`about.js` and fixed everywhere else: `browserLocalPersistence`'s session restore is asynchronous,
+so a query fired right after the import can reach Firestore with no ID token attached yet. All three
+now `.then(m => m.authReady())` after the import, matching `js/shell.js`'s own ticker preview branch.
