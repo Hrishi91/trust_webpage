@@ -1104,3 +1104,18 @@ Fonts origin and that the preload URL resolves 200, plus a check that `h1`'s com
 `font-family` includes "Baloo Da 2" and `document.fonts.check('700 20px "Baloo Da 2"')` is true
 after `document.fonts.ready`. README gained a "Fonts" section naming the self-hosted set and its
 OFL licence.
+
+`perf(css): inline tokens/themes; single body-font preload` — the previous commit already cut
+Google Fonts; this one cuts the other three blocking same-origin CSS requests down to one.
+`scripts/sync-head.mjs`'s `fonts:start`/`fonts:end` block now reads `css/tokens.css` and
+`css/themes.css` off disk and inlines them verbatim into two `<style>` tags (generated, so the
+files on disk stay the single source of truth — `tests/unit/contrast.test.js` still parses
+`css/tokens.css` directly — and the inlined copy can never drift). Inlining BOTH tokens and every
+`[data-theme]` override (not just tokens) means a visitor whose stored theme differs from সিদ্ধি
+gets zero flash of the wrong theme, since every theme's custom properties are already on the page
+before the first paint — no non-blocking-with-`onload` trick needed, and no `<noscript>` fallback
+either (a plain `<style>` tag works with JS disabled). `css/site.css` (the real layout, not a
+handful of custom properties) stays a normal blocking `<link>`. `admin/index.html` is unchanged
+here — a single-operator, always-online tool gets nothing from inlining, so it keeps `tokens.css`/
+`themes.css` as plain `<link>`s. `tests/unit/sync-head.test.js`'s CSS-link assertion now asserts
+the inlined `<style>` blocks are present and that `tokens.css`/`themes.css` are no longer linked.

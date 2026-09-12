@@ -246,11 +246,13 @@ const ASSETS_MARKER_RE = /<!-- fonts:start -->[\s\S]*?<!-- fonts:end -->/;
 const ASSETS_LEGACY_RE = /<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">\n<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin>\n<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/css2\?[^"]*">\n<link rel="stylesheet" href="css\/tokens\.css">\n<link rel="stylesheet" href="css\/site\.css">\n<link rel="stylesheet" href="css\/themes\.css">\n?/;
 
 function buildAssetsBlock() {
+  const tokens = readFileSync(join(ROOT, 'css', 'tokens.css'), 'utf8').trim();
+  const themes = readFileSync(join(ROOT, 'css', 'themes.css'), 'utf8').trim();
   return [
     '<link rel="stylesheet" href="css/fonts.css">',
-    '<link rel="stylesheet" href="css/tokens.css">',
+    `<style>${tokens}</style>`,
+    `<style>${themes}</style>`,
     '<link rel="stylesheet" href="css/site.css">',
-    '<link rel="stylesheet" href="css/themes.css">',
   ].join('\n');
 }
 

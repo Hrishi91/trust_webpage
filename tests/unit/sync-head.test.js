@@ -101,13 +101,18 @@ test('generatedFiles(): every HTML file has exactly one self-hosted font preload
   }
 });
 
-test('generatedFiles(): every HTML file links css/fonts.css, css/tokens.css, css/site.css and css/themes.css (self-hosted, no Google Fonts)', () => {
+// Phase 7 performance pass, second commit: css/tokens.css and css/themes.css are now inlined
+// (first paint has the default tokens AND every [data-theme] override, no separate render-blocking
+// request for ~3 KB of custom properties) — css/fonts.css and css/site.css stay real <link>s.
+test('generatedFiles(): every HTML file inlines css/tokens.css (and css/themes.css) into a <style> block and links css/fonts.css + css/site.css, with no separate tokens.css/themes.css <link>', () => {
   const files = generatedFiles();
   for (const [rel, html] of Object.entries(files)) {
     if (!rel.endsWith('.html')) continue;
+    assert.match(html, /<style>[\s\S]*?:root\{/, `${rel} must inline css/tokens.css's :root block`);
+    assert.match(html, /<style>\/\* Theme token overrides/, `${rel} must inline css/themes.css`);
     assert.match(html, /<link rel="stylesheet" href="css\/fonts\.css">/, `${rel} must link css/fonts.css`);
-    assert.match(html, /<link rel="stylesheet" href="css\/tokens\.css">/, `${rel} must link css/tokens.css`);
     assert.match(html, /<link rel="stylesheet" href="css\/site\.css">/, `${rel} must link css/site.css`);
-    assert.match(html, /<link rel="stylesheet" href="css\/themes\.css">/, `${rel} must link css/themes.css`);
+    assert.doesNotMatch(html, /<link rel="stylesheet" href="css\/tokens\.css">/, `${rel} must not also link css/tokens.css`);
+    assert.doesNotMatch(html, /<link rel="stylesheet" href="css\/themes\.css">/, `${rel} must not also link css/themes.css`);
   }
 });
