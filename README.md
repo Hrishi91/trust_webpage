@@ -1,5 +1,7 @@
 # Ganesh Puja Trust Website
 
+[![CI](https://github.com/Hrishi91/trust_webpage/actions/workflows/ci.yml/badge.svg)](https://github.com/Hrishi91/trust_webpage/actions/workflows/ci.yml)
+
 Static vanilla-JS public website + single-admin Firebase backend for the Ganesh Puja Trust.
 
 **Status: Phases 0–6 live on production (2026-09-12)** — donations, transparency, live announcements, the members portal, a five-theme design system, and Phase 6's "nothing static" template (every UI string, image slot, colour/font, home-section order, and culture card is admin-editable) are all serving real traffic at `https://hrishi91.github.io/trust_webpage/`; see `docs/PROJECT_CONTEXT.md` §5–7 and `docs/pending.md` for owner follow-ups (real donation data, phone OTP on a device, App Check key, picking a theme, editing the Phase 6 defaults).

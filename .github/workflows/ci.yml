@@ -1,0 +1,81 @@
+name: CI
+
+# Phase 7 Task 7 (site-basics audit item 41): unit + rules + e2e + generated-file checks on every
+# push/PR to main. Mirrors the exact local gate (CLAUDE.md): npm run test:unit; the two
+# --check generators (sync-head.mjs regenerates static <head>/robots/sitemap/manifest from
+# STRINGS/page-defaults, bump-sw.mjs regenerates sw.js from scripts/lib/shell-assets.mjs — both
+# fail the build the moment a source file changes without its generated output being regenerated);
+# npm run test:rules (its own ephemeral `firebase emulators:exec`, run BEFORE the long-running
+# emulator below is started, so the two never fight over ports 8080/9099/9199); then e2e against a
+# manually started + seeded emulator, same three-step flow as local dev (`npm run emu` -> `npm run
+# seed` -> `npm run e2e`), using `wait-on` instead of a sleep to know the emulator is actually up.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# One run per ref at a time — a second push to the same branch/PR cancels the one already running,
+# instead of queueing a redundant ~10+ minute job behind it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # scripts/sync-head.mjs's --check compares against git commit dates for some of its
+          # generated output — a shallow (depth-1) checkout would give every file the same
+          # clone-time date and make that comparison meaningless.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Generated-file checks (static <head>/robots/sitemap/manifest, service worker)
+        run: |
+          node scripts/sync-head.mjs --check
+          node scripts/bump-sw.mjs --check
+
+      - name: Rules tests (own ephemeral emulator via `firebase emulators:exec`)
+        run: npm run test:rules
+
+      - name: Start emulators for e2e
+        run: npx firebase emulators:start --only firestore,storage,auth --project demo-trust &
+
+      - name: Wait for emulators
+        run: npx wait-on tcp:8080 tcp:9099 tcp:9199
+
+      - name: Seed emulators
+        run: npm run seed
+
+      - name: e2e tests
+        run: npm run e2e
+
+      - name: Upload Playwright report + test results (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
