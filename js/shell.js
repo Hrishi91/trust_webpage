@@ -4,33 +4,9 @@ import { el, digits, fmtDate } from './ui.js';
 import { resolveTheme, applyTheme, applyOverrides, isPreview } from './theme.js';
 import { mediaUrl, httpsUrl } from './media-slots.js';
 import { paintHeader, onResize } from './art.js';
+import { NAV, FOOTER_PAGES } from './nav-config.js';
 
 let unsubHeader = null;
-
-const NAV = [
-  ['home', 'index.html', 'nav.home', null],
-  ['about', 'about.html', 'nav.about', 'about'],
-  ['committee', 'committee.html', 'nav.committee', 'committee'],
-  ['gallery', 'gallery.html', 'nav.gallery', 'gallery'],
-  ['events', 'events.html', 'nav.events', 'events'],
-  ['donate', 'donate.html', 'nav.donate', 'donate'],
-  ['transparency', 'transparency.html', 'nav.transparency', 'transparency'],
-  ['members', 'members.html', 'nav.members', 'members'],
-];
-
-// Phase 7 Task 1: footer-only pages (privacy/terms, about-the-trust, contact, FAQ, news archive,
-// downloads) — never in the top nav bar (NAV above already fills the burger menu on mobile), just
-// appended to the footer's "পাতা" column below. `refund` and `notfound` are deliberately absent:
-// the refund policy is a #refund section on privacy.html, not its own link, and the 404 page is
-// never something a visitor should navigate to on purpose.
-const FOOTER_PAGES = [
-  ['privacy.html', 'page.privacy.title'],
-  ['trust.html', 'page.trust.title'],
-  ['contact.html', 'contact.title'],
-  ['faq.html', 'faq.title'],
-  ['news.html', 'news.title'],
-  ['downloads.html', 'downloads.title'],
-];
 
 const OM_MARK = 'ॐ';
 function brandMark(s) {
@@ -44,11 +20,40 @@ export function sectionHead(title, aside) { return el('div', { class: 'sh' }, el
 // (`<img>`, opacity-faded by CSS) replaces the painted-canvas background instead of layering with
 // it — the two backgrounds were never designed to combine, and one image slot per header keeps
 // the admin's choice unambiguous.
+//
+// Phase 7 Task 4 (item 28, "static shell"): scripts/sync-shell.mjs bakes a real `.ph` skeleton
+// (canvas + .wrap[crumb?, h1, lead?]) into every non-home page's <main> so there's no `…`
+// placeholder before Firestore answers. When that skeleton is present (and its image/no-image
+// "shape" matches what this call needs), patch its existing fields in place and return the SAME
+// node — main.replaceChildren(pageHeader(...), ...) then keeps it as-is (same DOM reference),
+// so the header never flashes blank/rebuilds and the page's biggest above-the-fold box never
+// shifts. A shape mismatch (e.g. an admin header photo where the static default had none) falls
+// through to the pre-Task-4 fresh-build behaviour — a rare admin-only case, not worth patching.
 export function pageHeader({ crumb, title, lead, image }) {
+  const main = document.getElementById('main');
+  const existing = main?.firstElementChild?.classList.contains('ph') ? main.firstElementChild : null;
+  const wantPhoto = !!image;
+  if (existing && existing.classList.contains('photo') === wantPhoto) {
+    const wrap = existing.querySelector(':scope > .wrap') || existing;
+    const crumbEl = wrap.querySelector(':scope > .crumb');
+    if (crumb) { if (crumbEl) crumbEl.textContent = crumb; else wrap.insertBefore(el('span', { class: 'crumb', text: crumb }), wrap.firstChild); }
+    else if (crumbEl) crumbEl.remove();
+    const h1 = wrap.querySelector(':scope > h1');
+    if (h1) h1.textContent = title; else wrap.appendChild(el('h1', { text: title }));
+    const leadEl = wrap.querySelector(':scope > p');
+    if (lead) { if (leadEl) leadEl.textContent = lead; else wrap.appendChild(el('p', { text: lead })); }
+    else if (leadEl) leadEl.remove();
+    if (wantPhoto) {
+      const img = existing.querySelector(':scope > img.ph-img');
+      if (img) { img.src = image; img.alt = title; }
+    } else {
+      const c = existing.querySelector(':scope > canvas.ph-bg');
+      if (c) { requestAnimationFrame(() => paintHeader(c)); unsubHeader?.(); unsubHeader = onResize(() => paintHeader(c)); }
+    }
+    return existing;
+  }
   const copy = el('div', { class: 'wrap' },
     crumb ? el('span', { class: 'crumb', text: crumb }) : null, el('h1', { text: title }), lead ? el('p', { text: lead }) : null);
-  // Item 24: a page-header photo is content (it's the admin's own chosen image for this page), not
-  // decoration — alt = the page title text already shown next to it.
   if (image) return el('div', { class: 'ph photo' }, el('img', { class: 'ph-img', src: image, alt: title }), copy);
   const c = el('canvas', { class: 'ph-bg', 'aria-hidden': 'true' });
   const ph = el('div', { class: 'ph' }, c, copy);
@@ -70,8 +75,14 @@ export async function mountShell(active, pageTitleKey) {
   // there (an element needs a tabindex to be focus()-able via fragment navigation in most browsers).
   const headerEl = document.getElementById('site-header');
   headerEl.setAttribute('role', 'banner');
-  const skip = el('a', { class: 'skip', href: '#main' });
-  headerEl.prepend(skip);
+  // Phase 7 Task 4: `data-shell` marks the real nav/footer markup scripts/sync-shell.mjs bakes
+  // into every page's <body> (item 28). When present, renderNav()/renderFooter() below patch that
+  // markup's existing nodes in place instead of replaceChildren-ing the whole header/footer —
+  // "never blank the page" — and the skip link below is the one ALREADY in that static markup,
+  // never a second one prepended on top of it.
+  const shellMode = headerEl.hasAttribute('data-shell');
+  let skip = shellMode ? headerEl.querySelector(':scope > a.skip') : null;
+  if (!skip) { skip = el('a', { class: 'skip', href: '#main' }); headerEl.prepend(skip); }
   document.getElementById('main')?.setAttribute('tabindex', '-1');
   s.media = c.media;
   applyTheme(resolveTheme(s.design, location.search), { persist: !isPreview(location.search) });
@@ -113,7 +124,10 @@ export async function mountShell(active, pageTitleKey) {
     else if (existing) existing.remove();
   };
   // Nav is rebuilt only by the initial mount and on langchange (labels/lang toggle differ) —
-  // never by an announcements update, so an open burger menu survives ticker refreshes.
+  // never by an announcements update, so an open burger menu survives ticker refreshes. In shell
+  // mode it PATCHES the static nav (brand text, per-link text/href/class, add/remove only where
+  // the visible set differs from the static default's "show everything") rather than rebuilding
+  // it — keeping `.links.open` (an open mobile menu) intact across a langchange too.
   const renderNav = () => {
     document.documentElement.lang = getLang();
     skip.textContent = t('a11y.skip');
@@ -139,22 +153,62 @@ export async function mountShell(active, pageTitleKey) {
         if (meta) meta.content = ogImg;
       }
     }
-    const links = el('div', { class: 'links' },
-      ...NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false)
-            .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));
-    const nav = el('nav', { class: 'nav' }, el('div', { class: 'wrap' },
+    const visible = NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false);
+    const header = document.getElementById('site-header');
+    const nav = shellMode ? header.querySelector(':scope > nav.nav') : null;
+    if (nav) {
+      const brand = nav.querySelector('.brand');
+      brand.setAttribute('aria-label', pick(s.name));
+      const oldMark = brand.querySelector('.mark');
+      const newMark = brandMark(s);
+      if (oldMark) oldMark.replaceWith(newMark); else brand.prepend(newMark);
+      const lockup = brand.querySelector('.t')?.parentElement;
+      const tEl = lockup?.querySelector('.t');
+      if (tEl) tEl.textContent = pick(s.name);
+      const tagline = pick(s.tagline);
+      let sEl = lockup?.querySelector('.s');
+      if (tagline) {
+        if (!sEl) { lockup.appendChild(el('br')); sEl = el('span', { class: 's' }); lockup.appendChild(sEl); }
+        sEl.textContent = tagline;
+      } else if (sEl) {
+        const br = sEl.previousElementSibling;
+        sEl.remove();
+        if (br?.tagName === 'BR') br.remove();
+      }
+      const linksWrap = nav.querySelector('.links');
+      const existingLinks = [...linksWrap.querySelectorAll('a')];
+      const byHref = new Map(existingLinks.map(a => [a.getAttribute('href'), a]));
+      const wanted = new Set(visible.map(([, href]) => href));
+      for (const a of existingLinks) if (!wanted.has(a.getAttribute('href'))) a.remove();
+      let prev = null;
+      for (const [key, href, tkey] of visible) {
+        let a = byHref.get(href);
+        if (!a) a = el('a', { href });
+        a.textContent = t(tkey);
+        a.className = key === active ? 'on' : '';
+        if (prev) prev.after(a); else linksWrap.prepend(a);
+        prev = a;
+      }
+      const langBtn = nav.querySelector('.lang');
+      langBtn.textContent = getLang() === 'bn' ? 'EN' : 'বাং';
+      langBtn.onclick = () => setLang(getLang() === 'bn' ? 'en' : 'bn');
+      const burger = nav.querySelector('.burger');
+      burger.setAttribute('aria-label', t('nav.menu'));
+      burger.onclick = e => { const open = linksWrap.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); };
+      return;
+    }
+    // Fallback: no static shell present — build fresh (pre-Task-4 behaviour).
+    const links = el('div', { class: 'links' }, ...visible.map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));
+    const freshNav = el('nav', { class: 'nav' }, el('div', { class: 'wrap' },
       el('a', { href: 'index.html', class: 'brand', 'aria-label': pick(s.name) }, brandMark(s),
-        // concept markup put a <br> between .t and .s (two-line lockup: name, then tagline below);
-        // it was dropped when this was ported in Task 5, so name+tagline ran together on one line.
         el('span', {}, el('span', { class: 't', text: pick(s.name) }), pick(s.tagline) ? el('br') : null, pick(s.tagline) ? el('span', { class: 's', text: pick(s.tagline) }) : null)),
       links,
       el('button', { class: 'lang', type: 'button', text: getLang() === 'bn' ? 'EN' : 'বাং', onclick: () => setLang(getLang() === 'bn' ? 'en' : 'bn') }),
       el('button', { class: 'burger', type: 'button', 'aria-label': t('nav.menu'), 'aria-expanded': 'false',
         onclick: e => { const open = links.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); } },
         el('span', { class: 'bars', 'aria-hidden': 'true' }))));
-    const header = document.getElementById('site-header');
     const existingNav = header.querySelector('.nav');
-    if (existingNav) existingNav.replaceWith(nav); else header.appendChild(nav);
+    if (existingNav) existingNav.replaceWith(freshNav); else header.appendChild(freshNav);
   };
   const renderFooter = () => {
     const wa = digits(s.contacts.whatsapp);
@@ -171,23 +225,30 @@ export async function mountShell(active, pageTitleKey) {
       wag ? el('a', { href: wag, target: '_blank', rel: 'noopener', text: t('footer.whatsapp') }) : null,
     ].filter(Boolean);
     const mapHref = httpsUrl(s.mapUrl);
-    document.getElementById('site-footer').replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
-      // concept footer put a <br> before the "Reg. no." line (own line, muted); missing here ran
-      // the address and reg. no. together on one line with no separator.
-      el('div', {}, el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('br') : null, s.regNo ? el('span', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null),
-      el('div', {}, el('b', { text: t('footer.contact') }),
-        s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
-        wa ? el('a', { href: `https://wa.me/${wa}`, text: t('footer.whatsapp') }) : null,
-        mapHref ? el('a', { href: mapHref, target: '_blank', rel: 'noopener', text: t('footer.map') }) : null,
-        s.contacts.email ? el('a', { href: `mailto:${s.contacts.email}`, text: s.contacts.email }) : null),
-      el('div', {}, el('b', { text: t('footer.pages') }),
-        ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) })),
-        ...FOOTER_PAGES.map(([href, tkey]) => el('a', { href, text: t(tkey) }))),
-      el('div', {}, el('b', { text: t('footer.trust') }),
-        el('a', { href: 'transparency.html', text: t('tr.docs') }), el('a', { href: 'committee.html', text: t('nav.committee') }),
-        el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }),
-        socialItems.length ? el('div', { class: 'social' }, ...socialItems) : null)),
-    ));
+    // concept footer put a <br> before the "Reg. no." line (own line, muted); missing here ran
+    // the address and reg. no. together on one line with no separator.
+    const col1 = [el('b', { text: pick(s.name) }), pick(s.address), s.regNo ? el('br') : null, s.regNo ? el('span', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null];
+    const col2 = [el('b', { text: t('footer.contact') }),
+      s.contacts.phone ? el('a', { href: `tel:${s.contacts.phone}`, text: s.contacts.phone }) : null,
+      wa ? el('a', { href: `https://wa.me/${wa}`, text: t('footer.whatsapp') }) : null,
+      mapHref ? el('a', { href: mapHref, target: '_blank', rel: 'noopener', text: t('footer.map') }) : null,
+      s.contacts.email ? el('a', { href: `mailto:${s.contacts.email}`, text: s.contacts.email }) : null];
+    const col3 = [el('b', { text: t('footer.pages') }),
+      ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) })),
+      ...FOOTER_PAGES.map(([href, tkey]) => el('a', { href, text: t(tkey) }))];
+    const col4 = [el('b', { text: t('footer.trust') }),
+      el('a', { href: 'transparency.html', text: t('tr.docs') }), el('a', { href: 'committee.html', text: t('nav.committee') }),
+      el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }),
+      socialItems.length ? el('div', { class: 'social' }, ...socialItems) : null];
+    const footerRoot = document.getElementById('site-footer');
+    const wrap = shellMode ? footerRoot.querySelector(':scope > footer > .wrap') : null;
+    if (wrap && wrap.children.length === 4) {
+      const cols = [col1, col2, col3, col4];
+      for (let i = 0; i < 4; i++) wrap.children[i].replaceChildren(...cols[i].filter(x => x != null));
+      return;
+    }
+    footerRoot.replaceChildren(el('footer', {}, el('div', { class: 'wrap' },
+      el('div', {}, ...col1), el('div', {}, ...col2), el('div', {}, ...col3), el('div', {}, ...col4))));
   };
   renderTicker(); renderNav(); renderFooter();
   onLangChange(() => { renderTicker(); renderNav(); renderFooter(); document.dispatchEvent(new CustomEvent('langchange')); });

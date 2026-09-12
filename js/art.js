@@ -18,7 +18,12 @@ function setup(c) {
 }
 const svgFrom = str => new DOMParser().parseFromString(str, 'image/svg+xml').documentElement;
 
-const GANESH = `<svg xmlns="http://www.w3.org/2000/svg" class="ganesh" viewBox="0 0 420 500" fill="none" stroke="var(--gold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-label="সিদ্ধিদাতা গণেশ">
+// Exported as literal strings too (not just via ganeshSvg()/diyaSvg() below) so
+// scripts/sync-shell.mjs can inline the exact same markup into index.html's static app-shell
+// (Phase 7 Task 4, item 28) without needing a DOM — this module has no top-level DOM/Firebase
+// calls of its own, so importing it under plain Node is safe as long as nothing here calls
+// setup()/paintHero() etc. at import time (it doesn't).
+export const GANESH = `<svg xmlns="http://www.w3.org/2000/svg" class="ganesh" viewBox="0 0 420 500" fill="none" stroke="var(--gold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-label="সিদ্ধিদাতা গণেশ">
         <circle cx="210" cy="230" r="196" stroke="var(--gold)" stroke-opacity=".28" stroke-width="1.2"/>
         <circle cx="210" cy="230" r="170" stroke="var(--gold)" stroke-opacity=".18" stroke-width="1" stroke-dasharray="3 7"/>
         <!-- crown -->
@@ -56,7 +61,7 @@ const GANESH = `<svg xmlns="http://www.w3.org/2000/svg" class="ganesh" viewBox="
         <path d="M318 470 c-12 -16 -34 -12 -36 6 c-1 12 12 16 22 12 M280 486 c-8 8 -16 4 -20 -6" stroke-width="2.4"/>
         <circle cx="300" cy="462" r="4" fill="none" stroke-width="2"/><circle cx="311" cy="474" r="1.6" fill="var(--gold)" stroke="none"/>
       </svg>`;
-const DIYA = `<svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>`;
+export const DIYA = `<svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg>`;
 
 export function ganeshSvg() { return svgFrom(GANESH); }
 export function diyaSvg() { return svgFrom(DIYA); }

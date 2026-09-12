@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- head:start -->
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/balooda2/v26/2-ci9J9j0IaUMQZwAJyJQvvdoKFD.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/hindsiliguri/v14/ijwTs5juQtsyLLR5jN4cxBEoTI7ax9k0.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/hindsiliguri/v14/ijwOs5juQtsyLLR5jN4cxBEoREP-0vQVKxGv.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/hindsiliguri/v14/ijwOs5juQtsyLLR5jN4cxBEoRCf_0vQVKxGv.woff2" crossorigin>
 <title>গণেশ পুজো ট্রাস্ট</title>
 <meta name="description" content="গণেশ পুজো ট্রাস্ট — পুজোর কাউন্টডাউন, আসন্ন অনুষ্ঠান আর সাম্প্রতিক ছবির অ্যালবাম।">
 <link rel="canonical" href="https://hrishi91.github.io/trust_webpage/">
@@ -62,10 +66,92 @@
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/themes.css"></head>
 <body>
-<div id="site-header"></div>
-<main id="main"><p class="muted" id="loading">…</p></main>
-<div id="site-footer"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.4/purify.min.js" integrity="sha384-eEu5CTj3qGvu9PdJuS+YlkNi7d2XxQROAFYOr59zgObtlcux1ae1Il3u7jvdCSWu" crossorigin="anonymous"></script>
+<!-- shell:start -->
+<div id="site-header" data-shell="1" role="banner">
+<a class="skip" href="#main">মূল অংশে যান</a>
+<nav class="nav"><div class="wrap">
+<a href="index.html" class="brand" aria-label="গণেশ পুজো ট্রাস্ট"><span class="mark om" aria-hidden="true">ॐ</span><span><span class="t">গণেশ পুজো ট্রাস্ট</span></span></a>
+<div class="links"><a href="index.html" class="on">হোম</a><a href="about.html">ইতিহাস</a><a href="committee.html">কমিটি</a><a href="gallery.html">গ্যালারি</a><a href="events.html">অনুষ্ঠান</a><a href="donate.html">দান</a><a href="transparency.html">হিসাব</a><a href="members.html">সদস্য</a></div>
+<button class="lang" type="button">EN</button>
+<button class="burger" type="button" aria-label="মেনু" aria-expanded="false"><span class="bars" aria-hidden="true"></span></button>
+</div></nav>
+</div>
+<main id="main" tabindex="-1">
+<header class="hero">
+<canvas class="bg" id="heroBg" aria-hidden="true"></canvas>
+<div class="wrap">
+<div class="copy">
+<h1>গণেশ পুজো ট্রাস্ট</h1>
+<div class="ctas"><a class="btn ghost" href="events.html">অনুষ্ঠান</a></div>
+</div>
+<div class="art">
+<svg xmlns="http://www.w3.org/2000/svg" class="ganesh" viewBox="0 0 420 500" fill="none" stroke="var(--gold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-label="সিদ্ধিদাতা গণেশ">
+        <circle cx="210" cy="230" r="196" stroke="var(--gold)" stroke-opacity=".28" stroke-width="1.2"/>
+        <circle cx="210" cy="230" r="170" stroke="var(--gold)" stroke-opacity=".18" stroke-width="1" stroke-dasharray="3 7"/>
+        <!-- crown -->
+        <path d="M150 120 L160 78 L182 104 L210 60 L238 104 L260 78 L270 120"/>
+        <path d="M148 128 Q210 108 272 128"/>
+        <circle cx="210" cy="74" r="5" fill="var(--pitambar)" stroke="none"/>
+        <!-- head -->
+        <path d="M146 150 C146 108 274 108 274 150 C280 200 262 228 210 236 C158 228 140 200 146 150 Z"/>
+        <!-- ears -->
+        <path d="M148 158 C100 120 60 172 84 214 C100 244 138 244 152 214"/>
+        <path d="M272 158 C320 120 360 172 336 214 C320 244 282 244 268 214"/>
+        <path d="M112 176 C96 190 100 214 118 220" stroke-opacity=".6" stroke-width="2"/>
+        <path d="M308 176 C324 190 320 214 302 220" stroke-opacity=".6" stroke-width="2"/>
+        <!-- tilak -->
+        <path d="M210 128 v22"/><circle cx="210" cy="124" r="3.5" fill="var(--sindoor)" stroke="none"/>
+        <!-- eyes -->
+        <path d="M176 176 q12 -10 24 0"/><path d="M220 176 q12 -10 24 0"/>
+        <!-- trunk: curves left, ends in a curl (vamamukhi) -->
+        <path d="M210 236 C214 270 200 292 178 306 C150 324 138 356 158 378 C172 394 196 386 196 368 C196 356 184 352 178 360"/>
+        <!-- tusk -->
+        <path d="M238 240 C252 250 258 266 250 282"/>
+        <path d="M188 244 C182 250 180 258 184 262" stroke-opacity=".6"/>
+        <!-- body -->
+        <path d="M136 300 C96 330 92 396 118 432 C150 474 270 474 302 432 C328 396 324 330 284 300"/>
+        <path d="M150 348 C170 336 250 336 270 348" stroke-opacity=".5" stroke-width="2"/>
+        <!-- right hand: abhaya (raised palm) -->
+        <path d="M300 300 C332 292 352 262 344 236 M344 236 v-22 M334 232 v-22 M354 234 v-22 M324 240 v-18"/>
+        <!-- left hand with modak -->
+        <path d="M122 300 C96 296 78 318 92 340"/>
+        <path d="M84 344 l16 -22 l16 22 z" fill="var(--pitambar)" fill-opacity=".9" stroke="var(--gold)" stroke-width="2"/>
+        <!-- lotus base -->
+        <path d="M120 446 C150 428 170 456 210 440 C250 456 270 428 300 446"/>
+        <path d="M104 462 C150 440 180 470 210 452 C240 470 270 440 316 462"/>
+        <!-- mouse (mushak) -->
+        <path d="M318 470 c-12 -16 -34 -12 -36 6 c-1 12 12 16 22 12 M280 486 c-8 8 -16 4 -20 -6" stroke-width="2.4"/>
+        <circle cx="300" cy="462" r="4" fill="none" stroke-width="2"/><circle cx="311" cy="474" r="1.6" fill="var(--gold)" stroke="none"/>
+      </svg>
+<div class="diyas"><svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="diya" viewBox="0 0 34 40"><path class="fl" d="M17 4 C22 12 24 16 20 22 C18 25 16 25 14 22 C10 16 12 12 17 4 Z" fill="var(--pitambar)"/><path d="M6 28 h22 c0 6 -5 9 -11 9 s-11 -3 -11 -9 z" fill="var(--sindoor)"/><path d="M4 27 h26" stroke="var(--gold)" stroke-width="1.5"/></svg></div>
+</div>
+</div>
+<canvas class="garland" id="garland" aria-hidden="true"></canvas>
+</header>
+<div class="sec-skel" data-section="cred"></div>
+<div class="sec-skel" data-section="glance"></div>
+<div class="sec-skel" data-section="story"></div>
+<div class="sec-skel" data-section="culture"></div>
+<div class="sec-skel" data-section="gallery"></div>
+<div class="sec-skel" data-section="schedule"></div>
+<div class="sec-skel" data-section="ledger"></div>
+<div class="sec-skel" data-section="donate"></div>
+<div class="sec-skel" data-section="committee"></div>
+<div class="sec-skel" data-section="members"></div>
+<p class="sr-only" aria-live="polite">লোড হচ্ছে…</p>
+</main>
+<div id="site-footer" data-shell="1">
+<footer><div class="wrap">
+<div><b>গণেশ পুজো ট্রাস্ট</b></div>
+<div><b>যোগাযোগ</b></div>
+<div><b>পাতা</b><a href="about.html">ইতিহাস</a><a href="committee.html">কমিটি</a><a href="gallery.html">গ্যালারি</a><a href="events.html">অনুষ্ঠান</a><a href="donate.html">দান</a><a href="transparency.html">হিসাব</a><a href="members.html">সদস্য</a><a href="privacy.html">গোপনীয়তা ও শর্তাবলী</a><a href="trust.html">ট্রাস্ট সম্পর্কে</a><a href="contact.html">যোগাযোগ</a><a href="faq.html">সচরাচর জিজ্ঞাসা</a><a href="news.html">খবর ও ঘোষণা</a><a href="downloads.html">ডাউনলোড</a></div>
+<div><b>ট্রাস্ট</b><a href="transparency.html">নথি</a><a href="committee.html">কমিটি</a><span class="muted">© 2026 গণেশ পুজো ট্রাস্ট</span></div>
+</div></footer>
+</div>
+<noscript><p>এই ওয়েবসাইটের পুরো তথ্য দেখতে JavaScript চালু করুন।</p></noscript>
+<!-- shell:end -->
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.4/purify.min.js" integrity="sha384-eEu5CTj3qGvu9PdJuS+YlkNi7d2XxQROAFYOr59zgObtlcux1ae1Il3u7jvdCSWu" crossorigin="anonymous"></script>
 <script type="module" src="js/pages/home.js"></script>
 </body>
 </html>

@@ -42,6 +42,9 @@ export const STRINGS = {
   'common.empty': { bn: 'এখনও কিছু নেই', en: 'Nothing here yet' },
   'common.error': { bn: 'কিছু ভুল হয়েছে, আবার চেষ্টা করুন', en: 'Something went wrong, please retry' },
   'common.richUnavailable': { bn: 'লেখা দেখানো যাচ্ছে না', en: 'Text could not be shown' },
+  // Phase 7 Task 4 (item 28): <noscript> note baked into every page's static shell, literal (JS
+  // never runs to translate it) — bn first, same convention as the rest of this file's defaults.
+  'common.noscript': { bn: 'এই ওয়েবসাইটের পুরো তথ্য দেখতে JavaScript চালু করুন।', en: 'Please enable JavaScript to see the full content of this website.' },
   'footer.maintenance': { bn: 'সাইটে কাজ চলছে, একটু পরে আসুন', en: 'Site under maintenance, please come back shortly' },
   // admin
   'admin.login': { bn: 'অ্যাডমিন লগইন', en: 'Admin login' },

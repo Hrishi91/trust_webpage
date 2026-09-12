@@ -22,10 +22,55 @@ if (s) {
   if (events !== null) {
     const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
     let unsubHero = null;
+    // Phase 7 Task 4 (item 28, "static shell"): index.html's <main> starts with a real
+    // <header class="hero"> (scripts/sync-shell.mjs — default name, no puja date/countdown/photo,
+    // the inline Ganesh SVG art) instead of the `…` placeholder. When that static hero is still
+    // there and its "shape" (photo vs. drawn-SVG hero, image vs. canvas garland) matches what the
+    // real settings need, patch its copy in place — h1, tagline, ctas, countdown — and return the
+    // SAME <header> node so main.replaceChildren() below keeps it as-is: no flash, no reflow of
+    // the page's biggest above-the-fold box. A shape mismatch (admin set a hero/garland photo
+    // where the static default had none) falls through to the pre-Task-4 fresh-build branch.
     const hero = () => {
       const now = new Date(), cd = s.pujaDate ? countdown(s.pujaDate, now) : null;
       const heroImg = mediaUrl(s.media, 'hero');
       const garlandImg = mediaUrl(s.media, 'garland');
+      const existing = document.querySelector('#main > header.hero');
+      const wantPhoto = !!heroImg;
+      const garlandEl = existing?.querySelector(':scope > .garland');
+      const garlandIsImg = garlandEl?.tagName === 'IMG';
+      if (existing && existing.classList.contains('photo') === wantPhoto && !!garlandImg === garlandIsImg) {
+        const bg = existing.querySelector('canvas.bg');
+        const copy = existing.querySelector('.copy');
+        const eyebrow = copy.firstElementChild?.classList.contains('eyebrow') ? copy.firstElementChild : null;
+        if (s.pujaDate) {
+          const txt = fmtDate(s.pujaDate, getLang());
+          if (eyebrow) eyebrow.textContent = txt; else copy.prepend(el('span', { class: 'eyebrow', text: txt }));
+        } else eyebrow?.remove();
+        const h1 = copy.querySelector('h1');
+        h1.textContent = pick(s.name);
+        const taglineText = pick(s.tagline);
+        const tagline = h1.nextElementSibling?.tagName === 'P' ? h1.nextElementSibling : null;
+        if (taglineText) { if (tagline) tagline.textContent = taglineText; else h1.after(el('p', { text: taglineText })); }
+        else tagline?.remove();
+        const oldCtas = copy.querySelector(':scope > .ctas');
+        const newCtas = el('div', { class: 'ctas' },
+          s.sectionVisibility.donate !== false ? el('a', { class: 'btn', href: 'donate.html', text: t('nav.donate') }) : null,
+          el('a', { class: 'btn ghost', href: 'events.html', text: t('nav.events') }));
+        if (oldCtas) oldCtas.replaceWith(newCtas); else copy.appendChild(newCtas);
+        let cdEl = newCtas.nextElementSibling;
+        if (cdEl && !cdEl.classList.contains('countdown') && !cdEl.classList.contains('countdown-today')) cdEl = null;
+        if (cd) {
+          const newCd = cd.past ? el('p', { class: 'countdown-today', text: t('countdown.today') })
+            : el('div', { class: 'countdown', 'aria-label': t('countdown.days') },
+                el('div', {}, el('b', { text: num(cd.days) }), el('span', { text: t('countdown.days') })),
+                el('div', {}, el('b', { text: num(cd.hours) }), el('span', { text: t('countdown.hours') })),
+                el('div', {}, el('b', { text: num(cd.minutes) }), el('span', { text: t('countdown.minutes') })));
+          if (cdEl) cdEl.replaceWith(newCd); else newCtas.after(newCd);
+        } else cdEl?.remove();
+        requestAnimationFrame(() => { paintHero(bg); if (!garlandImg && garlandEl) paintGarland(garlandEl); });
+        unsubHero?.(); unsubHero = onResize(() => { paintHero(bg); if (!garlandImg && garlandEl) paintGarland(garlandEl); });
+        return existing;
+      }
       const bg = el('canvas', { class: 'bg', id: 'heroBg', 'aria-hidden': 'true' });
       const garland = garlandImg ? el('img', { class: 'garland', src: garlandImg, alt: '' }) : el('canvas', { class: 'garland', id: 'garland', 'aria-hidden': 'true' });
       // Item 24: the admin's own hero photo is content, not decoration — alt = the trust name

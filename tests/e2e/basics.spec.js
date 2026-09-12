@@ -67,7 +67,11 @@ test('trust page lists a named trustee (falls back to committee officers)', asyn
 test('contact page shows tel/WhatsApp/email and pre-fills wa.me from the message field', async ({ page }) => {
   await page.addInitScript(() => { window.__openedUrl = null; window.open = url => { window.__openedUrl = url; return null; }; });
   await page.goto('/contact.html');
-  await expect(page.locator('a[href^="https://wa.me/919800000000"]')).toBeVisible();
+  // Scoped to #main: since Phase 7 Task 4's static app-shell, the footer's own WhatsApp link
+  // (from the same seeded contacts.whatsapp) reliably renders in the same window as the page's own
+  // info-card link, so an unscoped locator strict-mode-violates on 2 matches (same reasoning as
+  // public.spec.js's "#main p.muted" scoping a few lines up in that file).
+  await expect(page.locator('#main a[href^="https://wa.me/919800000000"]')).toBeVisible();
   await page.fill('textarea', 'আমার একটা প্রশ্ন আছে');
   await page.click('button:has-text("WhatsApp-এ পাঠান")');
   const url = await page.evaluate(() => window.__openedUrl);
