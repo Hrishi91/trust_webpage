@@ -78,6 +78,38 @@ test('📜 লগ — shows the row of the immediately preceding admin edit, new
   await expect(first.locator('pre')).toContainText('admin-ops log test');
 });
 
+test('📜 লগ → ত্রুটি tab shows a client error report, lazily loaded (item 42)', async ({ page }) => {
+  // Seeded directly via the emulator's REST API (owner bearer, bypasses rules) rather than
+  // triggering a real thrown error — tests/e2e/basics.spec.js's own error-report test already
+  // covers js/errors.js's write path end-to-end; this test only needs a known row for the admin
+  // viewer to display.
+  const BASE = 'http://127.0.0.1:8080/v1/projects/demo-trust/databases/(default)/documents';
+  const HEADERS = { Authorization: 'Bearer owner', 'Content-Type': 'application/json' };
+  const marker = `admin-log-errors-test-${Date.now()}`;
+  const createRes = await fetch(`${BASE}/errors`, {
+    method: 'POST',
+    headers: HEADERS,
+    body: JSON.stringify({
+      fields: {
+        message: { stringValue: marker },
+        url: { stringValue: 'https://example.com/about.html' },
+        ua: { stringValue: 'test-ua' },
+        stack: { stringValue: 'at test (about.js:1)' },
+        at: { timestampValue: new Date().toISOString() },
+      },
+    }),
+  });
+  expect(createRes.ok).toBe(true);
+
+  await login(page);
+  await page.goto('/admin/#log');
+  // Default pane is অডিট (audit), same as before this task — the ত্রুটি row must not appear
+  // until its own tab is clicked (lazy fetch, item 42's own render() comment).
+  await expect(page.locator('.log-row', { hasText: marker })).toHaveCount(0);
+  await page.click('.log-tabs button:has-text("ত্রুটি")');
+  await expect(page.locator('.log-row', { hasText: marker })).toBeVisible();
+});
+
 test('মুছে ফেলা দেখাও + পুনরুদ্ধার — delete→restore a committee row returns it to the public page (item 35)', async ({ page }) => {
   await page.goto('/committee.html');
   await expect(page.locator('.person', { hasText: 'সভাপতি' })).toBeVisible();

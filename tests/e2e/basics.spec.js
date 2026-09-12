@@ -98,3 +98,39 @@ test('/404.html renders the shell with a home link', async ({ page }) => {
   await expect(page.locator('.ph h1')).toHaveText('পাতাটি পাওয়া যায়নি');
   await expect(page.locator('a[href="index.html"]', { hasText: 'হোমে ফিরুন' })).toBeVisible();
 });
+
+// Phase 7 Task 7 — ops (audit items 41-44). item 42: js/errors.js reports uncaught errors/
+// unhandled rejections to the bounded `errors` collection; skipped on localhost unless ?errors=1
+// (js/errors.js's own comment on why — every other e2e test in this suite must see unchanged
+// behaviour). Reads the emulator's own REST API as the reserved 'owner' bearer token, same
+// pattern as tests/e2e/content.spec.js/theme.spec.js's audit-row reads.
+const REST_BASE = 'http://127.0.0.1:8080/v1/projects/demo-trust/databases/(default)/documents';
+const REST_HEADERS = { Authorization: 'Bearer owner' };
+
+test('js/errors.js reports a thrown error to the bounded `errors` collection (item 42)', async ({ page }) => {
+  const marker = `e2e-error-${Date.now()}`;
+  await page.goto('/index.html?errors=1');
+  // Thrown from a macrotask (setTimeout), same as an accidental real bug — this is what
+  // window.addEventListener('error') on window actually observes, not a synchronous throw inside
+  // page.evaluate() itself (which Playwright would instead surface as evaluate() rejecting).
+  await page.evaluate(msg => { setTimeout(() => { throw new Error(msg); }, 0); }, marker);
+
+  let found = null;
+  for (let i = 0; i < 20 && !found; i++) {
+    await page.waitForTimeout(500);
+    const res = await fetch(`${REST_BASE}/errors`, { headers: REST_HEADERS });
+    const json = await res.json();
+    found = (json.documents || []).find(d => d.fields?.message?.stringValue?.includes(marker));
+  }
+  expect(found, 'an errors/{id} doc with the thrown message should appear within ~10s').toBeTruthy();
+  // url is origin+pathname only — no query string (this very page was loaded with ?errors=1).
+  expect(found.fields.url.stringValue).toContain('/index.html');
+  expect(found.fields.url.stringValue).not.toContain('?');
+  expect(found.fields.ua.stringValue.length).toBeGreaterThan(0);
+
+  // Admin cleanup — not required for correctness (tests/seed/seed.js's recursiveDelete already
+  // clears `errors` on the next `npm run seed`), just tidy for repeat runs against the same
+  // still-seeded emulator.
+  const id = found.name.split('/').pop();
+  await fetch(`${REST_BASE}/errors/${id}`, { method: 'DELETE', headers: REST_HEADERS });
+});

@@ -261,6 +261,11 @@ export const STRINGS = {
   'admin.log.path': { bn: 'পাথ', en: 'Path' },
   'admin.log.uid': { bn: 'অ্যাডমিন', en: 'Admin' },
   'admin.log.details': { bn: 'বিস্তারিত', en: 'Details' },
+  // admin — Phase 7 Task 7 (item 42): 📜 লগ gains an ত্রুটি (error) tab reading `errors`.
+  'admin.log.tabAudit': { bn: 'অডিট', en: 'Audit' },
+  'admin.log.tabErrors': { bn: 'ত্রুটি', en: 'Errors' },
+  'admin.log.message': { bn: 'বার্তা', en: 'Message' },
+  'admin.log.url': { bn: 'ঠিকানা', en: 'URL' },
   'admin.showDeleted': { bn: 'মুছে ফেলা দেখাও', en: 'Show deleted' },
   'admin.restore': { bn: 'পুনরুদ্ধার', en: 'Restore' },
   'admin.forgotPassword': { bn: 'পাসওয়ার্ড ভুলে গেছেন?', en: 'Forgot password?' },

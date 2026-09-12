@@ -102,6 +102,10 @@ input[type=color]{width:44px;height:44px;padding:0;border-radius:10px}
 .log-row .log-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline}
 .log-row .log-head b{color:var(--sindoor)}
 .log-row pre{white-space:pre-wrap;word-break:break-word;background:var(--ivory2);border-radius:8px;padding:.6rem;font-size:12px;max-height:260px;overflow:auto}
+/* 📜 লগ — অডিট/ত্রুটি tabs (item 42); admin.js loads admin.css only, not css/site.css's own
+   .tabs, so this is its own small rule reusing the existing .btn-sm.secondary look. */
+.log-tabs{display:flex;gap:.5rem;margin:0 0 1rem}
+.log-tabs button.active{background:var(--sindoor);color:var(--ticker-ink);border-color:var(--sindoor)}
 
 /* Phase 7 Task 6: "?" help link in the top bar (item 37) */
 #adm-help{background:transparent;border:1px solid var(--hero-muted);color:var(--hero-ink);min-height:32px;min-width:32px;display:inline-flex;align-items:center;justify-content:center;padding:0;border-radius:50%;text-decoration:none;font-weight:700}

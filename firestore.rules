@@ -205,6 +205,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Phase 7 Task 7 (item 42): client-side error reports (js/errors.js). Create-only, no auth
+    // required — any visitor's browser can throw. Bounded field sizes limit abuse from a hostile
+    // client (App Check, owner-only, will gate this further); `at` must equal `request.time`, the
+    // server-resolved value of the client's `serverTimestamp()` sentinel, so it can't be forged.
+    // Read is admin-only (📜 লগ → ত্রুটি tab); never editable or hard-deletable, same as `audit`.
+    match /errors/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['message', 'url', 'ua', 'stack', 'at'])
+        && request.resource.data.message is string && request.resource.data.message.size() <= 500
+        && request.resource.data.url is string && request.resource.data.url.size() <= 300
+        && request.resource.data.ua is string && request.resource.data.ua.size() <= 300
+        && request.resource.data.stack is string && request.resource.data.stack.size() <= 2000
+        && request.resource.data.at == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
     // Everything else is denied until its phase adds explicit rules + tests.
     match /{document=**} {
       allow read, write: if false;

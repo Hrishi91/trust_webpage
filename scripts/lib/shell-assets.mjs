@@ -29,6 +29,7 @@ export const SHELL_JS_ROOT = [
   'js/contrast.js',
   'js/culture.js',
   'js/default-settings.js',
+  'js/errors.js',
   'js/firebase-auth.js',
   'js/firebase-config.js',
   'js/firebase.js',

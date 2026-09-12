@@ -5,6 +5,10 @@ import { resolveTheme, applyTheme, applyOverrides, isPreview } from './theme.js'
 import { mediaUrl, httpsUrl } from './media-slots.js';
 import { paintHeader, onResize } from './art.js';
 import { NAV, FOOTER_PAGES } from './nav-config.js';
+// Item 42: importing this for its side effect (window 'error'/'unhandledrejection' listeners)
+// wires client error reporting into every public page that calls mountShell() below — see
+// js/errors.js's own header comment for why this lives here rather than a per-page import.
+import './errors.js';
 
 let unsubHeader = null;
 

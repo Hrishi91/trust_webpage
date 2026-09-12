@@ -11,7 +11,7 @@
 // touches Firestore/Storage/Auth requests, online or offline.
 'use strict';
 
-const SW_VERSION = '20260912-8';
+const SW_VERSION = '20260912-10';
 const CACHE_NAME = 'trust-shell-' + SW_VERSION;
 const CACHE_PREFIX = 'trust-shell-';
 
@@ -38,6 +38,7 @@ const PRECACHE_URLS = [
   './js/contrast.js',
   './js/culture.js',
   './js/default-settings.js',
+  './js/errors.js',
   './js/firebase-auth.js',
   './js/firebase-config.js',
   './js/firebase.js',

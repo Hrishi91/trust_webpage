@@ -11,9 +11,12 @@
 // and content/strings and content/media are covered by DOCS below, not an open collection).
 // `photos` is albums/{id}/photos, a subcollection with no root-level `collection(db, 'photos')` of
 // its own — export.js fetches it per-album, not via the main per-collection loop.
+// Phase 7 Task 7 (item 42): `errors` (client-side error reports) joined the rules file — same
+// "every collection in firestore.rules" coverage rule as everything else here, kept honest by
+// tests/unit/export-colls.test.js parsing the rules file itself rather than trusting this list.
 export const COLLS = [
   'history', 'pages', 'events', 'committee', 'culture', 'albums', 'photos',
-  'audit', 'donations', 'transparency', 'announcements', 'members', 'notices', 'roster',
+  'audit', 'donations', 'transparency', 'announcements', 'members', 'notices', 'roster', 'errors',
 ];
 // Single-doc paths that live outside any collection this admin account can getDocs() a whole
 // collection from — settings/site and the two fixed content/* docs (Phase 6).
