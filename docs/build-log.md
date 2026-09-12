@@ -950,3 +950,11 @@ never reassigns `onclick`. `tests/e2e/public.spec.js`'s language-toggle test rev
 click (no more `toPass()` retry wrapper), and a new test blocks every Firestore RPC
 (`page.route('**/google.firestore.v1.Firestore/**', r => r.abort())`) and proves both controls work
 at 390×844 before `getSettings()`/`getContent()`'s fail-soft fallback ever settles.
+
+`fix(admin): forgot-password never reveals whether an account exists` — I2. `admin/js/admin.js`'s
+`$('adm-forgot').onclick` collapsed every outcome past the empty-field guard to the same
+`toast(t('admin.resetSent'))` — a caught Firebase error (e.g. `auth/user-not-found`) used to surface
+a distinct "couldn't send" toast, which is exactly the signal that lets someone probe whether an
+email has an admin account (the surrounding comment already said this was the intent; the code
+didn't match it). A failure is now `console.warn`'d (never the email itself) but never changes what
+the admin sees.

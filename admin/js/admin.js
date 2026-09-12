@@ -55,15 +55,21 @@ $('adm-logout').onclick = () => signOut(auth);
 
 // Item 36: forgot-password link on the login form — sendPasswordResetEmail with whatever email
 // is currently in the form field (no separate lookup; a non-existent-account error from Firebase
-// is intentionally indistinguishable from success in the UI so this can't be used to probe emails).
+// is intentionally indistinguishable from success in the UI so this can't be used to probe
+// emails). Final-review fix wave I2: EVERY outcome past the empty-field guard collapses to the
+// same success toast, matching this comment's own stated intent — a caught Firebase error
+// (including 'auth/user-not-found') used to surface a distinct "couldn't send" toast, which is
+// exactly the signal that lets someone probe whether an email has an admin account. console.warn
+// logs that something failed, for our own diagnosis, but never the email address itself (the
+// point of the fix is that the *user-visible* outcome carries no signal, not that we can't debug).
 $('adm-forgot').onclick = async e => {
   e.preventDefault();
   const email = new FormData($('adm-login-form')).get('email');
   if (!email) { toast(t('common.error'), 'err'); return; }
   const link = e.currentTarget; link.style.pointerEvents = 'none';
-  try { await sendPasswordResetEmail(auth, email); toast(t('admin.resetSent')); }
-  catch (err) { console.error(err); toast(t('admin.resetFailed'), 'err'); }
-  finally { link.style.pointerEvents = ''; }
+  try { await sendPasswordResetEmail(auth, email); }
+  catch (err) { console.warn('[admin] resetPassword', err); }
+  finally { link.style.pointerEvents = ''; toast(t('admin.resetSent')); }
 };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
