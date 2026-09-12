@@ -5,7 +5,7 @@
 import {
   initializeAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged,
   reauthenticateWithCredential, EmailAuthProvider, browserLocalPersistence,
-  RecaptchaVerifier, signInWithPhoneNumber,
+  RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import { app, IS_LOCAL } from './firebase.js';
 
@@ -24,5 +24,18 @@ if (IS_LOCAL) connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnin
 
 export {
   signInWithEmailAndPassword, signOut, onAuthStateChanged, reauthenticateWithCredential,
-  EmailAuthProvider, RecaptchaVerifier, signInWithPhoneNumber,
+  EmailAuthProvider, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail,
 };
+
+// Item 38 (?preview=1 branches on public pages): resolves once Auth's first onAuthStateChanged
+// tick fires. Restoring a persisted admin session from browserLocalPersistence is asynchronous
+// even though localStorage itself is synchronous — the SDK always fires at least one
+// onAuthStateChanged tick later — so a preview branch that queries Firestore immediately after
+// `await import('./firebase-auth.js')` can race that restore and reach Firestore with no ID token
+// attached. A LIST query (getDocs on a collection, or onSnapshot) with no `published` filter then
+// looks unsafe to the rules engine for an unauthenticated reader and firestore rejects the whole
+// query outright — not just the rows that would've failed. Awaiting this after the dynamic import
+// guarantees the session (or its genuine absence) is resolved before the query ever fires.
+export function authReady() {
+  return new Promise(resolve => { const unsub = onAuthStateChanged(auth, () => { unsub(); resolve(); }); });
+}

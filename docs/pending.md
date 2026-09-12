@@ -174,7 +174,7 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 - [x] Task 3 accessibility (skip link, 16px inputs, accessible lightbox, tab ARIA, aria-live, contrast fixes, alt text, form labels, banner role) (2026-09-12)
 - [x] Task 4 performance (items 28, 30–32: static above-the-fold app-shell, `width`/`height`/`aspect-ratio` on images, firebase-auth split, font preload, deferred DOMPurify) (2026-09-12) — the PWA service worker (item 29) is its own follow-up (sdd task-5-brief.md), not built here despite this line's original wording
 - [x] item 29 PWA service worker follow-up (sdd `task-5-brief.md`/`task-5-report.md`): versioned app-shell `sw.js`, `js/sw-register.js`, `scripts/bump-sw.mjs` hash+version discipline (2026-09-12)
-- [ ] Task 5 admin usability (export coverage, 📜 লগ audit viewer, restore toggle, forgot-password, help links, ?preview=1 everywhere, masked re-auth, list search)
+- [x] Task 5 admin usability (export coverage, 📜 লগ audit viewer, restore toggle, forgot-password, help links, ?preview=1 everywhere, masked re-auth, list search) (2026-09-12) — build-log's own heading calls this "Task 6" (sdd task-6-brief.md numbering); see that entry for the discovered latent about.js preview-race bug (not fixed, out of scope) and Task 8's follow-up (admin-guide.md headings matching the "?" help anchors)
 - [ ] Task 6 ops (CI, client error reporting, scheduled backup workflow, "শেষ আপডেট" stamps)
 - [ ] Task 7 docs + rules deploy + production seed
 - [ ] Task 8 Lighthouse pass + live verification (includes the live GitHub Pages 404 check for item 1)

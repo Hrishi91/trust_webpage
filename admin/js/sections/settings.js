@@ -55,7 +55,10 @@ registerSection('settings', {
       f.estYear.node, f.credItems.node, f.metaDescription.node,
       el('h3', { text: t('admin.settings.visibleSections') }),
       ...visFields.map(x => x.node),
-      el('button', { class: 'btn', type: 'submit', text: t('admin.saveDraft') }));
+      el('div', { class: 'row' },
+        el('button', { class: 'btn', type: 'submit', text: t('admin.saveDraft') }),
+        // Item 38: settings affect the whole site, not one page — plain link, no ?preview=1 branch.
+        el('a', { class: 'btn secondary', href: '../index.html', target: '_blank', text: t('admin.preview') })));
     form.onsubmit = async e => {
       e.preventDefault();
       // Client-side gate on top of firestore.rules' validSocial(): each social URL is either

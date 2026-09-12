@@ -25,6 +25,21 @@ export function boolField(label, name, value = false) {
   return { node: el('label', { class: 'row' }, input, el('span', { text: pick(label) })), read: () => input.checked };
 }
 
+// Item 40: a client-side search box that filters already-rendered rows by their visible text — no
+// refetch, no new query. The caller places the returned <input> above whatever container it should
+// filter (a listView() result, or a section's own custom listPane); `rowSelector` defaults to
+// '.list-item', the class every list row in this admin panel already uses.
+export function searchInput(container, rowSelector = '.list-item') {
+  const input = el('input', { type: 'search', placeholder: t('admin.search'), 'aria-label': t('admin.search') });
+  input.oninput = () => {
+    const q = input.value.trim().toLowerCase();
+    container.querySelectorAll(rowSelector).forEach(row => {
+      row.style.display = !q || row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  };
+  return input;
+}
+
 export async function saveDoc(ctx, coll, id, data, { publish } = {}) {
   try {
     const ref = id ? doc(ctx.db, coll, id) : doc(collection(ctx.db, coll));

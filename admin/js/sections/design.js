@@ -174,7 +174,13 @@ const def = {
       list,
       el('div', { class: 'savebar' }, saveBtn));
 
-    box.append(el('p', { class: 'muted', text: t('admin.designHint') }), grid, overridesCard);
+    // Item 38: design affects the whole site (theme/colours/fonts/section order), not one page —
+    // plain link, distinct from the per-theme "প্রিভিউ" buttons already in `grid` (those use
+    // ?theme= for a specific theme; this is just "see the live site as it is now").
+    box.append(
+      el('p', { class: 'muted', text: t('admin.designHint') }),
+      el('div', { class: 'row' }, el('a', { class: 'btn secondary', href: '../index.html', target: '_blank', text: t('admin.preview') })),
+      grid, overridesCard);
   },
 };
 registerSection('design', def);

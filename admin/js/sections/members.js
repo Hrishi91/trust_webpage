@@ -4,7 +4,7 @@ import { t, pick } from '../../../js/i18n.js';
 import { el, toast } from '../../../js/ui.js';
 import { sum, inr, balance } from '../../../js/money.js';
 import { normalizePhone } from '../../../js/phone.js';
-import { biField, textField, boolField, saveDoc, softDelete } from '../forms.js';
+import { biField, textField, boolField, saveDoc, softDelete, searchInput } from '../forms.js';
 
 const COLL = 'members';
 // Keys, not resolved {bn,en} objects — resolved with t(L.x) at the point of use so every render
@@ -37,7 +37,12 @@ async function listPane(ctx) {
 
   const box = el('div');
   box.append(el('div', { class: 'row' },
-    el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) })));
+    el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) }),
+    // Item 38: member data is private (own-doc-only + OTP login) — no anonymous public listing to
+    // preview, so this links to the entry page a member signs in from instead of a filtered view.
+    el('a', { class: 'btn secondary', href: '../members.html', target: '_blank', text: t('admin.preview') })));
+  // Item 40: search narrows the rendered rows client-side, no refetch.
+  box.append(searchInput(box));
   if (!rows.length) box.append(el('p', { text: t('common.empty') }));
   rows.forEach(d => {
     const due = balance(d.pledge || 0, d.payments ?? []);

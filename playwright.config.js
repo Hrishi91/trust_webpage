@@ -27,6 +27,11 @@ export default defineConfig({
   projects: [
     { name: 'public', testMatch: /(public|donate|transparency|live|theme|content|basics|seo|a11y|pwa)\.spec\.js/ },
     { name: 'members', testMatch: /members\.spec\.js/, dependencies: ['public'] },
-    { name: 'admin', testMatch: /admin\.spec\.js/, dependencies: ['members'] },
+    // Phase 7 Task 6 adds admin-ops.spec.js (export/log/restore/reset-link/search) to the same
+    // 'admin' project — same reasoning as admin.spec.js: needs the admin login, runs after
+    // 'members'. Neither file's mutations touch the other's seed rows (admin.spec.js soft-deletes
+    // history/h1; admin-ops.spec.js's restore test round-trips committee/c1 back to its original
+    // state), so run order between the two admin.*.spec.js files doesn't matter.
+    { name: 'admin', testMatch: /admin.*\.spec\.js/, dependencies: ['members'] },
   ],
 });

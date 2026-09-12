@@ -94,6 +94,14 @@ export async function mountShell(active, pageTitleKey) {
     link.href = favUrl;
   }
   document.documentElement.lang = getLang();
+  // Item 38: ?preview=1 lets a signed-in admin see a draft/unpublished announcement in the ticker
+  // too (any page, since the ticker is shell-wide) — same "unfiltered read, admin session required
+  // by firestore.rules" pattern as js/pages/about.js's own ?preview=1 branch. The dynamic import
+  // happens here (not left to the individual page module) because mountShell() — and therefore
+  // this ticker subscription — runs before a page's own ?preview=1 handling does. authReady()
+  // (js/firebase-auth.js) is awaited too — see its own comment for why a bare import isn't enough.
+  const previewAnn = new URLSearchParams(location.search).has('preview');
+  if (previewAnn) await import('./firebase-auth.js').then(m => m.authReady());
   let ann = [], live = false;
   // Item 22: aria-live="polite" — a screen reader announces a new/changed announcement without
   // the visitor having to reload or refocus anything; aria-atomic="false" (the default) means only
@@ -253,7 +261,7 @@ export async function mountShell(active, pageTitleKey) {
   };
   renderTicker(); renderNav(); renderFooter();
   onLangChange(() => { renderTicker(); renderNav(); renderFooter(); document.dispatchEvent(new CustomEvent('langchange')); });
-  const unsub = onAnnouncements((list, meta) => { ann = list; live = meta.live; renderTicker(); });
+  const unsub = onAnnouncements((list, meta) => { ann = list; live = meta.live; renderTicker(); }, { preview: previewAnn });
   window.addEventListener('pagehide', unsub);
   if (s.maintenance && !location.pathname.includes('/admin/')) {
     document.getElementById('main').replaceChildren(el('p', { class: 'notice', text: t('footer.maintenance') }));

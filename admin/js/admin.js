@@ -1,7 +1,7 @@
 import { db, storage, doc, getDoc } from '../../js/firebase.js';
 import {
   auth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  reauthenticateWithCredential, EmailAuthProvider,
+  reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail,
 } from '../../js/firebase-auth.js';
 import { t, getLang, setLang, onLangChange, pick, setOverrides } from '../../js/i18n.js';
 import { el, toast } from '../../js/ui.js';
@@ -53,6 +53,19 @@ $('adm-login-form').onsubmit = async e => {
 };
 $('adm-logout').onclick = () => signOut(auth);
 
+// Item 36: forgot-password link on the login form — sendPasswordResetEmail with whatever email
+// is currently in the form field (no separate lookup; a non-existent-account error from Firebase
+// is intentionally indistinguishable from success in the UI so this can't be used to probe emails).
+$('adm-forgot').onclick = async e => {
+  e.preventDefault();
+  const email = new FormData($('adm-login-form')).get('email');
+  if (!email) { toast(t('common.error'), 'err'); return; }
+  const link = e.currentTarget; link.style.pointerEvents = 'none';
+  try { await sendPasswordResetEmail(auth, email); toast(t('admin.resetSent')); }
+  catch (err) { console.error(err); toast(t('admin.resetFailed'), 'err'); }
+  finally { link.style.pointerEvents = ''; }
+};
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // Only a real "not an admin" (Firestore denies the read) should sign the admin out. Any other
@@ -87,15 +100,33 @@ onAuthStateChanged(auth, async u => {
   route();
 });
 
-/** Ask for the password again before a sensitive action. Resolves true on success. */
-async function reauth() {
-  const pw = prompt(t('admin.reauth'));
-  if (!pw) return false;
-  try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, pw)); return true; }
-  catch { toast(t('admin.wrongPassword'), 'err'); return false; }
+/** Ask for the password again before a sensitive action. Resolves true on success.
+ * Item 39: a masked <dialog> (admin/index.html #reauth-dialog), not window.prompt() — prompt()
+ * shows the password in clear text on a phone screen. showModal()/close() round-trips through a
+ * Promise the same way prompt() used to, so every existing reauth() caller is unchanged. */
+function reauth() {
+  const dialog = $('reauth-dialog');
+  const input = dialog.querySelector('input[type=password]');
+  input.value = '';
+  return new Promise(resolve => {
+    const onClose = async () => {
+      dialog.removeEventListener('close', onClose);
+      if (dialog.returnValue !== 'confirm' || !input.value) { resolve(false); return; }
+      try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, input.value)); resolve(true); }
+      catch { toast(t('admin.wrongPassword'), 'err'); resolve(false); }
+    };
+    dialog.addEventListener('close', onClose);
+    dialog.showModal();
+  });
 }
 
 const ctx = () => ({ db, storage, user, lang: getLang(), navigate: h => { location.hash = h; }, reauth });
+
+// Item 37: "?" help link — one element in the top bar (shared by the dashboard and every section,
+// since #adm-title is also shared that way) whose href tracks the current route. Anchors match the
+// section key (e.g. #export, #log); docs/user-guide/admin-guide.md gets matching headings in
+// Task 8 — see task-6-report.md for the full anchor list this points at.
+const GUIDE = 'https://github.com/Hrishi91/trust_webpage/blob/main/docs/user-guide/admin-guide.md';
 
 function dashboard() {
   const grid = el('div', { class: 'grid' });
@@ -112,6 +143,7 @@ async function route() {
   const key = location.hash.replace(/^#/, '').split('/')[0];
   const def = sections.get(key);
   $('adm-title').textContent = def ? (def.titleKey ? t(def.titleKey) : pick(def.title)) : 'Admin';
+  $('adm-help').href = `${GUIDE}#${key || 'dashboard'}`;
   if (!def) { main.append(dashboard()); return; }
   main.append(el('a', { class: 'back', href: '#', text: '‹ ' + t('admin.dashboard') }));
   const box = el('div'); main.append(box);

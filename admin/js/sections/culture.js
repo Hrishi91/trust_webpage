@@ -36,6 +36,9 @@ registerSection(COLL, {
       el('div', { class: 'row' },
         el('button', { class: 'btn secondary', type: 'button', text: t('admin.saveDraft'), onclick: save(false) }),
         el('button', { class: 'btn', type: 'submit', text: t('admin.publish') }),
+        // Item 38: culture cards render on the home page, not their own page — js/pages/home.js
+        // now reads deleted==false unfiltered (bypassing published) when ?preview=1 under admin auth.
+        id !== 'new' ? el('a', { class: 'btn secondary', href: `../index.html?preview=1`, target: '_blank', text: t('admin.preview') }) : null,
         id !== 'new' ? el('button', { class: 'btn danger', type: 'button', text: t('admin.delete'),
           onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } } }) : null));
     form.onsubmit = save(true);

@@ -41,8 +41,13 @@ test('create + publish an event, it appears publicly', async ({ page }) => {
 test('soft delete asks confirm + reauth and hides the row', async ({ page }) => {
   await login(page);
   await page.goto('/admin/#history/h1');
-  page.on('dialog', d => d.type() === 'confirm' ? d.accept() : d.accept('password12345'));
+  // confirm() is still a native browser dialog; reauth() (item 39) is now an in-page <dialog> with
+  // a masked input, filled below like a normal form field instead of via page.on('dialog', ...).
+  page.on('dialog', d => d.accept());
   await page.click('button.danger');
+  await expect(page.locator('dialog.reauth')).toBeVisible();
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page).toHaveURL(/#history$/);
   await page.goto('/about.html');
   await expect(page.locator('article')).toHaveCount(0);
@@ -66,10 +71,13 @@ test('admin panel follows the stored theme and uses the site fonts', async ({ pa
     expect(box.height).toBeGreaterThanOrEqual(44);
   }
   await page.goto('/admin/#design');
-  page.on('dialog', d => d.accept('password12345'));
   await page.click('.theme-tile[data-theme-name="atreyee"] button.apply');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'atreyee');
   await page.click('.theme-tile[data-theme-name="siddhi"] button.apply');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'siddhi');
 });
 test('✏️ লেখা — override a string, see it publicly, then reset it', async ({ page }) => {
@@ -86,8 +94,9 @@ test('✏️ লেখা — override a string, see it publicly, then reset it'
   await page.fill('input[type=search]', 'admin.culture');
   await page.fill('input[name="admin.culture.bn"]', 'শিল্পকলা');
   await page.fill('input[type=search]', '');
-  page.on('dialog', d => d.accept('password12345'));
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   await expect(page.locator('.links a').first()).toHaveText('শুরু');
@@ -108,6 +117,8 @@ test('✏️ লেখা — override a string, see it publicly, then reset it'
   await page.click('.str-row:has(input[name="admin.culture.bn"]) .btn-sm');
   await page.fill('input[type=search]', '');
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   await expect(page.locator('.links a').first()).toHaveText('হোম');
@@ -154,8 +165,9 @@ test('🖼️ UI ছবি — upload the hero image, the httpsUrl() gate keeps 
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGP8z8Dwn4GBgYGJAQoAHxcCAk+Uzr4AAAAASUVORK5CYII=', 'base64');
   await heroCard.locator('input[type=file]').setInputFiles({ name: 'hero.png', mimeType: 'image/png', buffer: png });
   await expect(heroCard.locator('img.thumb')).toBeVisible();
-  page.on('dialog', d => d.accept('password12345')); // reauth prompt on save
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345'); // reauth on save (item 39: masked dialog, not prompt())
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   expect(await mediaField('hero')).toMatch(/^http:\/\/127\.0\.0\.1:9199\//); // real Storage round-trip landed in Firestore
   // No-op save: admin re-opens media panel and saves without changing anything — should show "Nothing changed" toast
@@ -170,6 +182,8 @@ test('🖼️ UI ছবি — upload the hero image, the httpsUrl() gate keeps 
   await page.goto('/admin/#media');
   await page.locator('.slot-card[data-slot="hero"] .btn-sm.secondary').click();
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   expect(await mediaField('hero')).toBeUndefined();
   await page.goto('/index.html');

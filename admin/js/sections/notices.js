@@ -30,7 +30,10 @@ async function listPane(ctx) {
 
   const box = el('div');
   box.append(el('div', { class: 'row' },
-    el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) })));
+    el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) }),
+    // Item 38: notices are only visible to signed-in active members (no anonymous public page to
+    // preview) — links to the sign-in entry point instead of a filtered view.
+    el('a', { class: 'btn secondary', href: '../members.html', target: '_blank', text: t('admin.preview') })));
   if (!rows.length) box.append(el('p', { text: t('common.empty') }));
   rows.forEach(d => {
     box.append(el('div', { class: 'list-item' },

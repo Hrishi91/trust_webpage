@@ -1,5 +1,6 @@
 import { mountShell, section, pageHeader } from '../shell.js';
 import { listPublished } from '../content.js';
+import { db, collection, getDocs, query, where, orderBy } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, fmtDate, isLiveEvent } from '../ui.js';
 import { mediaUrl } from '../media-slots.js';
@@ -11,7 +12,13 @@ const s = await mountShell('events', 'nav.events');
 if (s) {
   let all, errored = false;
   try {
-    all = await listPublished('events');
+    // Item 38: ?preview=1 lets a signed-in admin see draft (unpublished) events too — same
+    // "unfiltered read, admin session required by firestore.rules" pattern as js/pages/about.js.
+    const preview = new URLSearchParams(location.search).has('preview');
+    if (preview) await import('../firebase-auth.js').then(m => m.authReady());
+    all = preview
+      ? (await getDocs(query(collection(db, 'events'), where('deleted', '==', false), orderBy('order')))).docs.map(d => ({ id: d.id, ...d.data() }))
+      : await listPublished('events');
   } catch (err) {
     console.error(err);
     errored = true;

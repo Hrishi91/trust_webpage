@@ -103,6 +103,8 @@ const def = {
 
     box.append(
       el('p', { class: 'muted', text: t('admin.stringsHint') }),
+      // Item 38: text overrides apply site-wide, not to one page — plain link, no ?preview=1 branch.
+      el('div', { class: 'row' }, el('a', { class: 'btn secondary', href: '../index.html', target: '_blank', text: t('admin.preview') })),
       search,
       ...detailsEls,
       el('div', { class: 'savebar' }, saveBtn),

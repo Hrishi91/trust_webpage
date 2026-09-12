@@ -263,6 +263,13 @@ export const STRINGS = {
   'admin.log.details': { bn: 'বিস্তারিত', en: 'Details' },
   'admin.showDeleted': { bn: 'মুছে ফেলা দেখাও', en: 'Show deleted' },
   'admin.restore': { bn: 'পুনরুদ্ধার', en: 'Restore' },
+  'admin.forgotPassword': { bn: 'পাসওয়ার্ড ভুলে গেছেন?', en: 'Forgot password?' },
+  'admin.resetSent': { bn: 'রিসেট লিঙ্ক ইমেলে পাঠানো হয়েছে', en: 'Reset link sent to your email' },
+  'admin.resetFailed': { bn: 'রিসেট পাঠানো যায়নি', en: 'Could not send reset link' },
+  'admin.help': { bn: '?', en: '?' },
+  'admin.confirm': { bn: 'ঠিক আছে', en: 'Confirm' },
+  'admin.cancel': { bn: 'বাতিল', en: 'Cancel' },
+  'admin.search': { bn: 'খুঁজুন…', en: 'Search…' },
   // admin — committee section form
   'admin.committee.name': { bn: 'নাম', en: 'Name' },
   'admin.committee.post': { bn: 'পদ', en: 'Post' },

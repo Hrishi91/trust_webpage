@@ -30,8 +30,10 @@ test('admin applies a theme from the 🎨 card; the public site reflects it; aud
   await page.goto('/admin/#design');
   await expect(page.locator('.theme-tile')).toHaveCount(5);
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');
-  page.on('dialog', d => d.accept('password12345'));
   await page.click('.theme-tile[data-theme-name="atreyee"] button.apply');
+  // Item 39: reauth() is a masked in-page <dialog>, not window.prompt().
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'atreyee');
   // logAudit(ctx, 'update', 'settings/site', {design: cur}, {design: 'atreyee'}) (admin/js/sections/
@@ -48,6 +50,8 @@ test('admin applies a theme from the 🎨 card; the public site reflects it; aud
   // restore for the other specs (theme.spec runs inside the 'public' project before 'admin')
   await page.goto('/admin/#design');
   await page.click('.theme-tile[data-theme-name="siddhi"] button.apply');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');
 });
 // Phase 6 Task 6: 🎨 ডিজাইন colour override — one row's hex text input round-trips to the public
@@ -60,17 +64,20 @@ test('🎨 colour override — sindoor hex reaches <html> on the public site, th
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
   await expect(page.locator('.grid .tile')).toHaveCount(18);
-  page.on('dialog', d => d.accept('password12345'));
   await page.goto('/admin/#design');
   const sindoorText = page.locator('.colour-row[data-key="sindoor"] input[type=text]');
   await sindoorText.fill('#112233');
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   expect((await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sindoor'))).trim()).toBe('#112233');
   await page.goto('/admin/#design');
   await page.click('.colour-row[data-key="sindoor"] button.btn-sm.secondary');
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   expect((await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sindoor'))).trim()).toBe('#c9361a');
@@ -84,16 +91,19 @@ test('🎨 home sections — turning off "culture" hides it on the home page; tu
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
   await expect(page.locator('.grid .tile')).toHaveCount(18);
-  page.on('dialog', d => d.accept('password12345'));
   await page.goto('/admin/#design');
   await page.uncheck('input[name="sec.culture"]');
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   await expect(page.locator('.culture')).toHaveCount(0);
   await page.goto('/admin/#design');
   await page.check('input[name="sec.culture"]');
   await page.click('.savebar button.btn');
+  await page.fill('dialog.reauth input[type=password]', 'password12345');
+  await page.click('dialog.reauth button[value=confirm]');
   await expect(page.locator('.toast')).toBeVisible();
   await page.goto('/index.html');
   await expect(page.locator('.culture')).toHaveCount(1);

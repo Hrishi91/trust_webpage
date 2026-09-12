@@ -16,6 +16,7 @@
 <body>
 <header class="adm-top">
   <strong id="adm-title">Admin</strong>
+  <a id="adm-help" class="btn-sm" href="#" target="_blank" rel="noopener" data-t="admin.help"></a>
   <span class="grow"></span>
   <button id="adm-lang" class="btn-sm" type="button">EN</button>
   <button id="adm-logout" class="btn-sm" type="button" hidden></button>
@@ -28,8 +29,23 @@
     <label><span data-t="admin.password"></span><input name="password" type="password" autocomplete="current-password" minlength="12" required></label>
     <button class="btn" type="submit" data-t="admin.login"></button>
     <p id="adm-login-err" class="err" role="alert"></p>
+    <a id="adm-forgot" href="#" data-t="admin.forgotPassword"></a>
   </form>
 </section>
+
+<!-- Item 39: masked re-auth — a real <input type=password>, not window.prompt() (which shows the
+     password in clear text). admin.js's reauth() opens this with showModal() and resolves its
+     Promise from the form's `close` event; returnValue is the clicked button's `value`. -->
+<dialog id="reauth-dialog" class="reauth">
+  <form method="dialog">
+    <h2 data-t="admin.reauth"></h2>
+    <label><span data-t="admin.password"></span><input type="password" autocomplete="current-password" required></label>
+    <div class="row">
+      <button type="submit" value="cancel" formnovalidate class="btn secondary" data-t="admin.cancel"></button>
+      <button type="submit" value="confirm" class="btn" data-t="admin.confirm"></button>
+    </div>
+  </form>
+</dialog>
 
 <main id="adm-main" hidden></main>
 <script type="module" src="js/admin.js"></script>

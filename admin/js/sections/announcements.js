@@ -63,6 +63,9 @@ async function mainPane(ctx) {
       f.text.node, f.pinned.node, f.isLive.node, f.expiresAt.node,
       el('div', { class: 'row' },
         el('button', { class: 'btn', type: 'submit', text: t('admin.publish') }),
+        // Item 38: announcements render in the ticker on every page — js/shell.js's mountShell()
+        // now reads deleted==false unfiltered (bypassing published) when ?preview=1 under admin auth.
+        el('a', { class: 'btn secondary', href: `../index.html?preview=1`, target: '_blank', text: t('admin.preview') }),
       ));
     form.onsubmit = save;
     formBox.replaceChildren(form);

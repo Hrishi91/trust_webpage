@@ -51,7 +51,13 @@ export async function listPublished(coll) {
   return rows(await getDocs(query(collection(db, coll), where('published', '==', true), where('deleted', '==', false), orderBy('order'))));
 }
 // culture/{id} — same published+!deleted+order semantics as every other listPublished() collection.
-export async function listCulture() {
+// Item 38: `{ preview: true }` (js/pages/home.js, ?preview=1) drops the published filter — same
+// "unfiltered read, admin session required by firestore.rules" pattern as about.js's own branch —
+// so a signed-in admin can see a draft culture card. Ordinary callers pass nothing, unaffected.
+export async function listCulture(opts) {
+  if (opts?.preview) {
+    return rows(await getDocs(query(collection(db, 'culture'), where('deleted', '==', false), orderBy('order'))));
+  }
   return listPublished('culture');
 }
 export async function listCommittee() {
@@ -125,11 +131,17 @@ export async function getTransparency(year) {
   }
 }
 
-// onAnnouncements(cb): realtime, published+!deleted, newest order first, non-expired only,
+// onAnnouncements(cb, opts): realtime, published+!deleted, newest order first, non-expired only,
 // pinned first within that. cb(list, { live }) — live means at least one visible row is isLive.
-export function onAnnouncements(cb) {
-  const q = query(collection(db, 'announcements'),
-    where('published', '==', true), where('deleted', '==', false), orderBy('order', 'desc'), limit(20));
+// Item 38: `{ preview: true }` (js/shell.js, ?preview=1) drops the published filter so a signed-in
+// admin sees a draft/unpublished announcement in the ticker too — both filter shapes are already
+// covered by firestore.indexes.json (`published+deleted+order` and `deleted+order`), so no new
+// index is needed for this branch.
+export function onAnnouncements(cb, opts) {
+  const filters = opts?.preview
+    ? [where('deleted', '==', false)]
+    : [where('published', '==', true), where('deleted', '==', false)];
+  const q = query(collection(db, 'announcements'), ...filters, orderBy('order', 'desc'), limit(20));
   return onSnapshot(q, snap => {
     const now = Date.now();
     const list = rows(snap)

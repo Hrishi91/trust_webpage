@@ -43,6 +43,8 @@ registerSection(COLL, {
       el('div', { class: 'row' },
         el('button', { class: 'btn secondary', type: 'button', text: t('admin.saveDraft'), onclick: save(false) }),
         el('button', { class: 'btn', type: 'submit', text: t('admin.publish') }),
+        // Item 38: events.html had no ?preview=1 branch before this task — see js/pages/events.js.
+        id !== 'new' ? el('a', { class: 'btn secondary', href: `../events.html?preview=1`, target: '_blank', text: t('admin.preview') }) : null,
         id !== 'new' ? el('button', { class: 'btn danger', type: 'button', text: t('admin.delete'),
           onclick: async () => { try { if (await softDelete(ctx, COLL, id)) ctx.navigate(`#${COLL}`); } catch { /* toast shown in softDelete */ } } }) : null));
     form.onsubmit = save(true);

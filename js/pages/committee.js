@@ -1,5 +1,6 @@
 import { mountShell, pageHeader, section, sectionHead } from '../shell.js';
 import { listCommittee } from '../content.js';
+import { db, collection, getDocs, query, where, orderBy } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
 import { mediaUrl, httpsUrl } from '../media-slots.js';
@@ -9,7 +10,14 @@ const s = await mountShell('committee', 'nav.committee');
 if (s) {
   let people = [];
   try {
-    people = await listCommittee();
+    // Item 38: ?preview=1 lets a signed-in admin see hidden/non-public rows too (deleted==false
+    // only, isPublic skipped) — same "unfiltered read, admin session required by firestore.rules"
+    // pattern as js/pages/about.js's own ?preview=1 branch.
+    const preview = new URLSearchParams(location.search).has('preview');
+    if (preview) await import('../firebase-auth.js').then(m => m.authReady());
+    people = preview
+      ? (await getDocs(query(collection(db, 'committee'), where('deleted', '==', false), orderBy('order')))).docs.map(d => ({ id: d.id, ...d.data() }))
+      : await listCommittee();
   } catch (err) {
     console.error(err);
     main.replaceChildren(el('p', { class: 'muted', text: t('common.error') }));

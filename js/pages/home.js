@@ -13,11 +13,21 @@ import { renderRich } from '../rich.js';
 import { shareRow } from '../share.js';
 
 const main = document.getElementById('main');
+// Item 38: ?preview=1 lets a signed-in admin see a draft culture card on the home page (culture
+// cards have no page of their own) — same "unfiltered read, admin session required by
+// firestore.rules" pattern as js/pages/about.js. mountShell() itself also checks this flag (for
+// the announcements ticker), so the dynamic import below is redundant-but-harmless when it does —
+// importing an already-loaded module a second time is a cache hit, not a second network request.
+const preview = new URLSearchParams(location.search).has('preview');
+if (preview) await import('../firebase-auth.js').then(m => m.authReady());
 const s = await mountShell('home');
 if (s) {
   let events, albums, history, people, years, cultureRows;
   try {
-    ({ events, albums, history, people, years, cultureRows } = await loadHome({ listPublished, listCommittee, listTransparencyYears, listCulture }));
+    ({ events, albums, history, people, years, cultureRows } = await loadHome({
+      listPublished, listCommittee, listTransparencyYears,
+      listCulture: () => listCulture(preview ? { preview: true } : undefined),
+    }));
   } catch (err) { console.error(err); main.replaceChildren(el('p', { class: 'muted', text: t('common.error') })); events = null; }
   if (events !== null) {
     const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);

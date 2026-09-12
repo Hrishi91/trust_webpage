@@ -3,7 +3,7 @@ import { collection, doc, getDoc, getDocs, query, where, orderBy } from '../../.
 import { t } from '../../../js/i18n.js';
 import { el, fmtDate, toast } from '../../../js/ui.js';
 import { sum, inr } from '../../../js/money.js';
-import { textField, boolField, saveDoc, softDelete } from '../forms.js';
+import { textField, boolField, saveDoc, softDelete, searchInput } from '../forms.js';
 
 const COLL = 'donations';
 const MODES = ['cash', 'upi', 'bank'];
@@ -84,7 +84,12 @@ async function listPane(ctx) {
     el('div', { class: 'row' },
       el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: () => ctx.navigate(`#${COLL}/new`) }),
       el('label', {}, el('span', { text: t(L.year) }), yearSelect),
+      // Item 38: donations always publish immediately (no draft state) — plain link to the live
+      // donor wall, no ?preview=1 branch needed.
+      el('a', { class: 'btn secondary', href: '../donate.html', target: '_blank', text: t('admin.preview') }),
     ),
+    // Item 40: search narrows the rendered rows client-side, no refetch.
+    searchInput(body),
     body,
   );
   return outer;

@@ -102,3 +102,15 @@ input[type=color]{width:44px;height:44px;padding:0;border-radius:10px}
 .log-row .log-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline}
 .log-row .log-head b{color:var(--sindoor)}
 .log-row pre{white-space:pre-wrap;word-break:break-word;background:var(--ivory2);border-radius:8px;padding:.6rem;font-size:12px;max-height:260px;overflow:auto}
+
+/* Phase 7 Task 6: "?" help link in the top bar (item 37) */
+#adm-help{background:transparent;border:1px solid var(--hero-muted);color:var(--hero-ink);min-height:32px;min-width:32px;display:inline-flex;align-items:center;justify-content:center;padding:0;border-radius:50%;text-decoration:none;font-weight:700}
+#adm-forgot{display:inline-block;margin-top:.5rem;color:var(--sindoor);font-weight:600;text-decoration:none}
+
+/* Item 39: masked re-auth dialog */
+dialog.reauth{border:0;border-radius:var(--r);padding:1.2rem;background:var(--card);color:var(--ink);max-width:360px;width:90vw}
+dialog.reauth::backdrop{background:rgba(0,0,0,.5)}
+dialog.reauth h2{margin-top:0}
+
+/* Item 40: search inputs on committee/donations/members lists */
+input[type=search]{margin:.5rem 0}
