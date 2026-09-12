@@ -63,6 +63,22 @@ custom domain-এ থাকে `/`-এ। তাই HTML-এর সব internal 
 **relative** হতে হবে (যেমন `css/site.css`, `../js/firebase.js`) — কখনও
 root-absolute (`/css/...`) না।
 
+## CI — প্রতি push-এ automatic টেস্ট
+
+`.github/workflows/ci.yml` প্রতিটা push/PR-এ নিজে থেকেই চলে (`ubuntu-latest`,
+Java 21 + firebase-tools + Playwright Chromium ইনস্টল করে) — unit + rules
+(emulator দিয়ে) + সব e2e টেস্ট রান করে, ঠিক লোকাল `npm test` + `npm run e2e`-এর
+মতোই। README-র ওপরের badge-টাই এই workflow-এর সাম্প্রতিক status দেখায় (সবুজ
+= পাশ)।
+
+- Verify: `gh run list --workflow ci.yml --limit 1` (সাম্প্রতিক run + status),
+  অথবা `gh run watch <run-id> --exit-status` (লাইভ ফলো করতে)।
+- CI **rules deploy করে না** — শুধু rules test চালায় emulator-এ। আসল প্রোডাকশন
+  rules deploy এখনও ম্যানুয়াল, `scripts/deploy-rules.sh` দিয়ে (Step 3)।
+- CI fail করলে push নিজে থেকে আটকায় না (branch protection সেটআপ করা নেই,
+  একা admin-এর repo) — কিন্তু badge লাল দেখাবে, সেটা দেখলে ঠিক করে আবার push
+  করুন।
+
 ## Step 3: Firestore/Storage rules deploy ⏳ owner-এর Firebase project হলে
 
 owner এখনও real Firebase project বানাননি (`js/firebase-config.js`-এ এখনও
@@ -175,7 +191,7 @@ set — skipping" লেখা দেখাবে।
 
 | পরিবর্তন | কমান্ড |
 |---|---|
-| সাইটের কোড/content বদল | `git push` |
+| সাইটের কোড/content বদল | `git push` (CI নিজে থেকেই টেস্ট চালাবে) |
 | Firestore/Storage rules বদল | `scripts/deploy-rules.sh` |
 | Custom domain সেটআপ/বদল | CNAME file + DNS + `scripts/auth-config.mjs --domain <domain>` + referrer list (Step 4) |
 | App Check enforce | শুধু Task 21 live-verify পাশ হওয়ার পরে (Step 5) |

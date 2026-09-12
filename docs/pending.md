@@ -176,8 +176,8 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 - [x] item 29 PWA service worker follow-up (sdd `task-5-brief.md`/`task-5-report.md`): versioned app-shell `sw.js`, `js/sw-register.js`, `scripts/bump-sw.mjs` hash+version discipline (2026-09-12)
 - [x] Task 5 admin usability (export coverage, 📜 লগ audit viewer, restore toggle, forgot-password, help links, ?preview=1 everywhere, masked re-auth, list search) (2026-09-12) — build-log's own heading calls this "Task 6" (sdd task-6-brief.md numbering); see that entry for the discovered latent about.js preview-race bug (not fixed, out of scope) and Task 8's follow-up (admin-guide.md headings matching the "?" help anchors)
 - [x] Task 6 ops (CI, client error reporting, scheduled backup workflow, "শেষ আপডেট" stamps) (2026-09-12) — build-log's own heading calls this "Task 7" (sdd `task-7-brief.md` numbering); see that entry for the full breakdown
-- [ ] Task 7 docs + rules deploy + production seed
-- [ ] Task 8 Lighthouse pass + live verification (includes the live GitHub Pages 404 check for item 1)
+- [x] Task 7 docs + rules deploy + push (2026-09-13) — sdd `task-8-brief.md` numbering did both this and Task 8 in one pass; see that task's report for the full command log
+- [x] Task 8 full gate + Lighthouse pass + live verification (includes the live GitHub Pages 404 check for item 1) (2026-09-13) — **Phase 7 is LIVE**
 
 ### Owner-only (Phase 7, recorded per the audit's §3)
 
@@ -187,6 +187,24 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 ### Not needed (Phase 7, recorded per the audit's §4)
 
 - hreflang (single URL per page, language is a client-side toggle — no per-language URLs to declare), RTL support, a cookie/consent banner (no tracking cookies are set), a Google Maps iframe embed (a plain link avoids ~200 KB + a third-party cookie; the link opens the visitor's own maps app), a payment gateway (UPI deep link + WhatsApp confirmation is the trust's chosen flow), and a minify/bundle build step (the project is deliberately no-build, per `CLAUDE.md`).
+
+### ⏳ Owner still to do (Phase 7)
+
+- **Read and edit the 8 new পাতা**: /admin/ → 📄 পাতা → privacy/refund/trust/contact/faq/news/downloads all ship with drafted bilingual defaults (`js/page-defaults.js`), not real trust-specific text — read এগুলো and rewrite in your own words (especially trust.html's purpose/what-donations-fund and privacy.html's actual policy) before pointing anyone at them.
+- **Add the `FIREBASE_SA` repo secret** once a real Firebase project/service account exists (see Owner-only above and `docs/user-guide/deploy.md` Step 6) — the backup workflow runs green every week either way, but only exports data after this is added.
+- **Check the live Lighthouse numbers** in this task's build-log entry — if Performance is still below the 70 target, the top-three opportunities are listed there and in the "Deferred minors" note below; none of them block go-live.
+
+### Deferred minors from Phase 7 reviews
+
+Folded from `.superpowers/sdd/2026-09-12-phase-7-site-basics/progress.md`'s per-task review notes.
+None of these gate Phase 7 going live; revisit opportunistically.
+
+- Task 1: 29-vs-30 rules-count wording in one build-log line; `news.js` uses a bare `.acc` wrapper without a `<details>` fallback; the trust.html bn opening sentence could read smoother.
+- Task 2: the print stylesheet is sitewide, not scoped to just হিসাব (harmless — other pages simply also get a cleaner print layout).
+- Task 3: the live ticker's `aria-live` region can announce the same announcement twice on rapid re-renders; the client error-report queue clears only on a successful submit (a page closed mid-retry re-sends on the next load); an album photo's `alt` duplicates its `caption` when both are filled (no harm, just redundant).
+- Task 4: `tests/e2e/basics.spec.js`'s contact-page selector is broader than it needs to be; `scripts/sync-shell.mjs` has no direct unit test (covered indirectly by the generated-file `--check` gate); local Lighthouse LCP numbers aren't comparable to the live baseline (see Task 4's own build-log/pending notes above).
+- Task 6 (admin usability): the "?" help links themselves were never click-tested end-to-end before this task wired up the matching `docs/user-guide/admin-guide.md` anchors; `admin/js/sections/log.js`'s audit-action label falls back to the raw action string for any future action not yet added to `admin.log.action.*` (by design, not a bug — see that file's own comment).
+- Task 7 (ops): `admin.log.message`/`admin.log.url` are unused i18n keys left over from an earlier ত্রুটি-tab layout; the `errors` Firestore rule effectively requires `stack` in practice (every real browser error includes one) even though the schema marks it optional.
 
 ### Task 1 notes
 
