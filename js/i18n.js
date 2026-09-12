@@ -252,6 +252,15 @@ export const STRINGS = {
   'admin.dashboard': { bn: 'ড্যাশবোর্ড', en: 'Dashboard' },
   'admin.backup': { bn: 'ব্যাকআপ', en: 'Backup' },
   'admin.settings': { bn: 'সেটিংস', en: 'Settings' },
+  // admin — Phase 7 Task 6: audit log viewer, restore, forgot password, help links, masked reauth, search
+  'admin.log': { bn: 'লগ', en: 'Log' },
+  'admin.log.filter': { bn: 'কালেকশন', en: 'Collection' },
+  'admin.log.all': { bn: 'সব', en: 'All' },
+  'admin.log.at': { bn: 'সময়', en: 'Time' },
+  'admin.log.action': { bn: 'কাজ', en: 'Action' },
+  'admin.log.path': { bn: 'পাথ', en: 'Path' },
+  'admin.log.uid': { bn: 'অ্যাডমিন', en: 'Admin' },
+  'admin.log.details': { bn: 'বিস্তারিত', en: 'Details' },
   // admin — committee section form
   'admin.committee.name': { bn: 'নাম', en: 'Name' },
   'admin.committee.post': { bn: 'পদ', en: 'Post' },

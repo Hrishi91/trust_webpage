@@ -93,3 +93,9 @@ input[type=color]{width:44px;height:44px;padding:0;border-radius:10px}
   .colour-row>.badge{grid-area:badge;justify-self:end}
   .colour-row>.btn-sm{grid-area:reset}
 }
+
+/* 📜 লগ — audit log viewer (item 34) */
+.log-row{border-bottom:1px solid var(--line);padding:.6rem 0}
+.log-row .log-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline}
+.log-row .log-head b{color:var(--sindoor)}
+.log-row pre{white-space:pre-wrap;word-break:break-word;background:var(--ivory2);border-radius:8px;padding:.6rem;font-size:12px;max-height:260px;overflow:auto}

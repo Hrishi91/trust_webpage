@@ -26,7 +26,7 @@ test('admin applies a theme from the 🎨 card; the public site reflects it; aud
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(17);
+  await expect(page.locator('.grid .tile')).toHaveCount(18);
   await page.goto('/admin/#design');
   await expect(page.locator('.theme-tile')).toHaveCount(5);
   await expect(page.locator('.theme-tile.current')).toHaveAttribute('data-theme-name', 'siddhi');
@@ -59,7 +59,7 @@ test('🎨 colour override — sindoor hex reaches <html> on the public site, th
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(17);
+  await expect(page.locator('.grid .tile')).toHaveCount(18);
   page.on('dialog', d => d.accept('password12345'));
   await page.goto('/admin/#design');
   const sindoorText = page.locator('.colour-row[data-key="sindoor"] input[type=text]');
@@ -83,7 +83,7 @@ test('🎨 home sections — turning off "culture" hides it on the home page; tu
   await page.fill('input[name=email]', 'admin@example.com');
   await page.fill('input[name=password]', 'password12345');
   await page.click('button[type=submit]');
-  await expect(page.locator('.grid .tile')).toHaveCount(17);
+  await expect(page.locator('.grid .tile')).toHaveCount(18);
   page.on('dialog', d => d.accept('password12345'));
   await page.goto('/admin/#design');
   await page.uncheck('input[name="sec.culture"]');
