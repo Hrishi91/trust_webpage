@@ -11,6 +11,8 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const HTML_FILES = [
   'about.html', 'committee.html', 'donate.html', 'events.html', 'gallery.html',
   'index.html', 'members.html', 'transparency.html', 'admin/index.html',
+  // Phase 7 Task 1
+  '404.html', 'privacy.html', 'trust.html', 'contact.html', 'faq.html', 'news.html', 'downloads.html',
 ];
 // Fix round 1, finding 1: the inline head-cache script (identical in all 9 HTML files) must
 // gate a cached designOverrides key on the same shape OVERRIDE_KEYS itself satisfies — the old
@@ -28,7 +30,7 @@ test('OVERRIDE_KEYS all satisfy the inline head-cache script\'s key regex, and e
   }
 });
 
-test('the inline head-cache script is byte-identical across all 9 HTML files', () => {
+test('the inline head-cache script is byte-identical across all 16 HTML files', () => {
   const extract = html => {
     const m = html.match(/<script>try\{var d=localStorage[^<]*<\/script>/);
     assert.ok(m, 'head-cache script not found');

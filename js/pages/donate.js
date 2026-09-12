@@ -22,6 +22,10 @@ if (s) {
     const purposes = parsePurposes(s.donatePurposes);
     // The three inputs are created per render() (placeholders follow the language) but held in these block-level bindings so the purpose chips — built in the same render — can fill the amount.
     let nameField, amountField, refField;
+    // Phase 7 Task 1 item 5: the donate page never learns whether the WhatsApp message was
+    // actually sent (window.open is fire-and-forget), so "thank you" just means "you told us" —
+    // re-render swaps the form out for a bilingual acknowledgement; "আবার" (again) brings it back.
+    let thanked = false;
 
     const upiCard = () => {
       if (!s.upiId) {
@@ -52,7 +56,14 @@ if (s) {
     const confirmCard = () => {
       const wa = digits(s.contacts.whatsapp);
       if (!wa) return null;
-      return el('div', { class: 'card' },
+      const refundLink = el('p', {}, el('a', { class: 'muted', href: 'privacy.html#refund', text: t('donate.refundLink') }));
+      if (thanked) {
+        return el('div', { class: 'card' }, refundLink,
+          el('h2', { text: t('donate.thankYouTitle') }),
+          el('p', { text: t('donate.thankYouBody') }),
+          el('button', { class: 'btn secondary', type: 'button', text: t('donate.again'), onclick: () => { thanked = false; render(); } }));
+      }
+      return el('div', { class: 'card' }, refundLink,
         el('h2', { text: t('donate.confirm') }),
         el('form', {
           onsubmit: e => {
@@ -62,6 +73,7 @@ if (s) {
             const vals = { amount: String(amount), ref: ref || '—', name: name || '—' };
             const msg = t('donate.confirmMsg').replace(/\{(amount|ref|name)\}/g, (_, k) => vals[k]);
             window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+            thanked = true; render();
           },
         },
           el('div', { class: 'row' }, nameField),

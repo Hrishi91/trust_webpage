@@ -27,7 +27,7 @@ const bi = (bn, en) => ({ bn, en });
 // "create + publish an event" test) that a plain upsert-by-fixed-ID below would never touch —
 // left alone, a stray published doc from one run corrupts item-count assertions on the next.
 // recursiveDelete also clears albums/*/photos subcollections.
-for (const coll of ['history', 'events', 'albums', 'committee', 'culture', 'donations', 'transparency', 'announcements', 'members', 'notices', 'roster']) {
+for (const coll of ['history', 'events', 'albums', 'committee', 'culture', 'donations', 'transparency', 'announcements', 'members', 'notices', 'roster', 'pages']) {
   await db.recursiveDelete(db.collection(coll));
 }
 

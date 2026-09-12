@@ -188,6 +188,43 @@ export const STRINGS = {
   'donate.amount': { bn: 'পরিমাণ (₹)', en: 'Amount (₹)' },
   'donate.ref': { bn: 'UPI রেফারেন্স', en: 'UPI reference' },
   'donate.purposeHeading': { bn: 'কোন খাতে', en: 'For what' },
+  // donate page — refund-policy link + on-site thank-you state (Phase 7 Task 1)
+  'donate.refundLink': { bn: 'দান ফেরত নীতি', en: 'Refund policy' },
+  'donate.thankYouTitle': { bn: 'ধন্যবাদ!', en: 'Thank you!' },
+  'donate.thankYouBody': {
+    bn: 'আপনার বার্তা WhatsApp-এ পাঠানো হয়েছে। কোষাধ্যক্ষ যাচাই করে শীঘ্রই যোগাযোগ করবেন।',
+    en: 'Your message has been sent on WhatsApp. The treasurer will verify and get back to you shortly.',
+  },
+  'donate.again': { bn: 'আবার', en: 'Again' },
+  // page chrome — privacy/terms + "about the trust" (Phase 7 Task 1)
+  'page.privacy.title': { bn: 'গোপনীয়তা ও শর্তাবলী', en: 'Privacy & terms' },
+  'page.privacy.crumb': { bn: 'নীতি', en: 'Policy' },
+  'page.trust.title': { bn: 'ট্রাস্ট সম্পর্কে', en: 'About the trust' },
+  'page.trust.crumb': { bn: 'পরিচিতি', en: 'About' },
+  'page.trust.trustees': { bn: 'ট্রাস্টিগণ', en: 'Trustees' },
+  // donation/refund policy — its own pages/refund doc, shown as a #refund section on privacy.html
+  'refund.title': { bn: 'দান ফেরত নীতি', en: 'Donation / refund policy' },
+  // contact page
+  'contact.title': { bn: 'যোগাযোগ', en: 'Contact' },
+  'contact.crumb': { bn: 'যোগাযোগ', en: 'Contact' },
+  'contact.name': { bn: 'আপনার নাম (ঐচ্ছিক)', en: 'Your name (optional)' },
+  'contact.message': { bn: 'বার্তা', en: 'Message' },
+  'contact.messagePlaceholder': { bn: 'আপনার প্রশ্ন বা বার্তা লিখুন…', en: 'Type your question or message…' },
+  'contact.send': { bn: 'WhatsApp-এ পাঠান', en: 'Send on WhatsApp' },
+  'contact.needMessage': { bn: 'অনুগ্রহ করে একটি বার্তা লিখুন', en: 'Please write a message' },
+  // FAQ page
+  'faq.title': { bn: 'সচরাচর জিজ্ঞাসা', en: 'FAQ' },
+  'faq.crumb': { bn: 'প্রশ্নোত্তর', en: 'Q&A' },
+  // news archive (past the home ticker's 5)
+  'news.title': { bn: 'খবর ও ঘোষণা', en: 'News & updates' },
+  'news.crumb': { bn: 'আর্কাইভ', en: 'Archive' },
+  // downloads — every published transparency document, across years, on one page
+  'downloads.title': { bn: 'ডাউনলোড', en: 'Downloads' },
+  'downloads.crumb': { bn: 'নথিপত্র', en: 'Documents' },
+  // 404
+  'notfound.title': { bn: 'পাতাটি পাওয়া যায়নি', en: 'Page not found' },
+  'notfound.crumb': { bn: '৪০৪', en: '404' },
+  'notfound.home': { bn: 'হোমে ফিরুন', en: 'Back to home' },
   // transparency page
   'tr.total': { bn: 'মোট', en: 'Total' },
   'tr.download': { bn: 'ডাউনলোড', en: 'Download' },
@@ -330,6 +367,13 @@ export const STRINGS = {
   'admin.strings.group.footer': { bn: 'ফুটার', en: 'Footer' },
   'admin.strings.group.cred': { bn: 'বিশ্বাসযোগ্যতা', en: 'Credibility' },
   'admin.strings.group.admin': { bn: 'অ্যাডমিন', en: 'Admin' },
+  'admin.strings.group.page': { bn: 'পাতা', en: 'Pages' },
+  'admin.strings.group.refund': { bn: 'দান ফেরত', en: 'Refund' },
+  'admin.strings.group.contact': { bn: 'যোগাযোগ', en: 'Contact' },
+  'admin.strings.group.faq': { bn: 'প্রশ্নোত্তর', en: 'FAQ' },
+  'admin.strings.group.news': { bn: 'খবর', en: 'News' },
+  'admin.strings.group.downloads': { bn: 'ডাউনলোড', en: 'Downloads' },
+  'admin.strings.group.notfound': { bn: '৪০৪', en: '404' },
   // admin — 🖼️ UI ছবি media slots (Phase 6 Task 5)
   'admin.media': { bn: 'UI ছবি', en: 'UI images' },
   'admin.media.usingArt': { bn: 'আঁকা art/ default দেখাচ্ছে', en: 'Showing drawn art / default' },
@@ -344,6 +388,13 @@ export const STRINGS = {
   'admin.culture.tag': { bn: 'ট্যাগ', en: 'Tag' },
   'admin.culture.text': { bn: 'বিবরণ', en: 'Text' },
   'admin.culture.image': { bn: 'ছবি', en: 'Image' },
+  // admin — 📄 পাতা pages editor (Phase 7 Task 1)
+  'admin.pages': { bn: 'পাতা', en: 'Pages' },
+  'admin.pages.title': { bn: 'শিরোনাম', en: 'Title' },
+  'admin.pages.body': {
+    bn: 'লেখা (অনুমোদিত HTML: p, b, i, ul, ol, li, h3, h4, a, blockquote)',
+    en: 'Body (allowed HTML: p, b, i, ul, ol, li, h3, h4, a, blockquote)',
+  },
 };
 
 // --- overrides layer (Phase 6: admin can override any default above) ---
@@ -386,6 +437,10 @@ const PREFIX_TO_GROUP = { tr: 'transparency', mem: 'members' };
 const GROUP_NAMES = [
   'nav', 'common', 'countdown', 'live', 'home', 'about', 'committee', 'gallery',
   'events', 'donate', 'transparency', 'members', 'footer', 'cred', 'admin',
+  // Phase 7 Task 1: pages & legal — privacy/trust share the generic 'page' prefix (page.privacy.*,
+  // page.trust.*); refund/contact/faq/news/downloads/notfound each get their own, matching their
+  // STRINGS key prefix.
+  'page', 'refund', 'contact', 'faq', 'news', 'downloads', 'notfound',
 ];
 export const STRING_GROUPS = (() => {
   const groups = Object.fromEntries(GROUP_NAMES.map(g => [g, []]));

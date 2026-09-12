@@ -64,6 +64,13 @@ service cloud.firestore {
     // <a href> (js/shell.js's footer already gates every link through httpsUrl() too — this is
     // the write-side half of that same guarantee, not a redundant check).
     function httpsOrEmpty(v) { return v is string && (v == '' || v.matches('^https://.*')); }
+    // Phase 7 Task 1: settings.trustees — a list of {name,role} shown on trust.html. Rules cannot
+    // validate list elements (same limitation as validHomeSections()); a sane size cap is all
+    // that's enforced server-side, same reasoning as homeSections.
+    function validTrustees() {
+      return !('trustees' in request.resource.data)
+        || (request.resource.data.trustees is list && request.resource.data.trustees.size() <= 20);
+    }
     function validSocial() {
       return !('social' in request.resource.data) || (
         request.resource.data.social is map
@@ -77,7 +84,7 @@ service cloud.firestore {
 
     match /settings/site {
       allow read: if true;
-      allow create, update: if isAdmin() && validDesign() && validOverrides() && validFonts() && validHomeSections() && validSocial();
+      allow create, update: if isAdmin() && validDesign() && validOverrides() && validFonts() && validHomeSections() && validSocial() && validTrustees();
       allow delete: if false;
     }
 
@@ -90,6 +97,15 @@ service cloud.firestore {
     }
 
     match /history/{id} {
+      allow read: if isAdmin() || isLive();
+      allow create, update: if isAdmin() && hasDeletedFlag();
+      allow delete: if false;
+    }
+
+    // Phase 7 Task 1: pages/{id} — privacy, refund, trust, contact, faq, news, downloads,
+    // notfound. Fixed ids (js/page-defaults.js), same published+!deleted shape as history; no
+    // `order` field (not a reorderable list) but the shape check doesn't care.
+    match /pages/{id} {
       allow read: if isAdmin() || isLive();
       allow create, update: if isAdmin() && hasDeletedFlag();
       allow delete: if false;

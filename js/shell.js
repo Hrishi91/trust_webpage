@@ -18,6 +18,20 @@ const NAV = [
   ['members', 'members.html', 'nav.members', 'members'],
 ];
 
+// Phase 7 Task 1: footer-only pages (privacy/terms, about-the-trust, contact, FAQ, news archive,
+// downloads) — never in the top nav bar (NAV above already fills the burger menu on mobile), just
+// appended to the footer's "পাতা" column below. `refund` and `notfound` are deliberately absent:
+// the refund policy is a #refund section on privacy.html, not its own link, and the 404 page is
+// never something a visitor should navigate to on purpose.
+const FOOTER_PAGES = [
+  ['privacy.html', 'page.privacy.title'],
+  ['trust.html', 'page.trust.title'],
+  ['contact.html', 'contact.title'],
+  ['faq.html', 'faq.title'],
+  ['news.html', 'news.title'],
+  ['downloads.html', 'downloads.title'],
+];
+
 const OM_MARK = 'ॐ';
 function brandMark(s) {
   const url = mediaUrl(s.media, 'brandMark') || httpsUrl(s.logoUrl);
@@ -138,7 +152,8 @@ export async function mountShell(active, pageTitleKey) {
         mapHref ? el('a', { href: mapHref, target: '_blank', rel: 'noopener', text: t('footer.map') }) : null,
         s.contacts.email ? el('a', { href: `mailto:${s.contacts.email}`, text: s.contacts.email }) : null),
       el('div', {}, el('b', { text: t('footer.pages') }),
-        ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) }))),
+        ...NAV.slice(1).filter(([, , , vis]) => s.sectionVisibility[vis] !== false).map(([, href, tkey]) => el('a', { href, text: t(tkey) })),
+        ...FOOTER_PAGES.map(([href, tkey]) => el('a', { href, text: t(tkey) }))),
       el('div', {}, el('b', { text: t('footer.trust') }),
         el('a', { href: 'transparency.html', text: t('tr.docs') }), el('a', { href: 'committee.html', text: t('nav.committee') }),
         el('span', { class: 'muted', text: `© ${new Date().getFullYear()} ${pick(s.name)}` }),

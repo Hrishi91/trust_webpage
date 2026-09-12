@@ -246,7 +246,8 @@ footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
 .chips i{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:.2rem .7rem;font-size:13px;font-variant-numeric:tabular-nums}
 .chips i.on{background:var(--sindoor);color:#fff6e8;border-color:var(--sindoor)}
 .form{display:grid;gap:.6rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem}
-.form input{font:16px var(--body);padding:.7rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory)}
+.form input,.form textarea{font:16px var(--body);padding:.7rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--ivory)}
+.form textarea{resize:vertical;font-family:inherit}
 .wall{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem 1.5rem;font-size:14.5px}
 .wall div{display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 .wall div span:last-child{font-weight:700}
@@ -325,7 +326,7 @@ table.ledger td.amt{text-align:right;white-space:nowrap;font-variant-numeric:tab
 .err{color:var(--sindoor);min-height:1.2em}
 .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* bridge rules only ADD properties the concept block lacks — never re-declare a value the concept sets (amended after Task 3 review) */
-.otp input,.form input{width:100%;min-height:44px;color:var(--ink)}
+.otp input,.form input,.form textarea{width:100%;min-height:44px;color:var(--ink)}
 .otp input[inputmode=numeric]{letter-spacing:.4em;text-align:center;font-size:22px;font-weight:700}
 .brand .om{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--bg2);color:var(--pitambar);font:700 24px serif}
 .burger .bars{display:block;width:24px;height:2px;background:currentColor;box-shadow:0 -7px 0 currentColor,0 7px 0 currentColor}

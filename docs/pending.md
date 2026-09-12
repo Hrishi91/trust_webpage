@@ -164,3 +164,28 @@ dropped on save with no toast (M7).
   `--bg`; unlike the 🎨 ডিজাইন colour rows, there is no live contrast check against `--hero-ink` for
   the crumb/title/lead text, so a bright admin-uploaded header photo could leave that text hard to
   read.
+
+## Phase 7 — Site basics: everything a complete site needs
+
+Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowers/specs/2026-09-12-phase-7-site-basics.md`. 8 tasks close every ❌/⚠️ the audit marked *Build*.
+
+- [x] Task 1 pages & legal (404, privacy/terms+refund, trust, contact, downloads, news, faq) + admin 📄 পাতা (2026-09-12)
+- [ ] Task 2 SEO & share (titles/canonical/OG/JSON-LD, favicon/manifest, robots/sitemap, share row, .ics, print stylesheet)
+- [ ] Task 3 accessibility (skip link, 16px inputs, accessible lightbox, tab ARIA, aria-live, contrast fixes, alt text, form labels, banner role)
+- [ ] Task 4 performance & PWA shell (static above-the-fold shell, service worker, image dimensions, script loading)
+- [ ] Task 5 admin usability (export coverage, 📜 লগ audit viewer, restore toggle, forgot-password, help links, ?preview=1 everywhere, masked re-auth, list search)
+- [ ] Task 6 ops (CI, client error reporting, scheduled backup workflow, "শেষ আপডেট" stamps)
+- [ ] Task 7 docs + rules deploy + production seed
+- [ ] Task 8 Lighthouse pass + live verification (includes the live GitHub Pages 404 check for item 1)
+
+### Owner-only (Phase 7, recorded per the audit's §3)
+
+- App Check key, real photos/logo, trust deed + audit PDFs, registration number/80G status, custom domain, Google Search Console verification, phone-OTP test on a real number, uptime-monitor account, backup storage decision, MFA on the admin account, budget for any paid service, security headers via a CDN in front of GitHub Pages.
+
+### Not needed (Phase 7, recorded per the audit's §4)
+
+- hreflang (single URL per page, language is a client-side toggle — no per-language URLs to declare), RTL support, a cookie/consent banner (no tracking cookies are set), a Google Maps iframe embed (a plain link avoids ~200 KB + a third-party cookie; the link opens the visitor's own maps app), a payment gateway (UPI deep link + WhatsApp confirmation is the trust's chosen flow), and a minify/bundle build step (the project is deliberately no-build, per `CLAUDE.md`).
+
+### Task 1 notes
+
+`pages/{id}` (fixed ids: privacy, refund, trust, contact, faq, news, downloads, notfound) follows the same code-default pattern as `js/culture.js` — `js/page-defaults.js` supplies bilingual rich-HTML defaults so every page shows real copy before the admin ever edits it. `settings.trustees` (named trustees for trust.html) is wired end-to-end (default, rules validation, trust.html read) but has no admin editor yet — until the owner or a later task adds one, trust.html shows the committee's `officer:true` rows instead, which is the documented fallback, not a gap.

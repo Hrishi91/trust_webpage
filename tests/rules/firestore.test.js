@@ -32,7 +32,10 @@ test('settings: design must be one of the five theme names when present', async 
 });
 
 // ---- published-content collections share one shape ----
-for (const coll of ['history', 'events', 'albums']) {
+// Phase 7 Task 1: pages/{id} has the exact same published+!deleted / admin-write /
+// no-hard-delete shape as history/events/albums — `order` in the shared `pub` fixture is just
+// unused extra data for `pages` (fixed ids, no reordering), harmless to the shape assertions.
+for (const coll of ['history', 'events', 'albums', 'pages']) {
   test(`${coll}: public sees published+not-deleted only; admin sees all; no hard delete`, async () => {
     await E.seed(async db => {
       await db.doc(`${coll}/p`).set(pub);
@@ -309,4 +312,15 @@ test('settings: social must be https:// or empty per whitelisted key', async () 
   await assertFails(E.admin.firestore().doc('settings/site').set({ social: { evil: 'https://x.com' } }, { merge: true })); // unknown key
   await assertFails(E.admin.firestore().doc('settings/site').set({ social: 'nope' }, { merge: true }));
   await assertFails(E.anon.firestore().doc('settings/site').set({ social: { facebook: 'https://facebook.com/x' } }, { merge: true }));
+});
+
+// Phase 7 Task 1: settings.trustees — a bounded list for trust.html (rules can't validate list
+// element shape, same as homeSections — just the type + size cap).
+test('settings: trustees must be a list within the size cap', async () => {
+  await E.seed(db => db.doc('settings/site').set({ name: { bn: 'ট্রাস্ট', en: 'Trust' } }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ trustees: [{ name: { bn: 'ক', en: 'k' }, role: { bn: 'সভাপতি', en: 'President' } }] }, { merge: true }));
+  await assertSucceeds(E.admin.firestore().doc('settings/site').set({ tagline: { bn: 'x', en: 'y' } }, { merge: true })); // trustees absent is fine
+  await assertFails(E.admin.firestore().doc('settings/site').set({ trustees: 'nope' }, { merge: true }));
+  await assertFails(E.admin.firestore().doc('settings/site').set({ trustees: Array.from({ length: 21 }, () => ({})) }, { merge: true }));
+  await assertFails(E.anon.firestore().doc('settings/site').set({ trustees: [] }, { merge: true }));
 });

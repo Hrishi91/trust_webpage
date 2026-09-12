@@ -126,6 +126,7 @@ import './sections/design.js'; // Phase 5
 import './sections/strings.js'; // Phase 6 Task 4
 import './sections/media.js'; // Phase 6 Task 5
 import './sections/culture.js'; // Phase 6 Task 5
+import './sections/pages.js'; // Phase 7 Task 1
 import './sections/history.js'; // Task 15
 import './sections/committee.js'; // Task 16
 import './sections/albums.js'; // Task 18

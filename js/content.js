@@ -1,4 +1,5 @@
 import { db, collection, doc, getDoc, getDocs, query, where, orderBy, limit, onSnapshot } from './firebase.js';
+import { PAGE_DEFAULTS } from './page-defaults.js';
 
 // A read failure must not look like empty/absent data unless it actually IS an expected access
 // outcome — an inactive member's notices/roster query, or a signed-out visitor hitting an
@@ -23,6 +24,9 @@ export const DEFAULT_SETTINGS = {
   designOverrides: {}, fonts: { display: '', body: '' }, homeSections: [],
   social: { facebook: '', youtube: '', instagram: '', whatsappGroup: '' },
   estYear: '', credItems: '', metaDescription: { bn: '', en: '' },
+  // Phase 7 Task 1: named trustees for trust.html, {name:{bn,en}, role:{bn,en}}[]; empty means
+  // "fall back to committee officers" (js/pages/trust.js).
+  trustees: [],
 };
 
 let settingsPromise;
@@ -76,6 +80,21 @@ export async function listPhotos(albumId) {
     return [];
   }
 }
+// pages/{id} — Phase 7 Task 1. Never surfaces common.error: an unpublished/absent doc, or any
+// read failure, falls back to the code default in js/page-defaults.js so these pages always show
+// real copy (same "nothing static" promise as culture cards, just with a static fallback instead
+// of an empty list).
+export async function getPage(id) {
+  const def = PAGE_DEFAULTS[id];
+  try {
+    const pub = await getPublished('pages', id);
+    return pub ? { title: pub.title, body: pub.body } : def;
+  } catch (err) {
+    console.warn('[content] getPage', err);
+    return def;
+  }
+}
+
 export async function getPublished(coll, id) {
   try {
     const s = await getDoc(doc(db, coll, id));
@@ -132,6 +151,20 @@ export function onAnnouncements(cb) {
       .sort((x, y) => (y.pinned - x.pinned) || (y.order - x.order));
     cb(list, { live: list.some(a => a.isLive) });
   }, err => { console.warn('[content] announcements', err); cb([], { live: false }); });
+}
+
+// news.html archive (Phase 7 Task 1): every published+non-deleted announcement, newest first, no
+// limit and no expiresAt filter — unlike onAnnouncements() (the home ticker, capped at 5 and
+// hiding expired items), this is the page an old announcement stays reachable from forever.
+export async function listAnnouncementsAll() {
+  try {
+    return rows(await getDocs(query(collection(db, 'announcements'),
+      where('published', '==', true), where('deleted', '==', false), orderBy('order', 'desc'))));
+  } catch (err) {
+    console.warn('[content]', err);
+    if (!isExpectedAccessError(err)) throw err;
+    return [];
+  }
 }
 
 export async function getMyMember(phone) {
