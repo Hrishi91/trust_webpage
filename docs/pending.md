@@ -170,7 +170,7 @@ dropped on save with no toast (M7).
 Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowers/specs/2026-09-12-phase-7-site-basics.md`. 8 tasks close every ❌/⚠️ the audit marked *Build*.
 
 - [x] Task 1 pages & legal (404, privacy/terms+refund, trust, contact, downloads, news, faq) + admin 📄 পাতা (2026-09-12)
-- [ ] Task 2 SEO & share (titles/canonical/OG/JSON-LD, favicon/manifest, robots/sitemap, share row, .ics, print stylesheet)
+- [x] Task 2 SEO & share (titles/canonical/OG/JSON-LD, favicon/manifest, robots/sitemap, share row, .ics, print stylesheet) (2026-09-12)
 - [ ] Task 3 accessibility (skip link, 16px inputs, accessible lightbox, tab ARIA, aria-live, contrast fixes, alt text, form labels, banner role)
 - [ ] Task 4 performance & PWA shell (static above-the-fold shell, service worker, image dimensions, script loading)
 - [ ] Task 5 admin usability (export coverage, 📜 লগ audit viewer, restore toggle, forgot-password, help links, ?preview=1 everywhere, masked re-auth, list search)

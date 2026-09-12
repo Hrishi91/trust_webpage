@@ -4,6 +4,7 @@ import { db, doc, getDoc } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, bnDigits } from '../ui.js';
 import { mediaUrl, httpsUrl } from '../media-slots.js';
+import { shareRow } from '../share.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('gallery', 'nav.gallery');
@@ -33,6 +34,7 @@ if (s) {
             albums.length ? el('div', { class: 'albums' }, ...albums.map(a => el('a', { class: 'album', href: `gallery.html?album=${a.id}` },
               httpsUrl(a.coverUrl) ? el('img', { src: httpsUrl(a.coverUrl), alt: '', loading: 'lazy' }) : el('div', { class: 'nocover' }),
               el('div', { class: 'cap' }, el('b', { text: num(a.year) }), el('span', { text: pick(a.title) }))))) : el('p', { class: 'muted', text: t('common.empty') }),
+            shareRow({ url: location.href, title: t('gallery.albums') }),
           ].filter(Boolean)));
       };
       render(); document.addEventListener('langchange', render);
@@ -68,7 +70,8 @@ if (s) {
           const num = n => getLang() === 'bn' ? bnDigits(n) : String(n);
           main.replaceChildren(pageHeader({ crumb: t('gallery.albums'), title: `${num(album.year)} · ${pick(album.title)}`, image: mediaUrl(s.media, 'header.gallery') }),
             section(el('a', { href: 'gallery.html', text: '‹ ' + t('gallery.albums') }),
-              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('img', { class: 'cover', src: httpsUrl(p.url), alt: pick(p.caption), loading: 'lazy', onclick: () => open(i) })))));
+              el('div', { class: 'masonry' }, ...photos.map((p, i) => el('img', { class: 'cover', src: httpsUrl(p.url), alt: pick(p.caption), loading: 'lazy', onclick: () => open(i) }))),
+              shareRow({ url: location.href, title: `${num(album.year)} · ${pick(album.title)}` })));
         };
         render(); document.addEventListener('langchange', render);
       }

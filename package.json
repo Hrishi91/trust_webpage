@@ -10,7 +10,10 @@
     "emu": "firebase emulators:start --only firestore,storage,auth --project demo-trust",
     "seed": "node tests/seed/seed.js",
     "serve": "python3 -m http.server 5500 --bind 127.0.0.1",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "head:sync": "node scripts/sync-head.mjs",
+    "head:check": "node scripts/sync-head.mjs --check",
+    "icons": "node scripts/gen-icons.mjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",

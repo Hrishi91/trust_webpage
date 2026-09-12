@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /admin/
+Sitemap: https://hrishi91.github.io/trust_webpage/sitemap.xml

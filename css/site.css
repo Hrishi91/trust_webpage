@@ -385,3 +385,22 @@ footer a{min-height:44px;padding-block:.7rem}
 .social{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.6rem}
 .donate .band-img{width:96px;height:96px;object-fit:cover;border-radius:var(--r);margin-bottom:.6rem}
 .members .members-img{width:100%;max-width:220px;aspect-ratio:1;object-fit:cover;border-radius:var(--r);margin-bottom:.6rem}
+/* Phase 7 Task 2 item 15: share row (js/share.js) — WhatsApp/Facebook/copy-link, and native-share
+   when supported. Buttons reuse .btn.ghost's own look; only min-height is added here (44px touch
+   target) since .btn already sets everything else the concept needs. */
+.share{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+.share .btn{min-height:44px}
+/* item 16: the "ক্যালেন্ডারে যোগ" .ics download link on each events.html row — a small trailing
+   link, not a full .btn (one per row in a dense timeline list would be too heavy). */
+.ev .ics{display:inline-block;margin-top:.3rem;font-size:13px;text-decoration:underline}
+/* item 17: print stylesheet for হিসাব (transparency.html) — chrome (nav/ticker/footer/share/
+   tabs/buttons) never belongs on a printed page; the ledger tables, summary tiles and legal block
+   are what a donor/auditor prints, in plain black-on-white so it photocopies/scans cleanly. */
+@media print{
+  .nav,.ticker,footer,.share,.tabs,.btn{display:none!important}
+  body,#main{background:#fff;color:#000}
+  .summary,table.ledger,.legal,.ledger,.card{background:#fff;color:#000;border-color:#000;box-shadow:none}
+  a{color:#000;text-decoration:underline}
+  .ph{background:#fff!important}
+  .ph canvas{display:none}
+}

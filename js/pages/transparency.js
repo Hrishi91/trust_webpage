@@ -6,6 +6,7 @@ import { el, bnDigits } from '../ui.js';
 import { sum, inr } from '../money.js';
 import { barsView, donutView } from '../ledger-view.js';
 import { mediaUrl, httpsUrl } from '../media-slots.js';
+import { shareRow } from '../share.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('transparency', 'tr.title');
@@ -96,7 +97,8 @@ if (s) {
           data.notes && pick(data.notes, lang) ? el('p', { class: 'muted', text: pick(data.notes, lang) }) : null);
       })();
 
-      main.replaceChildren(pageHeader({ crumb: t('nav.transparency'), title: t('tr.title'), lead: headerParts.join(' · '), image: mediaUrl(s.media, 'header.transparency') }), section(tabsEl, body));
+      main.replaceChildren(pageHeader({ crumb: t('nav.transparency'), title: t('tr.title'), lead: headerParts.join(' · '), image: mediaUrl(s.media, 'header.transparency') }),
+        section(tabsEl, body, shareRow({ url: location.href, title: t('tr.title') })));
     };
     render();
     document.addEventListener('langchange', render);

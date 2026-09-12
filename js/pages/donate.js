@@ -5,6 +5,7 @@ import { el, fmtDate, toast, digits } from '../ui.js';
 import { inr } from '../money.js';
 import { parsePurposes } from '../ledger.js';
 import { mediaUrl, httpsUrl } from '../media-slots.js';
+import { shareRow } from '../share.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('donate', 'donate.title');
@@ -95,7 +96,8 @@ if (s) {
           el('div', {}, confirmCard(), el('div', { class: 'form wall-card' }, el('span', { class: 'eyebrow', text: t('donate.wall') }),
             errored ? el('p', { class: 'muted', text: t('common.error') }) : wall.length ? el('div', { class: 'wall' }, ...wall.map(d => el('div', { class: 'donor' },
               el('span', { text: d.isAnonymous ? t('donate.anonymous') : d.donorName }), el('span', { text: inr(d.amount, lang) }), el('span', { class: 'muted', text: fmtDate(d.date, lang) })))) : el('p', { class: 'muted', text: t('common.empty') }),
-            s.regNo ? el('small', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null)))));
+            s.regNo ? el('small', { class: 'muted', text: `${t('tr.regNo')} ${s.regNo}` }) : null))),
+          shareRow({ url: location.href, title: t('donate.title') })));
     };
     render();
     document.addEventListener('langchange', render);

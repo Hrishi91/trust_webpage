@@ -10,6 +10,7 @@ import { mediaUrl, httpsUrl } from '../media-slots.js';
 import { orderSections, parseCredItems } from '../sections.js';
 import { barsView, donutView } from '../ledger-view.js';
 import { renderRich } from '../rich.js';
+import { shareRow } from '../share.js';
 
 const main = document.getElementById('main');
 const s = await mountShell('home');
@@ -55,7 +56,11 @@ if (s) {
       if (s.has80G) items.push(el('span', {}, el('b', { text: t('cred.80g') }), ` ${t('donate.tax80g')}`));
       if (years.length) items.push(el('span', {}, el('b', { text: t('tr.title') }), ` ${t('home.ledgerPublished')}`));
       for (const it of parseCredItems(s.credItems)) items.push(el('span', { text: pick(it) }));
-      return items.length ? el('div', { class: 'cred' }, el('div', { class: 'wrap' }, ...items)) : null;
+      // Item 15: the share row sits right after the credibility strip, folded into the same
+      // section fn so it stays positioned there through settings.homeSections reordering/toggle
+      // (js/sections.js) without needing a new orderable 'share' key of its own.
+      const strip = items.length ? el('div', { class: 'cred' }, el('div', { class: 'wrap' }, ...items)) : null;
+      return el('div', {}, strip, el('div', { class: 'wrap' }, shareRow({ url: location.href, title: pick(s.name) })));
     };
     const bento = () => {
       const now = new Date(), cd = s.pujaDate ? countdown(s.pujaDate, now) : null;

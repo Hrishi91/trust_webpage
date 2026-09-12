@@ -3,6 +3,7 @@ import { getPage, listAnnouncementsAll } from '../content.js';
 import { pick, t, getLang } from '../i18n.js';
 import { el, fmtDate } from '../ui.js';
 import { renderRich } from '../rich.js';
+import { shareRow } from '../share.js';
 
 const main = document.getElementById('main');
 const s = await mountShell(null, 'news.title');
@@ -20,7 +21,7 @@ if (s) {
     })) : el('p', { class: 'muted', text: t('common.empty') });
     main.replaceChildren(
       pageHeader({ crumb: t('news.crumb'), title: t('news.title') }),
-      section(el('div', { class: 'rich' }, renderRich(pick(page.body))), errored ? el('p', { class: 'muted', text: t('common.error') }) : list),
+      section(el('div', { class: 'rich' }, renderRich(pick(page.body))), errored ? el('p', { class: 'muted', text: t('common.error') }) : list, shareRow({ url: location.href, title: t('news.title') })),
     );
   };
   render();

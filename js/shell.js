@@ -110,6 +110,17 @@ export async function mountShell(active, pageTitleKey) {
       if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
       meta.content = desc;
     }
+    // Phase 7 Task 2 spec §2: the static assets/og/<page>.png in each HTML's <head> is what a
+    // scraper that doesn't run JS (WhatsApp/Facebook/Google) sees; the admin's media-slots.js
+    // 'ogImage' slot, when set, only ever reaches an in-app/JS-executing preview via this runtime
+    // swap — same "static default, runtime override" split as the title/description above.
+    const ogImg = mediaUrl(s.media, 'ogImage');
+    if (ogImg) {
+      for (const sel of ['meta[property="og:image"]', 'meta[name="twitter:image"]']) {
+        const meta = document.querySelector(sel);
+        if (meta) meta.content = ogImg;
+      }
+    }
     const links = el('div', { class: 'links' },
       ...NAV.filter(([, , , vis]) => !vis || s.sectionVisibility[vis] !== false)
             .map(([key, href, tkey]) => el('a', { href, class: key === active ? 'on' : '', text: t(tkey) })));

@@ -225,6 +225,14 @@ export const STRINGS = {
   'notfound.title': { bn: 'পাতাটি পাওয়া যায়নি', en: 'Page not found' },
   'notfound.crumb': { bn: '৪০৪', en: '404' },
   'notfound.home': { bn: 'হোমে ফিরুন', en: 'Back to home' },
+  // Phase 7 Task 2 — share row (js/share.js), on home/gallery/events/donate/transparency/news
+  'share.share': { bn: 'শেয়ার', en: 'Share' },
+  'share.whatsapp': { bn: 'WhatsApp', en: 'WhatsApp' },
+  'share.facebook': { bn: 'Facebook', en: 'Facebook' },
+  'share.copy': { bn: 'লিংক কপি করুন', en: 'Copy link' },
+  'share.copied': { bn: 'লিংক কপি হয়েছে', en: 'Link copied' },
+  // Phase 7 Task 2 — .ics "add to calendar" link per event row (js/ics.js)
+  'events.addToCalendar': { bn: 'ক্যালেন্ডারে যোগ', en: 'Add to calendar' },
   // transparency page
   'tr.total': { bn: 'মোট', en: 'Total' },
   'tr.download': { bn: 'ডাউনলোড', en: 'Download' },
@@ -392,8 +400,8 @@ export const STRINGS = {
   'admin.pages': { bn: 'পাতা', en: 'Pages' },
   'admin.pages.title': { bn: 'শিরোনাম', en: 'Title' },
   'admin.pages.body': {
-    bn: 'লেখা (অনুমোদিত HTML: p, b, i, ul, ol, li, h3, h4, a, blockquote)',
-    en: 'Body (allowed HTML: p, b, i, ul, ol, li, h3, h4, a, blockquote)',
+    bn: 'লেখা (অনুমোদিত HTML: p, br, b, strong, i, em, ul, ol, li, h3, h4, a, img, blockquote)',
+    en: 'Body (allowed HTML: p, br, b, strong, i, em, ul, ol, li, h3, h4, a, img, blockquote)',
   },
 };
 
@@ -441,6 +449,8 @@ const GROUP_NAMES = [
   // page.trust.*); refund/contact/faq/news/downloads/notfound each get their own, matching their
   // STRINGS key prefix.
   'page', 'refund', 'contact', 'faq', 'news', 'downloads', 'notfound',
+  // Phase 7 Task 2: SEO & share
+  'share',
 ];
 export const STRING_GROUPS = (() => {
   const groups = Object.fromEntries(GROUP_NAMES.map(g => [g, []]));
