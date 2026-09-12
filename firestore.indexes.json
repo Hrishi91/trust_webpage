@@ -32,6 +32,10 @@
       { "fieldPath": "deleted", "order": "ASCENDING" },
       { "fieldPath": "order", "order": "ASCENDING" }
     ] },
+    { "collectionGroup": "culture", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "deleted", "order": "ASCENDING" },
+      { "fieldPath": "order", "order": "ASCENDING" }
+    ] },
     { "collectionGroup": "committee", "queryScope": "COLLECTION", "fields": [
       { "fieldPath": "isPublic", "order": "ASCENDING" },
       { "fieldPath": "deleted", "order": "ASCENDING" },

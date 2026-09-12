@@ -94,6 +94,9 @@ input[type=color]{width:44px;height:44px;padding:0;border-radius:10px}
   .colour-row>.btn-sm{grid-area:reset}
 }
 
+/* Item 35: "মুছে ফেলা দেখাও" toggle + পুনরুদ্ধার button on listView */
+.list-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+
 /* 📜 লগ — audit log viewer (item 34) */
 .log-row{border-bottom:1px solid var(--line);padding:.6rem 0}
 .log-row .log-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline}

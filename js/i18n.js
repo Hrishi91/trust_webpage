@@ -261,6 +261,8 @@ export const STRINGS = {
   'admin.log.path': { bn: 'পাথ', en: 'Path' },
   'admin.log.uid': { bn: 'অ্যাডমিন', en: 'Admin' },
   'admin.log.details': { bn: 'বিস্তারিত', en: 'Details' },
+  'admin.showDeleted': { bn: 'মুছে ফেলা দেখাও', en: 'Show deleted' },
+  'admin.restore': { bn: 'পুনরুদ্ধার', en: 'Restore' },
   // admin — committee section form
   'admin.committee.name': { bn: 'নাম', en: 'Name' },
   'admin.committee.post': { bn: 'পদ', en: 'Post' },

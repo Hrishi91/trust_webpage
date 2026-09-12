@@ -61,34 +61,70 @@ export async function softDelete(ctx, coll, id) {
   }
 }
 
+// Item 35: a "মুছে ফেলা দেখাও" checkbox switches the query from deleted==false to deleted==true
+// (same composite index shape, just the opposite literal — see firestore.indexes.json's
+// `deleted+order` entries, one per listView collection) and each row in that mode gets a
+// "পুনরুদ্ধার" button instead of the reorder/edit-link controls, since a deleted row isn't
+// editable until it's back. Restoring just flips `deleted:false` (rules already allow this — the
+// admin update rule only requires hasDeletedFlag(), not deleted:false specifically) and logs an
+// audit 'restore' row, same shape as the existing 'delete'/'reorder' entries.
 export async function listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reorder = true }) {
-  const box = el('div');
-  const q = query(collection(ctx.db, coll), where('deleted', '==', false), orderBy('order'));
-  const snap = await getDocs(q);
-  const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  box.append(el('div', { class: 'row' }, el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: onNew })));
-  if (!docs.length) box.append(el('p', { text: t('common.empty') }));
-  docs.forEach((d, i) => {
-    const b = badge ? badge(d) : null;
-    const row = el('div', { class: 'list-item' },
-      el('a', { href: '#', class: 'grow', text: itemLabel(d), onclick: e => { e.preventDefault(); onEdit(d.id); } }),
-      b && el('span', { class: `badge ${b === 'pub' ? 'pub' : ''}`, text: b === 'pub' ? t('admin.published') : t('admin.draft') }),
-    );
-    if (reorder) {
-      const swap = async (j) => {
-        if (j < 0 || j >= docs.length) return;
-        const a = docs[i], c = docs[j];
-        const batch = writeBatch(ctx.db);
-        batch.update(doc(ctx.db, coll, a.id), { order: c.order });
-        batch.update(doc(ctx.db, coll, c.id), { order: a.order });
-        await batch.commit();
-        await logAudit(ctx, 'reorder', `${coll}/${a.id}`, { order: a.order }, { order: c.order });
-        box.replaceWith(await listView(ctx, { coll, itemLabel, badge, onEdit, onNew, reorder }));
-      };
-      row.append(el('button', { class: 'btn-sm', type: 'button', text: '↑', onclick: () => swap(i - 1) }),
-                 el('button', { class: 'btn-sm', type: 'button', text: '↓', onclick: () => swap(i + 1) }));
-    }
-    box.append(row);
-  });
-  return box;
+  const outer = el('div');
+  const showDeletedCb = el('input', { type: 'checkbox' });
+  const listBox = el('div');
+  outer.append(
+    el('div', { class: 'list-toolbar' },
+      el('button', { class: 'btn', type: 'button', text: t('admin.new'), onclick: onNew }),
+      el('label', { class: 'row' }, showDeletedCb, el('span', { text: t('admin.showDeleted') }))),
+    listBox,
+  );
+
+  async function renderRows() {
+    const showDeleted = showDeletedCb.checked;
+    const q = query(collection(ctx.db, coll), where('deleted', '==', showDeleted), orderBy('order'));
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const rows = el('div');
+    if (!docs.length) rows.append(el('p', { text: t('common.empty') }));
+    docs.forEach((d, i) => {
+      const b = badge ? badge(d) : null;
+      const row = el('div', { class: 'list-item' },
+        el('a', {
+          href: '#', class: 'grow', text: itemLabel(d),
+          onclick: e => { e.preventDefault(); if (!showDeleted) onEdit(d.id); },
+        }),
+        b && el('span', { class: `badge ${b === 'pub' ? 'pub' : ''}`, text: b === 'pub' ? t('admin.published') : t('admin.draft') }),
+      );
+      if (showDeleted) {
+        row.append(el('button', {
+          class: 'btn-sm', type: 'button', text: t('admin.restore'),
+          onclick: async () => {
+            const ref = doc(ctx.db, coll, d.id);
+            await updateDoc(ref, { deleted: false, updatedAt: serverTimestamp() });
+            await logAudit(ctx, 'restore', `${coll}/${d.id}`, { deleted: true }, { deleted: false });
+            toast(t('admin.saved'));
+            await renderRows();
+          },
+        }));
+      } else if (reorder) {
+        const swap = async (j) => {
+          if (j < 0 || j >= docs.length) return;
+          const a = docs[i], c = docs[j];
+          const batch = writeBatch(ctx.db);
+          batch.update(doc(ctx.db, coll, a.id), { order: c.order });
+          batch.update(doc(ctx.db, coll, c.id), { order: a.order });
+          await batch.commit();
+          await logAudit(ctx, 'reorder', `${coll}/${a.id}`, { order: a.order }, { order: c.order });
+          await renderRows();
+        };
+        row.append(el('button', { class: 'btn-sm', type: 'button', text: '↑', onclick: () => swap(i - 1) }),
+                   el('button', { class: 'btn-sm', type: 'button', text: '↓', onclick: () => swap(i + 1) }));
+      }
+      rows.append(row);
+    });
+    listBox.replaceChildren(rows);
+  }
+  showDeletedCb.onchange = renderRows;
+  await renderRows();
+  return outer;
 }
