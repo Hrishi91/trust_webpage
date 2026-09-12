@@ -20,6 +20,28 @@ function brandMark(s) {
 
 export function section(...children) { return el('section', {}, el('div', { class: 'wrap' }, ...children)); }
 export function sectionHead(title, aside) { return el('div', { class: 'sh' }, el('h2', { text: title }), aside ?? null); }
+
+// Item 44: "শেষ আপডেট: <date>" under a page header, drawn from the newest `updatedAt` (falling
+// back to `createdAt` — admin/js/forms.js's saveDoc() sets `updatedAt` on every save, but a row
+// nobody has edited since seeding only ever got `createdAt`) among the rows a page already
+// fetched. Returns null (render nothing) when no row has either field, or `rows` is empty — a
+// page with no content yet has no "last updated" to show.
+function newestStamp(rows) {
+  let newest = null;
+  for (const r of rows ?? []) {
+    const raw = r?.updatedAt ?? r?.createdAt;
+    if (!raw) continue;
+    const d = raw.toDate ? raw.toDate() : new Date(raw);
+    if (Number.isNaN(d.getTime())) continue;
+    if (!newest || d > newest) newest = d;
+  }
+  return newest;
+}
+export function updatedStamp(rows) {
+  const newest = newestStamp(rows);
+  if (!newest) return null;
+  return el('p', { class: 'updated muted', text: `${t('common.updated')} ${fmtDate(newest, getLang())}` });
+}
 // `image`: a page-header media slot URL (js/media-slots.js `header.<page>`). When set, a photo
 // (`<img>`, opacity-faded by CSS) replaces the painted-canvas background instead of layering with
 // it — the two backgrounds were never designed to combine, and one image slot per header keeps

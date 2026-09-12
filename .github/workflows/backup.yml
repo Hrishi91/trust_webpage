@@ -1,0 +1,44 @@
+name: Scheduled backup
+
+# Phase 7 Task 7 (site-basics audit item 43): a dated Firestore export exists without anyone
+# pressing a button. Runs scripts/backup.mjs, which is secret-gated (see that script's own header
+# comment) — BACKUP_OPTIONAL=1 means a repo that hasn't added the FIREBASE_SA secret yet gets a
+# clean, green "skipped" run instead of a red X; a local run without BACKUP_OPTIONAL still fails
+# loudly on a missing secret. docs/user-guide/deploy.md documents creating the read-only service
+# account and adding it as this repo's FIREBASE_SA secret.
+#
+# No secret other than FIREBASE_SA and the default GITHUB_TOKEN (implicit, used only by
+# actions/upload-artifact) is ever referenced here.
+on:
+  schedule:
+    # 30 20 * * 6 UTC = Sunday 02:00 IST (UTC+5:30) — weekly.
+    - cron: '30 20 * * 6'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Export Firestore to backup-<date>.json
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+          BACKUP_OPTIONAL: '1'
+        run: node scripts/backup.mjs
+
+      - name: Upload backup artifact
+        if: hashFiles('backup-*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: firestore-backup
+          path: backup-*.json
+          retention-days: 90

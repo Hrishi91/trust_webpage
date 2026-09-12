@@ -127,6 +127,48 @@ Real domain-এ Task 21-এর live verification পাশ করার **পর
 করবেন — তার আগে না। Firebase console → App Check → Firestore/Storage →
 Enforce।
 
+## Step 6: Scheduled backup ⏳ owner-এর Firebase project হলে (একবারই)
+
+`.github/workflows/backup.yml` প্রতি রবিবার রাত ২টায় (IST)
+`scripts/backup.mjs` চালিয়ে সব collection/doc একটা dated JSON ফাইলে
+export করে GitHub Actions artifact হিসেবে রাখে (৯০ দিন retention)।
+`FIREBASE_SA` secret না থাকলে workflow ব্যর্থ না হয়ে শুধু স্কিপ করে
+(green থাকে) — যতক্ষণ না নিচের সেটআপ একবার করা হয়।
+
+**একবারই দরকার — Firebase console-এ (owner action):**
+
+1. Google Cloud Console → IAM & Admin → Service Accounts → project-টা
+   বেছে নিন (owner-এর real Firebase project, `demo-trust` না) →
+   **Create Service Account**।
+2. Role হিসেবে **Cloud Datastore Viewer** (শুধু read — write/delete
+   permission নেই) দিন। এর বেশি কোনো role লাগবে না, backup script শুধু
+   পড়ে, কিছু লেখে না।
+3. ওই service account-এর **Keys** ট্যাব → **Add Key → Create new key →
+   JSON** → ডাউনলোড হবে একটা `.json` ফাইল।
+4. GitHub repo → **Settings → Secrets and variables → Actions → New
+   repository secret** → নাম `FIREBASE_SA`, value-তে ওই পুরো JSON
+   ফাইলের content paste করুন (পুরো ফাইল, শুধু একটা field না)।
+
+```bash
+gh secret set FIREBASE_SA < path/to/service-account.json
+```
+
+(অথবা GitHub UI দিয়ে একই কাজ করুন)। JSON key ফাইলটা এরপর নিজের
+কম্পিউটার থেকে মুছে ফেলুন — GitHub secret-এই যথেষ্ট, দুই জায়গায় রাখার
+দরকার নেই।
+
+Verify: repo → **Actions → Scheduled backup → Run workflow** (manual
+trigger, `workflow_dispatch`) → সবুজ হলে, ওই run-এর **Artifacts** section-এ
+`firestore-backup` (একটা `backup-YYYY-MM-DD.json`) দেখা যাবে। secret
+এখনও যোগ না করা থাকলেও run সবুজ থাকবে, log-এ শুধু "FIREBASE_SA is not
+set — skipping" লেখা দেখাবে।
+
+**routine কাজ:** কিছু করার দরকার নেই — cron নিজে থেকেই প্রতি রবিবার
+চলবে। Restore করতে হলে (কখনও দরকার পড়লে) — artifact download করে JSON
+ফাইলটা দেখে ম্যানুয়ালি Firestore console/`firebase firestore:delete`
++ import script দিয়ে ফেরত আনতে হবে; এই workflow শুধু export করে,
+কোনো automatic restore path নেই।
+
 ---
 
 ## সংক্ষেপে — কবে কী করতে হবে
@@ -137,3 +179,4 @@ Enforce।
 | Firestore/Storage rules বদল | `scripts/deploy-rules.sh` |
 | Custom domain সেটআপ/বদল | CNAME file + DNS + `scripts/auth-config.mjs --domain <domain>` + referrer list (Step 4) |
 | App Check enforce | শুধু Task 21 live-verify পাশ হওয়ার পরে (Step 5) |
+| Scheduled backup সেটআপ (একবারই) | Service account তৈরি + `FIREBASE_SA` GitHub secret (Step 6) |

@@ -1,4 +1,4 @@
-import { mountShell, pageHeader, section, sectionHead } from '../shell.js';
+import { mountShell, pageHeader, section, sectionHead, updatedStamp } from '../shell.js';
 import { listCommittee } from '../content.js';
 import { db, collection, getDocs, query, where, orderBy } from '../firebase.js';
 import { pick, t, getLang } from '../i18n.js';
@@ -28,13 +28,14 @@ if (s) {
       const officers = people.filter(p => p.officer), rest = people.filter(p => !p.officer);
       // Item 24: a committee photo is content, not decoration — alt = the person's name.
       const ring = p => el('div', { class: 'ring' }, httpsUrl(p.photoUrl) ? el('img', { src: httpsUrl(p.photoUrl), alt: pick(p.name), loading: 'lazy' }) : el('span', { text: pick(p.name).slice(0, 1) }));
-      main.replaceChildren(pageHeader({ crumb: t('nav.committee'), title: t('committee.title'), image: mediaUrl(s.media, 'header.committee') }),
+      main.replaceChildren(...[pageHeader({ crumb: t('nav.committee'), title: t('committee.title'), image: mediaUrl(s.media, 'header.committee') }),
+        updatedStamp(people),
         section(...[
           officers.length ? el('div', { class: 'officers' }, ...officers.map(p => el('div', { class: 'officer person' }, ring(p), el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) })))) : null,
           rest.length ? sectionHead(t('committee.members'), el('span', { class: 'pill', text: `${getLang() === 'bn' ? bnDigits(rest.length) : rest.length}` })) : null,
           rest.length ? el('div', { class: 'mgrid' }, ...rest.map(p => el('div', { class: 'mrow person' }, ring(p), el('div', {}, el('b', { text: pick(p.name) }), el('small', { text: pick(p.post) }))))) : null,
           people.length ? null : el('p', { class: 'muted', text: t('common.empty') }),
-        ].filter(Boolean)));
+        ].filter(Boolean))].filter(Boolean));
     };
     render();
     document.addEventListener('langchange', render);

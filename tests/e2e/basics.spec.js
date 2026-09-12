@@ -134,3 +134,13 @@ test('js/errors.js reports a thrown error to the bounded `errors` collection (it
   const id = found.name.split('/').pop();
   await fetch(`${REST_BASE}/errors/${id}`, { method: 'DELETE', headers: REST_HEADERS });
 });
+
+// item 44: "শেষ আপডেট: <date>" under the page header on transparency/committee/about, from the
+// newest updatedAt (falling back to createdAt — the seed's history/committee/transparency rows
+// only ever got createdAt, never having been through admin/js/forms.js's saveDoc()).
+test('about/committee/transparency show a "শেষ আপডেট" last-updated stamp (item 44)', async ({ page }) => {
+  for (const path of ['/about.html', '/committee.html', '/transparency.html']) {
+    await page.goto(path);
+    await expect(page.locator('#main > p.updated'), path).toHaveText(/শেষ আপডেট/);
+  }
+});

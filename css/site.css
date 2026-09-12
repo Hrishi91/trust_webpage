@@ -317,6 +317,10 @@ footer .mouse{position:absolute;right:24px;bottom:14px;width:56px;opacity:.55}
 body{background:var(--ivory)}
 #main{min-height:40vh}
 #main>p.muted,#main>section>.wrap>p.muted{color:var(--muted);padding:1.2rem 0}
+/* Item 44: "শেষ আপডেট: <date>" stamp — a direct #main child like the .ph header before it, so it
+   inherits #main>p.muted's colour but sits snug under the header instead of that rule's roomier
+   mid-page padding (this is the very top of a page's body content, not a standalone empty-state). */
+#main>p.updated{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,40px) .6rem;font-size:13.5px}
 .nav .links.open{display:flex;position:absolute;left:0;right:0;top:100%;flex-direction:column;background:var(--bg);padding:.6rem 1rem 1rem;border-bottom:1px solid var(--line)}
 .nav .burger{background:none;border:0;color:inherit;cursor:pointer;padding:12px;display:none;min-height:44px;min-width:44px}
 @media (max-width:860px){.nav .burger{display:grid;place-items:center}}

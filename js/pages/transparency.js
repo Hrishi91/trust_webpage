@@ -1,4 +1,4 @@
-import { mountShell, pageHeader, section } from '../shell.js';
+import { mountShell, pageHeader, section, updatedStamp } from '../shell.js';
 import { listTransparencyYears } from '../content.js';
 import { db, doc, getDoc } from '../firebase.js';
 import { t, pick, getLang } from '../i18n.js';
@@ -104,8 +104,9 @@ if (s) {
           data.notes && pick(data.notes, lang) ? el('p', { class: 'muted', text: pick(data.notes, lang) }) : null);
       })();
 
-      main.replaceChildren(pageHeader({ crumb: t('nav.transparency'), title: t('tr.title'), lead: headerParts.join(' · '), image: mediaUrl(s.media, 'header.transparency') }),
-        section(tabsEl, body, shareRow({ url: location.href, title: t('tr.title') })));
+      main.replaceChildren(...[pageHeader({ crumb: t('nav.transparency'), title: t('tr.title'), lead: headerParts.join(' · '), image: mediaUrl(s.media, 'header.transparency') }),
+        updatedStamp(years),
+        section(tabsEl, body, shareRow({ url: location.href, title: t('tr.title') }))].filter(Boolean));
     };
     render();
     document.addEventListener('langchange', render);
