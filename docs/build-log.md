@@ -812,3 +812,21 @@ i  firestore: deploying indexes...
 `pages`/`errors` rules and the restore-toggle composite indexes (`deleted+order` per collection) are now
 live on `ganesh-puja-trust`. No auth prompt was needed (an existing `firebase login` session on this
 machine covered it).
+
+Push + CI (attempt 1): `git push origin main` (commit `190e1bf`). First-ever CI run
+(`gh run list --workflow ci.yml`) failed at the e2e step: `tests/e2e/public.spec.js`'s language-toggle
+test clicked `.lang` and asserted the English brand text immediately, but on GitHub's shared runner the
+click landed inside a real (if usually narrow) hydration race — `.lang` is part of the static
+above-the-fold shell (item 28) and exists in the DOM before `js/shell.js`'s `mountShell()` (async,
+waits on a Firestore settings read) attaches its `onclick`; Playwright's actionability check has no way
+to know whether a JS handler is attached yet. 75/104 e2e tests had already passed before this one failed
+the run (`--halt` on first failure is not configured, but Playwright's default `maxFailures` stopped the
+remaining 28). Not a workflow/environment config issue (no Java/emulator-timing problem — those steps
+all passed) — a genuine test race, more likely to lose on a slower shared CPU than on this machine.
+Fixed in `tests/e2e/public.spec.js` by retrying the click-then-assert as a unit
+(`expect(async () => {...}).toPass({timeout: 10000})`) instead of a single click before the assertion —
+this waits out the hydration race rather than weakening what's checked (the final assertions are
+identical). Reconfirmed locally: `npx playwright test tests/e2e/public.spec.js` and the full
+`npm run e2e` **104/104** green; full gate re-run clean (`npm test` 135+37, `sync-head --check` /
+`bump-sw --check` both up to date); dev emulator stopped after. Committed as
+`test(e2e): retry the language-toggle click to outrun the static-shell hydration race` and pushed.

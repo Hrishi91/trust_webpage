@@ -12,8 +12,17 @@ test('home shows name, countdown, hero art, next event tile, latest album', asyn
 });
 test('language toggle switches to English and persists', async ({ page }) => {
   await page.goto('/index.html');
-  await page.click('.lang');
-  await expect(page.locator('.brand')).toContainText('Ganesh Puja Trust');
+  // `.lang` is part of the static above-the-fold shell (Phase 7 item 28) and exists in the DOM
+  // before `mountShell()`'s async Firestore read resolves and wires its onclick — a real, if
+  // usually narrow, hydration race. Playwright's own actionability check has no way to know
+  // whether a JS handler is attached yet, so a single click can land in that window and do
+  // nothing; retrying the click-then-assert as a unit (not just the assert) is what actually
+  // waits out the race, without weakening what's being verified (the final assertions are
+  // unchanged). Caught by a real CI run on a slower shared runner, not reproducible locally.
+  await expect(async () => {
+    await page.click('.lang');
+    await expect(page.locator('.brand')).toContainText('Ganesh Puja Trust');
+  }).toPass({ timeout: 10000 });
   await page.goto('/events.html');
   await expect(page.locator('.ph h1')).toHaveText('Upcoming events');
 });
