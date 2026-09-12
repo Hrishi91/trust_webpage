@@ -1023,3 +1023,10 @@ the "keep the ₹100 Blaze budget alert current" ruling — both lost in an earl
 (implying one help button per card) to describe the actual single shared `#adm-help` link in the top
 bar that follows the current route. `docs/build-log.md`'s standalone `### Fix round 1` heading (a
 sub-heading the brief for this very wave forbids) folded into inline prose as `**Fix round 1.**`.
+
+`test(unit): admin-guide anchors` — M5 (test half). New `tests/unit/admin-guide-anchors.test.js`
+parses `admin/js/admin.js`'s `#adm-help` anchor scheme against `admin/js/sections/*.js`'s
+`registerSection()` calls (resolving both the literal-string and `const COLL = '...'` shapes) and
+asserts every one of the 18 section keys — plus the `dashboard` fallback — has a matching
+`<a id="...">` in `docs/user-guide/admin-guide.md`, so a future renamed/added section with no
+matching anchor fails a test instead of 404ing a help click.
