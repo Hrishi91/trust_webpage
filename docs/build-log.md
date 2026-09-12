@@ -830,3 +830,78 @@ identical). Reconfirmed locally: `npx playwright test tests/e2e/public.spec.js` 
 `npm run e2e` **104/104** green; full gate re-run clean (`npm test` 135+37, `sync-head --check` /
 `bump-sw --check` both up to date); dev emulator stopped after. Committed as
 `test(e2e): retry the language-toggle click to outrun the static-shell hydration race` and pushed.
+
+Push + CI (attempt 2 — green): `git push origin main` (commit `9588cb8`). CI run
+`gh run list --workflow ci.yml` → https://github.com/Hrishi91/trust_webpage/actions/runs/34715697334 —
+**all green in 2m43s** (unit, generated-file checks, rules, e2e all passed; no more attempts needed).
+
+Live verification against `https://hrishi91.github.io/trust_webpage/` (GitHub Pages had already
+rebuilt by the time CI finished — confirmed via `curl .../sw.js` showing the same `SW_VERSION
+20260912-12` as the local generated file, and `faq.html`/`trust.html` both 200). All 14 public pages
+200 with a real `.ph h1`/hero heading and zero console/page errors (scratch Playwright script,
+temp-copied into the repo root to run, deleted immediately after):
+
+```
+index.html         গণেশ পুজো ট্রাস্ট
+about.html          ইতিহাস
+committee.html      যাঁরা দায়িত্বে
+gallery.html        অ্যালবাম
+events.html         আসন্ন অনুষ্ঠান
+donate.html         দান করুন
+transparency.html   আয়-ব্যয়ের হিসাব
+members.html        মোবাইল নম্বর
+privacy.html        গোপনীয়তা ও শর্তাবলী
+trust.html          ট্রাস্ট সম্পর্কে
+contact.html        যোগাযোগ
+faq.html            সচরাচর জিজ্ঞাসা
+news.html           খবর ও ঘোষণা
+downloads.html      ডাউনলোড
+```
+
+No `identitytoolkit`/App Check 400s were observed on any page during this pass (nothing to report —
+the ignore-list in the scratch script never had to fire). `/trust_webpage/nonsense` → HTTP 404 with
+`<title>পাতাটি পাওয়া যায়নি · গণেশ পুজো ট্রাস্ট</title>` — the site's own 404, not GitHub's generic one.
+`robots.txt`/`sitemap.xml`/`manifest.webmanifest`/`assets/icons/favicon.ico`/`assets/og/index.png` all
+200. `curl .../index.html | grep -c og:image` → 1. Service worker: `navigator.serviceWorker.ready`
+resolved with scope `https://hrishi91.github.io/trust_webpage/`, `caches.keys()` →
+`["trust-shell-20260912-12"]` (registered without the `?sw=1` flag, as expected on production
+https). Offline reload (`context.setOffline(true)`, then reload) still showed the hero `<h1>গণেশ পুজো
+ট্রাস্ট</h1>` from cache. `/admin/` shows `#adm-login-form` with zero console errors; no login was
+attempted (never touches production auth/data) and no error-report throw was injected (would write a
+real `errors` doc). Screenshots of the live home at 390×844 and 1366×900 saved to
+`test-results/live-shots/home-{390,1366}.png` (git-ignored) — LOOKED at both: hero/countdown/ticker,
+"এক নজরে" stat tiles, this-year's-theme card, culture cards, gallery masonry, events list, the
+২০২৫ income/expense bars + donut chart, the donate band with UPI QR, committee ring cards, the
+member-portal teaser with phone input, and a four-column footer all render correctly at both widths
+with no horizontal overflow or broken layout.
+
+Lighthouse (mobile, `node scripts/lighthouse.mjs` against the live home, `test-results/lh.json`
+git-ignored):
+
+| Metric | Audit baseline (2026-09-12) | Live now (2026-09-13) | Target | Met? |
+|---|---|---|---|---|
+| Performance | 39 | **62** | ≥ 70 | ❌ (not blocking, per this task's own brief) |
+| Accessibility | 95 | **100** | ≥ 98 | ✅ |
+| Best Practices | 96 | **100** | ≥ 96 | ✅ |
+| SEO | n/a (0 tags) | **100** | 100 | ✅ |
+| CLS | 0.997 | **0.04** | ≤ 0.1 | ✅ |
+| LCP | 7.1 s | **8.6 s** | ≤ 2.5 s | ❌ |
+
+Four of six targets met (Accessibility/Best Practices/SEO/CLS), a dramatic CLS fix (0.997 → 0.04)
+confirming the static-shell work actually holds up live, not just structurally. Performance and LCP
+both still miss their targets; LCP is slightly worse than the pre-Phase-7 baseline. Per the brief,
+this does not block: the top three Lighthouse "Opportunities" on the live run were (1) reduce unused
+JavaScript (~640ms, ~118 KiB — largely public-page-doesn't-import-admin-code static analysis noise,
+not a real fix target), (2) minify CSS (~150ms, ~3 KiB — the project is deliberately no-build/
+no-minify per `CLAUDE.md`), (3) server response time (~50ms — GitHub Pages' own latency). The real
+driver of both the low score and the high LCP is `mainthread-work-breakdown` scoring 0 (20.4s
+simulated) — this matches Task 4's own build-log note that Lighthouse's simulated-throttling
+multiplier reacts badly to this measurement environment (a shared/virtualized headless-Chrome host,
+not a real phone) rather than indicating a 20-second real freeze; the render-blocking
+`tokens.css`/`site.css`/`themes.css`/Google-Fonts chain identified back in Task 4 remains the most
+credible real lever (an async-CSS-loading pattern, not attempted here — FOUC/theme-flash risk needs
+its own pass, out of this task's scope). Recorded in `docs/pending.md`'s Phase 7 owner-still-to-do
+list, not treated as a blocker.
+
+**Phase 7 is now fully live and CI-verified.** `docs/pending.md`'s Phase 7 Task 7/Task 8 lines marked
+done.

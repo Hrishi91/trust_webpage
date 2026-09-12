@@ -192,7 +192,23 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 
 - **Read and edit the 8 new পাতা**: /admin/ → 📄 পাতা → privacy/refund/trust/contact/faq/news/downloads all ship with drafted bilingual defaults (`js/page-defaults.js`), not real trust-specific text — read এগুলো and rewrite in your own words (especially trust.html's purpose/what-donations-fund and privacy.html's actual policy) before pointing anyone at them.
 - **Add the `FIREBASE_SA` repo secret** once a real Firebase project/service account exists (see Owner-only above and `docs/user-guide/deploy.md` Step 6) — the backup workflow runs green every week either way, but only exports data after this is added.
-- **Check the live Lighthouse numbers** in this task's build-log entry — if Performance is still below the 70 target, the top-three opportunities are listed there and in the "Deferred minors" note below; none of them block go-live.
+- **Live Lighthouse (2026-09-13, mobile) — Performance 62** (audit baseline 39; target ≥70, not yet
+  met — does not block go-live per this task's own brief). Accessibility 100 (baseline 95, target ≥98
+  ✅), Best Practices 100 (baseline 96, target ≥96 ✅), SEO 100 (target 100 ✅), CLS 0.04 (baseline
+  0.997, target ≤0.1 ✅ — the static-shell fix worked), LCP 8.6s (baseline 7.1s, target ≤2.5s, ❌ and
+  slightly worse than baseline). Top three Lighthouse "Opportunities" on the live run: (1) reduce
+  unused JavaScript (~640ms potential, ~118 KiB unused — most admin-only section modules are fetched
+  by nothing on the public home page today, so this is mostly measurement noise from Lighthouse's
+  static analysis, not a real fix target); (2) minify CSS (~150ms, ~3 KiB — the project is
+  deliberately no-build/no-minify per `CLAUDE.md`, so this is a known, accepted tradeoff, not a bug);
+  (3) initial server response time (~50ms — GitHub Pages' own latency, nothing to optimize here). The
+  real driver of both the low Performance score and the high LCP is `mainthread-work-breakdown`
+  scoring 0 (20.4s of simulated main-thread time) — consistent with Task 4's own build-log note that
+  Lighthouse's simulated-CPU-throttling multiplier reacts badly to this measurement environment (a
+  shared/virtualized headless-Chrome run, not a real phone); the render-blocking `tokens.css`/
+  `site.css`/`themes.css`/Google-Fonts stylesheet chain flagged back in Task 4 is still the most
+  credible real lever if the owner wants to chase this further (an async-CSS-loading pattern, not
+  attempted here — see Task 4's notes above for the FOUC/theme-flash risk that needs its own pass).
 
 ### Deferred minors from Phase 7 reviews
 
