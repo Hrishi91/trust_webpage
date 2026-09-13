@@ -1186,3 +1186,9 @@ LCP PENDING, CLS PENDING.
 `chore(sw): bump` — the closing fix above changed every public page's shell HTML (two font
 preloads instead of one); `node scripts/bump-sw.mjs` bumped `SW_VERSION` `20260912-15` ->
 `20260913-2` (66 shell files hashed) and regenerated `sw.js`/`js/sw-version.js`.
+
+`chore: regenerate sitemap.xml` — `lastmodFor()` derives each URL's `<lastmod>` from
+`git log -1 --format=%cs` on the file, so committing the two commits above (which touch every
+public HTML file) advanced their real commit date to 2026-09-14; CI's `sync-head --check` caught
+`sitemap.xml` as stale against that new git history and failed. Re-ran `node scripts/sync-head.mjs`
+after both commits landed and committed the regenerated `sitemap.xml` on its own.
