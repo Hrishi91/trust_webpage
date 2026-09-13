@@ -80,7 +80,7 @@ test('generatedFiles() is stable: running it twice yields byte-identical sitemap
 
 // Phase 7 performance pass (2026-09-13): the render-blocking Google Fonts stylesheet + its
 // preconnects + the four version-pinned gstatic preloads are gone from every generated public
-// page, replaced by one self-hosted preload and an inlined tokens/themes <style> block — see
+// page, replaced by self-hosted preloads and an inlined tokens/themes <style> block — see
 // css/fonts.css and scripts/sync-head.mjs's FONT_PRELOADS / buildAssetsBlock().
 test('generatedFiles(): no generated HTML file references fonts.googleapis.com or fonts.gstatic.com', () => {
   const files = generatedFiles();
@@ -91,13 +91,17 @@ test('generatedFiles(): no generated HTML file references fonts.googleapis.com o
   }
 });
 
-test('generatedFiles(): every HTML file has exactly one self-hosted font preload (the Hind Siliguri body face)', () => {
+// Closing fix (same date): live Lighthouse's lcp-breakdown-insight identified the hero <h1> (the
+// --display face, Baloo Da 2) as the actual LCP element — preloading only the body face left it
+// out. Both critical-path faces are now preloaded, display first (it's the LCP element) then body.
+test('generatedFiles(): every HTML file has exactly two font preloads — Baloo Da 2 (display, the LCP element) then Hind Siliguri (body)', () => {
   const files = generatedFiles();
   for (const [rel, html] of Object.entries(files)) {
     if (!rel.endsWith('.html')) continue;
     const preloads = html.match(/<link rel="preload" as="font"[^>]*>/g) || [];
-    assert.equal(preloads.length, 1, `${rel} must have exactly one font preload`);
-    assert.match(preloads[0], /href="assets\/fonts\/hind-siliguri-400-bengali\.woff2"/, `${rel} preload must target the self-hosted body face`);
+    assert.equal(preloads.length, 2, `${rel} must have exactly two font preloads`);
+    assert.match(preloads[0], /href="assets\/fonts\/baloo-da-2-700-bengali\.woff2"/, `${rel} first preload must be the display face`);
+    assert.match(preloads[1], /href="assets\/fonts\/hind-siliguri-400-bengali\.woff2"/, `${rel} second preload must be the self-hosted body face`);
   }
 });
 

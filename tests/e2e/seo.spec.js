@@ -91,7 +91,11 @@ test('css/site.css has an @media print rule hiding chrome (nav/ticker/footer/sha
 // self-hosted from css/fonts.css / assets/fonts/*.woff2 — this asserts the fix actually lands in
 // a real browser (not just in generatedFiles()'s string output, which tests/unit/sync-head.test.js
 // already covers) and that Baloo Da 2 (the h1 display face) actually loads.
-test('home makes no request to fonts.googleapis.com or fonts.gstatic.com, and the self-hosted body-font preload resolves 200', async ({ page, request }) => {
+//
+// Closing fix (same date): live Lighthouse's lcp-breakdown-insight named the hero <h1> — the
+// --display face, Baloo Da 2 — as the actual LCP element, so its preload is asserted here too,
+// alongside the body face.
+test('home makes no request to fonts.googleapis.com or fonts.gstatic.com, and both self-hosted font preloads resolve 200', async ({ page, request }) => {
   const requested = [];
   page.on('request', req => requested.push(req.url()));
   const res = await page.goto('/index.html');
@@ -103,8 +107,10 @@ test('home makes no request to fonts.googleapis.com or fonts.gstatic.com, and th
   await expect(page.locator('.brand')).toContainText('গণেশ পুজো ট্রাস্ট');
   expect(requested.some(u => u.includes('fonts.googleapis.com'))).toBe(false);
   expect(requested.some(u => u.includes('fonts.gstatic.com'))).toBe(false);
-  const preloadRes = await request.get('/assets/fonts/hind-siliguri-400-bengali.woff2');
-  expect(preloadRes.status()).toBe(200);
+  const displayPreloadRes = await request.get('/assets/fonts/baloo-da-2-700-bengali.woff2');
+  expect(displayPreloadRes.status()).toBe(200);
+  const bodyPreloadRes = await request.get('/assets/fonts/hind-siliguri-400-bengali.woff2');
+  expect(bodyPreloadRes.status()).toBe(200);
 });
 
 test('home: h1 renders in the self-hosted Baloo Da 2 face, and Hind Siliguri 700 actually loads', async ({ page }) => {
@@ -113,7 +119,8 @@ test('home: h1 renders in the self-hosted Baloo Da 2 face, and Hind Siliguri 700
   expect(family).toContain('Baloo Da 2');
   const loaded = await page.evaluate(async () => {
     await document.fonts.ready;
-    return document.fonts.check('700 20px "Baloo Da 2"');
+    // .eyebrow is 700-weight body text (Hind Siliguri), not a second Baloo Da 2 check.
+    return document.fonts.check('700 16px "Hind Siliguri"');
   });
   expect(loaded).toBe(true);
 });

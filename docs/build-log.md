@@ -1175,3 +1175,10 @@ home after this change: Performance 78, Accessibility/Best Practices/SEO 100/100
 LCP 4.5s, CLS 0.04, TBT 20ms (no local "before" run — only the live before was captured, by the
 final reviewer, prior to this pass). Live before->after numbers recorded after push + Pages
 propagation, appended below this same heading.
+
+Closing fix (2026-09-14): live `lh-live-after*.json`'s `lcp-breakdown-insight` named the hero
+`<h1>` (`--display`, Baloo Da 2) as the actual LCP element, not the body face alone —
+`scripts/sync-head.mjs`'s `FONT_PRELOADS` and `admin/index.html` now preload both critical-path
+faces (display then body); `tests/unit/sync-head.test.js`/`tests/e2e/seo.spec.js` updated to match,
+`sw.js`/`js/sw-version.js` re-bumped for the changed shell HTML. Live re-check (post-deploy,
+`node scripts/lighthouse.mjs`): Performance PENDING, FCP PENDING, LCP PENDING, CLS PENDING.

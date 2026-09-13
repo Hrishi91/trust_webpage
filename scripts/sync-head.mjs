@@ -169,12 +169,17 @@ function ldJson(id, meta, bnTitleFull, canonical) {
 // bottleneck for live Lighthouse Performance 62 / LCP 8.6s (docs/build-log.md "2026-09-13 —
 // Phase 7 performance pass"). Fonts are now self-hosted (css/fonts.css, assets/fonts/*.woff2 —
 // same bytes Google Fonts itself serves, Bengali+Latin subsets only, OFL-licensed, see
-// assets/fonts/OFL.txt). Only ONE font is worth preloading: Hind Siliguri 400 bengali is the
-// body face — the LCP text on every page — so preloading it (not the whole fonts.css stylesheet,
-// which is discovered fast anyway as a same-origin, SW-precached file) removes the one extra
-// round trip that matters. A same-origin relative path also can't rot the way the old
-// version-pinned gstatic URLs could.
+// assets/fonts/OFL.txt).
+//
+// Closing fix (same date, live `lh-live-after*.json`'s `lcp-breakdown-insight`): the actual LCP
+// element is the hero `<h1>` (selector `header.hero > div.wrap > div.copy > h1`), which renders
+// in `--display` (Baloo Da 2), not the body face. Preloading only Hind Siliguri 400 left the
+// element that Lighthouse times against fetching its font after the preload scanner had already
+// moved on. Both faces on the critical path are now preloaded, display first (it is the LCP
+// element) then body — a same-origin relative path can't rot the way the old version-pinned
+// gstatic URLs could.
 const FONT_PRELOADS = [
+  '<link rel="preload" as="font" type="font/woff2" href="assets/fonts/baloo-da-2-700-bengali.woff2" crossorigin>',
   '<link rel="preload" as="font" type="font/woff2" href="assets/fonts/hind-siliguri-400-bengali.woff2" crossorigin>',
 ];
 

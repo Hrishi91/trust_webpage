@@ -11,7 +11,10 @@
      (admin/ is excluded from HEAD_META/sync-head.mjs, already noindex) so it is updated by hand
      the same way. Unlike public pages, tokens.css/themes.css stay real <link>s here: admin is a
      single-operator, always-network tool where inlining buys nothing and a normal cached
-     stylesheet is simpler to maintain. -->
+     stylesheet is simpler to maintain.
+     Closing fix (same date): both critical-path faces are preloaded, display (Baloo Da 2, the
+     public pages' LCP element) first then body, matching scripts/sync-head.mjs's FONT_PRELOADS. -->
+<link rel="preload" as="font" type="font/woff2" href="../assets/fonts/baloo-da-2-700-bengali.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="../assets/fonts/hind-siliguri-400-bengali.woff2" crossorigin>
 <link rel="stylesheet" href="../css/fonts.css">
 <link rel="stylesheet" href="../css/tokens.css">
