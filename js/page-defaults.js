@@ -16,7 +16,7 @@ export const PAGE_DEFAULTS = {
       '<li>দাতার নাম, দানের পরিমাণ ও তারিখ — দাতা রাজি হলে তবেই পাবলিক দাতা-তালিকায় দেখানো হয়, নয়তো শুধু ট্রাস্টের হিসাবের খাতায় থাকে।</li>' +
       '<li>সদস্যদের ফোন নম্বর — শুধু সদস্য পোর্টালে লগইনের জন্য ব্যবহৃত হয়, প্রকাশ্যে দেখানো হয় না।</li>' +
       '<li>অ্যাডমিন প্যানেলে কে কী পরিবর্তন করলেন তার একটি লগ (audit log) রাখা হয়, শুধু ট্রাস্টের নিজস্ব ব্যবস্থাপনার জন্য।</li>' +
-      '<li>কোনো পাতায় প্রযুক্তিগত ত্রুটি (error) হলে — ত্রুটির বার্তা, পাতার ঠিকানা (URL, কোনো query/token ছাড়া), ব্রাউজারের পরিচিতি (user-agent) ও stack trace আমাদের ডেটাবেসে জমা হয়, শুধু বাগ ঠিক করার জন্য — সর্বোচ্চ ৯০ দিন রাখা হয়, তারপর মুছে ফেলা হয়।</li>' +
+      '<li>কোনো পাতায় প্রযুক্তিগত ত্রুটি (error) হলে — ত্রুটির বার্তা, পাতার ঠিকানা (URL, কোনো query/token ছাড়া), ব্রাউজারের পরিচিতি (user-agent) ও stack trace আমাদের ডেটাবেসে জমা হয়, শুধু বাগ ঠিক করার জন্য। এই ত্রুটি রিপোর্ট অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি ("সব মুছুন" বোতামে) না মোছা পর্যন্ত জমা থাকে — স্বয়ংক্রিয়ভাবে মোছা হয় না; কমিটির নীতি হলো, অন্তত প্রতি ৯০ দিনে একবার এই তালিকা মুছে ফেলা।</li>' +
       '</ul>' +
       '<h4>এই তথ্য কারা প্রসেস করে</h4>' +
       '<p>এই ওয়েবসাইটের হোস্টিং ও ডেটাবেস চালায় <b>Google Firebase</b>; সদস্যদের লগইন (ফোন OTP) ও অ্যাডমিন প্যানেল সুরক্ষার জন্য <b>Google reCAPTCHA</b> ব্যবহার করা হয় — এই দুই কাজে Google-ও এই তথ্য প্রসেস করে, তাদের নিজস্ব <a href="https://policies.google.com/privacy">প্রাইভেসি পলিসি</a> অনুযায়ী। এর বাইরে কোনো বিজ্ঞাপনদাতা বা অন্য তৃতীয় পক্ষের সঙ্গে এই তথ্য ভাগ করা হয় না।</p>' +
@@ -27,7 +27,7 @@ export const PAGE_DEFAULTS = {
       '<li>Firestore-এর নিজস্ব অফলাইন cache, দ্রুত লোড হওয়ার জন্য।</li>' +
       '</ul>' +
       '<p>কোনো ট্র্যাকিং কুকি বা বিজ্ঞাপনের কুকি ব্যবহার করা হয় না।</p>' +
-      '<p>যতদিন ট্রাস্ট সক্রিয় থাকবে, হিসাবের প্রমাণ হিসেবে ততদিন এই তথ্য রাখা হয় (ত্রুটির তথ্য বাদে, যা সর্বোচ্চ ৯০ দিনে মুছে যায়)। আপনার তথ্য মুছে ফেলতে চাইলে নিচের যোগাযোগ মাধ্যমে (WhatsApp/ইমেল) জানান।</p>' +
+      '<p>যতদিন ট্রাস্ট সক্রিয় থাকবে, হিসাবের প্রমাণ হিসেবে ততদিন এই তথ্য রাখা হয় (ত্রুটির তথ্য বাদে, যা অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি মোছা হয় — কমিটির নীতি অনুযায়ী অন্তত প্রতি ৯০ দিনে একবার)। আপনার তথ্য মুছে ফেলতে চাইলে নিচের যোগাযোগ মাধ্যমে (WhatsApp/ইমেল) জানান।</p>' +
       '<h3>ব্যবহারের শর্তাবলী</h3>' +
       '<p>এই ওয়েবসাইট শুধু তথ্য জানানোর জন্য। এখানে দেওয়া তথ্য যথাসাধ্য সঠিক রাখার চেষ্টা করা হয়, তবে কোনো নিশ্চয়তা ছাড়াই ("as is") দেওয়া হয়। ওয়েবসাইট ব্যবহারের ফলে কোনো ক্ষতি হলে ট্রাস্ট দায়ী থাকবে না।</p>',
       '<h3>Privacy policy</h3>' +
@@ -37,7 +37,7 @@ export const PAGE_DEFAULTS = {
       '<li>Donor name, donation amount and date — shown on the public donor wall only when the donor agrees; otherwise it stays only in the trust\'s own accounts.</li>' +
       '<li>Members\' phone numbers — used only to sign in to the members portal, never shown publicly.</li>' +
       '<li>An audit log of who changed what in the admin panel, kept only for the trust\'s own management.</li>' +
-      '<li>When a page hits a technical error, the error message, the page\'s URL (no query string/token), the browser\'s user-agent, and the stack trace are sent to our database so we can fix bugs — kept for at most 90 days, then deleted.</li>' +
+      '<li>When a page hits a technical error, the error message, the page\'s URL (no query string/token), the browser\'s user-agent, and the stack trace are sent to our database so we can fix bugs. This error data is kept until an admin manually clears it from the admin panel (the "Clear all" button) — it is not deleted automatically; the committee\'s policy is to clear this list at least once every 90 days.</li>' +
       '</ul>' +
       '<h4>Who else processes this data</h4>' +
       '<p>This website\'s hosting and database run on <b>Google Firebase</b>; member sign-in (phone OTP) and admin-panel protection use <b>Google reCAPTCHA</b> — for these two purposes, Google also processes this data, under its own <a href="https://policies.google.com/privacy">privacy policy</a>. Beyond that, this data is never shared with advertisers or any other third party.</p>' +
@@ -48,7 +48,7 @@ export const PAGE_DEFAULTS = {
       '<li>Firestore\'s own offline cache, for faster loading.</li>' +
       '</ul>' +
       '<p>No tracking cookies or advertising cookies are used.</p>' +
-      '<p>This data is kept as long as the trust is active, as proof for its accounts (except error reports, which are deleted within 90 days). To ask us to delete your data, use the WhatsApp/email contact below.</p>' +
+      '<p>This data is kept as long as the trust is active, as proof for its accounts (except error reports, which are cleared manually from the admin panel — committee policy is at least once every 90 days). To ask us to delete your data, use the WhatsApp/email contact below.</p>' +
       '<h3>Terms of use</h3>' +
       '<p>This website is for information only. We try to keep everything here accurate, but it is provided "as is" with no warranty. The trust is not liable for any loss arising from using this website.</p>',
     ),

@@ -1086,6 +1086,21 @@ set) on this public repo — expected and got a **failing** run at the "Refuse t
 repo without explicit opt-in" step, confirming the guard now actually fires on a real trigger.
 `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` was deliberately left unset for this test.
 
+### Residual C2 — privacy retention claim overstated
+
+`docs(privacy): error diagnostics retention stated as an admin policy, not automatic deletion` —
+`js/page-defaults.js`'s bn+en privacy defaults claimed client error diagnostics are "kept for at
+most 90 days, then deleted" / "সর্বোচ্চ ৯০ দিন রাখা হয়, তারপর মুছে ফেলা হয়", but no purge mechanism
+exists anywhere in the codebase (no scheduled function, no TTL policy on the `errors` collection) —
+the only deletion path is the admin manually pressing "সব মুছুন"/"Clear all" in 📜 লগ → ত্রুটি
+(`admin/js/sections/log.js`'s `clearErrors`). Reworded both languages to state this as the actual
+mechanism (kept until an admin clears it from the admin panel) plus the committee's own policy
+commitment (clear it at least once every 90 days) — a policy, not an automatic system guarantee.
+Added a matching one-line reminder to `docs/user-guide/admin-guide.md`'s 📜 লগ section. `node
+scripts/bump-sw.mjs` re-run (`js/page-defaults.js` is a precached shell asset) — `SW_VERSION`
+`20260913-1`, 66 files hashed; `--check` now exits 0. Checked `tests/e2e/` for assertions on the old
+wording ('ডায়াগনস্টিক', '৯০ দিন') — none exist, so no e2e changes were needed.
+
 ## 2026-09-13 — Phase 7 performance pass
 
 Final reviewer diagnosis for live Lighthouse mobile home (Performance 62, FCP 5.1s, LCP 8.6s, CLS
