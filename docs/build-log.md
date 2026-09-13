@@ -1180,8 +1180,8 @@ Closing fix (2026-09-14): live `lh-live-after*.json`'s `lcp-breakdown-insight` n
 `<h1>` (`--display`, Baloo Da 2) as the actual LCP element, not the body face alone —
 `scripts/sync-head.mjs`'s `FONT_PRELOADS` and `admin/index.html` now preload both critical-path
 faces (display then body); `tests/unit/sync-head.test.js`/`tests/e2e/seo.spec.js` updated to match.
-Live re-check (post-deploy, `node scripts/lighthouse.mjs`): Performance PENDING, FCP PENDING,
-LCP PENDING, CLS PENDING.
+Live re-check (post-deploy, `node scripts/lighthouse.mjs`): Performance 86, FCP 1.3s, LCP 3.5s,
+CLS 0.04 (one run, no further iteration per the original pass's stop condition).
 
 `chore(sw): bump` — the closing fix above changed every public page's shell HTML (two font
 preloads instead of one); `node scripts/bump-sw.mjs` bumped `SW_VERSION` `20260912-15` ->
