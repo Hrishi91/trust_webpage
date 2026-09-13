@@ -18,7 +18,7 @@
 // actually true again, and activate() below has to sweep stale versions of both.
 'use strict';
 
-const SW_VERSION = '20260913-1';
+const SW_VERSION = '20260913-2';
 const CACHE_NAME = 'trust-shell-' + SW_VERSION;
 const CACHE_PREFIX = 'trust-shell-';
 const NAV_CACHE_NAME = 'trust-nav-' + SW_VERSION;
