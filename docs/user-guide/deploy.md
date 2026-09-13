@@ -159,7 +159,12 @@ repo-র visibility-ই পায়, আলাদা কোনো access-contro
 লেখার আগেই এনক্রিপ্ট করে (AES-256-GCM, `BACKUP_PASSPHRASE` থেকে বানানো
 key দিয়ে) — plaintext JSON কখনো ডিস্কে লেখা হয় না। আর workflow-টা নিজেই
 একটা guard step-এ আটকে যাবে, যতক্ষণ না owner ইচ্ছাকৃতভাবে নিচের repo
-variable-টা সেট করছেন — দুটো আলাদা সুরক্ষার স্তর, একটা না।
+variable-টা সেট করছেন — দুটো আলাদা সুরক্ষার স্তর, একটা না। এই guard step
+প্রতিবার (weekly cron আর manual "Run workflow" দুটোতেই) `gh api` দিয়ে
+সরাসরি GitHub-কে জিজ্ঞেস করে repo-টা এখন পাবলিক কিনা — cron trigger-এ
+event payload-এ repo-র তথ্য থাকে না বলে, আগে ওই তথ্যের ওপর নির্ভর করা
+guard cron-এ সবসময় ভুল ফল দিত (repo আসলে যাই হোক, সবসময় "পাবলিক" ধরে
+নিত); এখন প্রতিটা run-এ visibility live-এ চেক হয়, trigger যা-ই হোক না কেন।
 
 **দুটো secret লাগবে:**
 
@@ -196,7 +201,9 @@ gh secret set BACKUP_PASSPHRASE   # prompt-এ পাসফ্রেজ পে�
 
 **repo পাবলিক থাকলে একটা repository variable-ও লাগবে**, নয়তো workflow-টা
 ইচ্ছাকৃতভাবে আটকে যাবে ("Refuse to run on a public repo without explicit
-opt-in" স্টেপ): **Settings → Secrets and variables → Actions → Variables
+opt-in" স্টেপ — প্রতিটা run-এ `gh api`-তে GitHub-কে জিজ্ঞেস করে repo এখন
+পাবলিক কিনা লাইভ-এ যাচাই করে, weekly cron বা manual "Run workflow" যেটাই
+হোক): **Settings → Secrets and variables → Actions → Variables
 → New repository variable** → নাম `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS`,
 value `true` — শুধু তখনই সেট করুন যখন আপনি সজ্ঞানে মেনে নিচ্ছেন যে একটা
 এনক্রিপ্টেড artifact-ও পাবলিক repo-তে যে কেউ ডাউনলোড করতে পারবে (ভেতরের

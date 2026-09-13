@@ -1065,6 +1065,27 @@ one new case), `node scripts/sync-head.mjs --check` and `node scripts/bump-sw.mj
 `firestore:rules,firestore:indexes,storage` to `ganesh-puja-trust` — 2026-09-13 02:43 (the `errors`
 delete permission is the one live rules change this wave makes).
 
+### Residual C1 — backup workflow guard invalid on `schedule`
+
+`fix(backup): visibility guard queries the API so it works on scheduled runs` —
+`.github/workflows/backup.yml`'s "Refuse to run on a public repo without explicit opt-in" step used
+`if: github.event.repository.private == false && ...`, but `github.event.repository` is empty on a
+`schedule` trigger (cron runs carry no webhook payload), so the comparison always evaluated `null ==
+false` -> `true` regardless of the repo's actual visibility — the guard was accidentally always-on
+for cron, and would have wrongly blocked a private repo's own scheduled run too. Replaced with a
+`bash` step that asks GitHub directly — `gh api repos/${{ github.repository }} --jq .private` (env
+`GH_TOKEN: ${{ github.token }}`, the default token can read repo metadata) — then compares that
+live value against `vars.ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS`; this works identically on `schedule`,
+`workflow_dispatch`, or any future trigger since it never touches the event payload. YAML validated
+with `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/backup.yml'))"`.
+`docs/user-guide/deploy.md` Step 6 and `docs/pending.md`'s backup-secrets bullet both reworded to
+say the guard checks visibility live on every run, not from cached event data.
+
+Live-exercised after push: `gh workflow run backup.yml` (`workflow_dispatch`, no secrets/variables
+set) on this public repo — expected and got a **failing** run at the "Refuse to run on a public
+repo without explicit opt-in" step, confirming the guard now actually fires on a real trigger.
+`ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` was deliberately left unset for this test.
+
 ## 2026-09-13 — Phase 7 performance pass
 
 Final reviewer diagnosis for live Lighthouse mobile home (Performance 62, FCP 5.1s, LCP 8.6s, CLS

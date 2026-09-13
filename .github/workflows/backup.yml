@@ -36,11 +36,25 @@ jobs:
       # (below) is the primary defence, but this step means the owner has to make a deliberate,
       # visible choice (setting the repo variable) before any artifact — encrypted or not — is
       # ever produced on a public repo, rather than that decision being made implicitly by nobody.
+      #
+      # Final-review residual C1: `github.event.repository` is empty on a `schedule` trigger (cron
+      # runs carry no webhook payload to copy it from), so an `if: github.event.repository.private
+      # == false` guard evaluates `null == false` -> true on EVERY scheduled run regardless of the
+      # repo's real visibility — always wrong, and it would even refuse a private repo's own
+      # legitimate cron run. Querying the API directly with `gh api` works identically on
+      # `schedule`, `workflow_dispatch`, or any future trigger, since it never depends on the event
+      # payload at all — only on `github.repository`, which is always set. The default
+      # `GITHUB_TOKEN` (exposed here as `GH_TOKEN` for `gh api`) has read access to the repo's own
+      # metadata, including `private`, with no extra permissions or secrets needed.
       - name: Refuse to run on a public repo without explicit opt-in
-        if: github.event.repository.private == false && vars.ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "::error::This repository is public. GitHub Actions artifacts inherit the repository's own visibility — an encrypted backup-*.json.enc file would still be downloadable by anyone, even though its contents are AES-256-GCM encrypted. Set the repository variable ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS=true (Settings -> Secrets and variables -> Actions -> Variables) only after deliberately accepting that risk (you trust a strong BACKUP_PASSPHRASE enough to publish the ciphertext), or make this repository private instead."
-          exit 1
+          private=$(gh api repos/${{ github.repository }} --jq .private)
+          if [ "$private" != "true" ] && [ "${{ vars.ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS }}" != "true" ]; then
+            echo "::error::This repository is public. GitHub Actions artifacts inherit the repository's own visibility — an encrypted backup-*.json.enc file would still be downloadable by anyone, even though its contents are AES-256-GCM encrypted. Set the repository variable ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS=true (Settings -> Secrets and variables -> Actions -> Variables) only after deliberately accepting that risk (you trust a strong BACKUP_PASSPHRASE enough to publish the ciphertext), or make this repository private instead."
+            exit 1
+          fi
 
       - uses: actions/setup-node@v4
         with:
