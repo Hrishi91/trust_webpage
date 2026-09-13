@@ -193,6 +193,9 @@ Audit: `docs/site-basics-audit-2026-09-12.md` (118 items). Spec: `docs/superpowe
 
 ### ⏳ Owner still to do (Phase 7)
 
+- **Backup workflow first run** (owner): Actions tab → "Scheduled backup" → Run workflow — the `gh` PAT on this machine lacks the Actions permission, so the visibility guard's first live exercise is yours; expected: it FAILS at the guard step until you add `BACKUP_PASSPHRASE` + `FIREBASE_SA` secrets and set the repo variable `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS=true` (see deploy.md Step 6).
+- **LCP still 2.7–3.5 s on the live home** (target 2.5 s; Performance 86–92 clears the ≥70 gate). Next candidates: inline critical `site.css` above-the-fold rules, `font-display: optional` with `size-adjust` for the two preloaded faces, defer the Firebase SDK import until after first paint.
+- `tests/e2e/pwa.spec.js` offline-cache test is occasionally flaky in the sandboxed dev environment (reproduced on an unmodified base commit); watch CI — if it recurs there, add a `serviceWorker.ready` + `caches.open` wait before going offline.
 - **Read and edit the 8 new পাতা**: /admin/ → 📄 পাতা → privacy/refund/trust/contact/faq/news/downloads all ship with drafted bilingual defaults (`js/page-defaults.js`), not real trust-specific text — read এগুলো and rewrite in your own words (especially trust.html's purpose/what-donations-fund and privacy.html's actual policy) before pointing anyone at them.
 - **Add the `FIREBASE_SA`/`BACKUP_PASSPHRASE` repo secrets** (and, while this repo stays public, the `ALLOW_PUBLIC_ENCRYPTED_ARTIFACTS` repo variable) once a real Firebase project/service account exists (see Owner-only above and `docs/user-guide/deploy.md` Step 6) — the backup workflow runs green every week either way, but only exports (encrypted) data after these are added.
 - **Live Lighthouse (2026-09-13, mobile) — Performance 62** (audit baseline 39; target ≥70, not yet
