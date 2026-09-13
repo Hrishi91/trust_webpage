@@ -1119,3 +1119,23 @@ handful of custom properties) stays a normal blocking `<link>`. `admin/index.htm
 here — a single-operator, always-online tool gets nothing from inlining, so it keeps `tokens.css`/
 `themes.css` as plain `<link>`s. `tests/unit/sync-head.test.js`'s CSS-link assertion now asserts
 the inlined `<style>` blocks are present and that `tokens.css`/`themes.css` are no longer linked.
+
+`chore(sw): bump for font assets` — `scripts/lib/shell-assets.mjs`'s `SHELL_CSS` gained
+`css/fonts.css`; a new `SHELL_FONTS` list precaches only the default (সিদ্ধি) theme's six
+Bengali+Latin font files (the preloaded Hind Siliguri 400/700 body weights and Baloo Da 2) —
+Hind Siliguri 500/600 and the Tiro Bangla/Atma theme faces are deliberately left uncached so a
+visitor on a non-default theme still only fetches fonts on demand, not on every first install.
+`node scripts/bump-sw.mjs` bumped `SW_VERSION` to `20260912-15` (66 shell files hashed) and
+regenerated `sw.js`/`js/sw-version.js`. `tests/unit/sw-version.test.js` gained a `SHELL_FONTS`
+assertion.
+
+Gate: `npm run test:unit` 151/151, dev emulator + `npm run seed` + `npm run e2e` 107/107 (105
+existing + 2 new font/CSS checks in `tests/e2e/seo.spec.js`), `node scripts/shots.mjs` exit 0 —
+`test-results/shots/siddhi/index-390.png` and `mukha/index-390.png` show clean Bengali glyphs in
+the self-hosted faces, no tofu, no fallback-font look. `node scripts/sync-head.mjs --check` and
+`node scripts/bump-sw.mjs --check` both exit 0. Local (indicative only — `npm run serve` against
+the dev Firestore emulator, not comparable to the live CDN/edge numbers below) Lighthouse mobile
+home after this change: Performance 78, Accessibility/Best Practices/SEO 100/100/100, FCP 2.9s,
+LCP 4.5s, CLS 0.04, TBT 20ms (no local "before" run — only the live before was captured, by the
+final reviewer, prior to this pass). Live before->after numbers recorded after push + Pages
+propagation, appended below this same heading.

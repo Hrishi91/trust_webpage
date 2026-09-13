@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
-  SHELL_ASSETS, SHELL_HTML, SHELL_CSS, SHELL_JS, hashAssetContents, computeShellHash,
+  SHELL_ASSETS, SHELL_HTML, SHELL_CSS, SHELL_FONTS, SHELL_JS, hashAssetContents, computeShellHash,
 } from '../../scripts/lib/shell-assets.mjs';
 import {
   isValidVersion, nextVersion, todayStamp, needsBump, generateSwVersionJs, generateSwJs,
@@ -17,9 +17,20 @@ import { SW_VERSION, SW_HASH } from '../../js/sw-version.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-test('SHELL_ASSETS covers the 15 root HTML pages, the 3 shell CSS files, and every public JS module, with no admin/* files', () => {
+test('SHELL_ASSETS covers the 15 root HTML pages, the 4 shell CSS files, the default-theme font files, and every public JS module, with no admin/* files', () => {
   assert.equal(SHELL_HTML.length, 15);
-  assert.deepEqual([...SHELL_CSS].sort(), ['css/site.css', 'css/themes.css', 'css/tokens.css']);
+  assert.deepEqual([...SHELL_CSS].sort(), ['css/fonts.css', 'css/site.css', 'css/themes.css', 'css/tokens.css']);
+  // Phase 7 performance pass: only the default (সিদ্ধি) theme's Bengali+Latin font files are
+  // precached — Hind Siliguri 500/600 and the Tiro Bangla/Atma theme faces stay a normal,
+  // uncached-until-used fetch (see scripts/lib/shell-assets.mjs's own comment on SHELL_FONTS).
+  assert.deepEqual([...SHELL_FONTS].sort(), [
+    'assets/fonts/baloo-da-2-700-bengali.woff2',
+    'assets/fonts/baloo-da-2-700-latin.woff2',
+    'assets/fonts/hind-siliguri-400-bengali.woff2',
+    'assets/fonts/hind-siliguri-400-latin.woff2',
+    'assets/fonts/hind-siliguri-700-bengali.woff2',
+    'assets/fonts/hind-siliguri-700-latin.woff2',
+  ]);
   assert.ok(SHELL_JS.length > 0);
   for (const rel of SHELL_ASSETS) {
     assert.ok(!rel.startsWith('admin/'), `${rel} must not be an admin/ file`);

@@ -18,7 +18,7 @@
 // actually true again, and activate() below has to sweep stale versions of both.
 'use strict';
 
-const SW_VERSION = '20260912-14';
+const SW_VERSION = '20260912-15';
 const CACHE_NAME = 'trust-shell-' + SW_VERSION;
 const CACHE_PREFIX = 'trust-shell-';
 const NAV_CACHE_NAME = 'trust-nav-' + SW_VERSION;
@@ -31,8 +31,15 @@ const NAV_CACHE_PREFIX = 'trust-nav-';
 const PRECACHE_URLS = [
   './404.html',
   './about.html',
+  './assets/fonts/baloo-da-2-700-bengali.woff2',
+  './assets/fonts/baloo-da-2-700-latin.woff2',
+  './assets/fonts/hind-siliguri-400-bengali.woff2',
+  './assets/fonts/hind-siliguri-400-latin.woff2',
+  './assets/fonts/hind-siliguri-700-bengali.woff2',
+  './assets/fonts/hind-siliguri-700-latin.woff2',
   './committee.html',
   './contact.html',
+  './css/fonts.css',
   './css/site.css',
   './css/themes.css',
   './css/tokens.css',

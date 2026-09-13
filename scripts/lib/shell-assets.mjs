@@ -18,7 +18,24 @@ import { HEAD_META } from '../sync-head.mjs';
 
 export const SHELL_HTML = Object.values(HEAD_META).map((m) => m.file).sort();
 
-export const SHELL_CSS = ['css/tokens.css', 'css/site.css', 'css/themes.css'];
+export const SHELL_CSS = ['css/fonts.css', 'css/tokens.css', 'css/site.css', 'css/themes.css'];
+
+// Phase 7 performance pass (2026-09-13): only the default (সিদ্ধি) theme's Bengali+Latin font
+// files are precached — the ones every first-time visitor needs regardless of theme choice (the
+// preloaded body face plus its bold weight, and the display face). The other ten faces declared
+// in css/fonts.css (Hind Siliguri 500/600, Tiro Bangla, Atma) are deliberately left OUT of this
+// list: precaching them would force every visitor to download every theme's fonts on first
+// install, defeating the whole point of "a browser only fetches a face once a matching text node
+// needs it" (css/fonts.css's own top comment) — those stay a normal, uncached-until-used network
+// fetch for the (rare) visitor on a non-default theme.
+export const SHELL_FONTS = [
+  'assets/fonts/baloo-da-2-700-bengali.woff2',
+  'assets/fonts/baloo-da-2-700-latin.woff2',
+  'assets/fonts/hind-siliguri-400-bengali.woff2',
+  'assets/fonts/hind-siliguri-400-latin.woff2',
+  'assets/fonts/hind-siliguri-700-bengali.woff2',
+  'assets/fonts/hind-siliguri-700-latin.woff2',
+];
 
 // Every js/*.js module actually used by a public page, plus js/sw-register.js itself (loaded by
 // every public page's generated shell block — scripts/sync-shell.mjs). admin/js/* is excluded
@@ -74,7 +91,7 @@ export const SHELL_JS = [...SHELL_JS_ROOT, ...SHELL_JS_PAGES].sort();
 
 // Full allowlist, repo-root-relative, sorted (deterministic — order must not affect the hash or
 // the generated sw.js diff).
-export const SHELL_ASSETS = [...SHELL_HTML, ...SHELL_CSS, ...SHELL_JS].sort();
+export const SHELL_ASSETS = [...SHELL_HTML, ...SHELL_CSS, ...SHELL_FONTS, ...SHELL_JS].sort();
 
 /** Pure: hash of an ordered list of (relPath, contentBuffer) pairs. Exported so unit tests can
  * verify the hashing logic itself without touching the filesystem. */
